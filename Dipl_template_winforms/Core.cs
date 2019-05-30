@@ -279,6 +279,7 @@ namespace Dipl_template_winforms
         private int indE1 = -1;
         private int indE2 = -1;
         int indP1 = -1, indP2 = -1;
+        private int indPoint1 = -1;
 
         public void ReCalc()
         {
@@ -760,6 +761,30 @@ namespace Dipl_template_winforms
             IsDrawPoint = false;
             return LabelOFAction = ActionWithFigure.None;
         }
+        public bool HitOnManipulators1(Vector2d mousePos)
+        {
+            for (int i = 0; i < Manipulators.Length - 1; i++)
+            {
+                // for Scale
+                if ((Manipulators[i] - mousePos).LengthSquared < 0.01)
+                {
+                    indPoint1 = i;
+                    return true;
+                }
+                // for Rotate
+                if ((Manipulators[i] - mousePos).LengthSquared < 0.05)
+                {
+                    indPoint1 = i;
+                    return true;
+                }
+            }
+
+            if ((Manipulators[8] - mousePos).LengthSquared < 0.01)
+                return true;
+
+            indPoint1 = -1;
+            return false;
+        }
         public void Draw()
         {     
             GL.Begin(BeginMode.Polygon);
@@ -786,7 +811,19 @@ namespace Dipl_template_winforms
                 for (int i = 0; i < Manipulators.Length; i++)
                     GL.Vertex2(Manipulators[i]);
                 GL.End();
-
+                if (indPoint1 > -1)
+                {
+                    GL.Begin(BeginMode.LineStrip);
+                    Vector2d c = Manipulators[indPoint1];
+                    for (int i = 0; i < 360; i++)
+                    {
+                        double t = MathHelper.DegreesToRadians(i);
+                        double x = 0.2 * Math.Cos(t);
+                        double y = 0.2 * Math.Sin(t);
+                        GL.Vertex2(c.X + x, c.Y + y);
+                    }
+                    GL.End();
+                }
                 GL.PopMatrix();
             }
             if (IsEdit)

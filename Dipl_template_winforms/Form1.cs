@@ -209,7 +209,8 @@ namespace Dipl_template_winforms
                 case TypeFigures.None:
                     if (pc.SelectedFigure != null)
                     {
-                        if (pc.IsEditMode == false)
+                        if (pc.IsEditMode == false)                           
+                        {
                             switch (pc.AWF)
                             {
                                 case ActionWithFigure.Move:
@@ -231,12 +232,14 @@ namespace Dipl_template_winforms
                                 default:
                                     break;
                             }
+                            if (pc.SelectedFigure.HitOnManipulators1(pc.SecondMousePos))
+                                Cursor.Current = Cursors.Arrow;
+                        }
                         else
                         {
                             if (pc.IsMovePoint)
                                 pc.SelectedFigure.SetNewPoint(pc.SecondMousePos);
                         }
-                        //SetProperties(pc.SelectedFigure);
                     }
                     break;
 

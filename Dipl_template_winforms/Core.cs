@@ -690,8 +690,14 @@ namespace Dipl_template_winforms
         {
             if (indPoint > -1)
             {
+                int i = FindIndScale(indPoint);
                 Vector2d m = manipul[indPoint];
                 Vector2d smp = secondMousePos - MoveTo;
+                if (i == 1 || i == 4)
+                    ScaleTo = new Vector2d(smp.X / m.X, ScaleTo.Y);
+                else if (i == 6 || i == 7)
+                    ScaleTo = new Vector2d(ScaleTo.X, smp.Y / m.Y);
+                else
                 ScaleTo = new Vector2d(smp.X / m.X, smp.Y / m.Y);
             }
         }

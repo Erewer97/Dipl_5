@@ -160,6 +160,7 @@ namespace Dipl_template_winforms
     {
         public bool IsNewFile { get; set; } = false;
         public bool IsEditMode { get; set; } = false;
+        public bool IsSelectingPoint { get; set; } = true;
         public bool IsMovePoint { get; set; } = false;
         public Figure CurrentFigure { get; set; } = null;
         public Figure AddedFigure { get; set; } = null;

@@ -105,11 +105,11 @@
             this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
             this.btn_CreateFile = new System.Windows.Forms.ToolStripMenuItem();
             this.открытьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.btn_Add_layer = new System.Windows.Forms.ToolStripMenuItem();
             this.btn_Del_layer = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.LeftToolStripPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -489,6 +489,8 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(212, 20);
             this.textBox1.TabIndex = 20;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox1_KeyDown);
             // 
             // label14
             // 
@@ -592,6 +594,7 @@
             this.nud_angle.Name = "nud_angle";
             this.nud_angle.Size = new System.Drawing.Size(50, 20);
             this.nud_angle.TabIndex = 11;
+            this.nud_angle.ValueChanged += new System.EventHandler(this.nud_angle_ValueChanged);
             // 
             // label8
             // 
@@ -724,6 +727,7 @@
             this.nud_posY.Name = "nud_posY";
             this.nud_posY.Size = new System.Drawing.Size(50, 20);
             this.nud_posY.TabIndex = 1;
+            this.nud_posY.ValueChanged += new System.EventHandler(this.nud_posY_ValueChanged);
             // 
             // nud_posX
             // 
@@ -747,6 +751,7 @@
             this.nud_posX.Name = "nud_posX";
             this.nud_posX.Size = new System.Drawing.Size(50, 20);
             this.nud_posX.TabIndex = 0;
+            this.nud_posX.ValueChanged += new System.EventHandler(this.nud_posX_ValueChanged);
             // 
             // tabPage2
             // 
@@ -974,7 +979,7 @@
             this.toolStripDropDownButton1});
             this.toolStrip2.Location = new System.Drawing.Point(3, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(141, 25);
+            this.toolStrip2.Size = new System.Drawing.Size(110, 25);
             this.toolStrip2.TabIndex = 0;
             // 
             // toolStripDropDownButton2
@@ -994,14 +999,26 @@
             // btn_CreateFile
             // 
             this.btn_CreateFile.Name = "btn_CreateFile";
-            this.btn_CreateFile.Size = new System.Drawing.Size(180, 22);
+            this.btn_CreateFile.Size = new System.Drawing.Size(154, 22);
             this.btn_CreateFile.Text = "Создать";
             // 
             // открытьToolStripMenuItem
             // 
             this.открытьToolStripMenuItem.Name = "открытьToolStripMenuItem";
-            this.открытьToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.открытьToolStripMenuItem.Size = new System.Drawing.Size(154, 22);
             this.открытьToolStripMenuItem.Text = "Открыть";
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(151, 6);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(154, 22);
+            this.toolStripMenuItem1.Text = "Экспорт в .geo";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
             // toolStripDropDownButton1
             // 
@@ -1026,18 +1043,6 @@
             this.btn_Del_layer.Name = "btn_Del_layer";
             this.btn_Del_layer.Size = new System.Drawing.Size(126, 22);
             this.btn_Del_layer.Text = "Удалить";
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(177, 6);
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
-            this.toolStripMenuItem1.Text = "Экспорт в .geo";
-            this.toolStripMenuItem1.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
             // Form1
             // 

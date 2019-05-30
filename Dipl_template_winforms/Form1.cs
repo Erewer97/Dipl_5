@@ -133,11 +133,13 @@ namespace Dipl_template_winforms
                             {
                                 pc.SecondFigure = pc.SelectedFigure;
                                 pc.SelectedFigure.IsSelect = true;
+                                SetProperties(pc.SelectedFigure);
                             }
                             else if (pc.SelectedFigure == null && pc.SecondFigure != null)
                             {
                                 pc.SecondFigure.IsSelect = false;
                                 pc.SecondFigure = null;
+                                SetProperties(null);
                             }
                             else
                             {
@@ -170,7 +172,6 @@ namespace Dipl_template_winforms
                     {
                         pc.AddedFigure = helper.Add(TypeFigures.Line, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
                         pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
-                        pc.AddedFigure.Id = _core.Ids.ToString();
                         //pc.AddedFigure.CalcAABB();
                     }
                     break;
@@ -181,7 +182,6 @@ namespace Dipl_template_winforms
                         pc.AddedFigure = helper.Add(TypeFigures.Rect, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
                         pc.AddedFigure.FillColor = pc.CurrentFillColor;
                         pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
-                        pc.AddedFigure.Id = _core.Ids.ToString();
                         //pc.AddedFigure.CalcAABB();
                     }
                     break;
@@ -192,8 +192,6 @@ namespace Dipl_template_winforms
                         pc.AddedFigure = helper.Add(TypeFigures.Ellipsoid, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
                         pc.AddedFigure.FillColor = pc.CurrentFillColor;
                         pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
-                        pc.AddedFigure.Id = _core.Ids.ToString();
-
                         //pc.AddedFigure.CalcAABB();
                     }
                     break;
@@ -204,8 +202,6 @@ namespace Dipl_template_winforms
                         pc.AddedFigure = helper.Add(TypeFigures.Polygon, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
                         pc.AddedFigure.FillColor = pc.CurrentFillColor;
                         pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
-                        pc.AddedFigure.Id = _core.Ids.ToString();
-
                         //pc.AddedFigure.CalcAABB();
                     }
                     break;
@@ -219,11 +215,13 @@ namespace Dipl_template_winforms
                                 case ActionWithFigure.Move:
                                     pc.SelectedFigure.MoveTo = pc.SecondMousePos;
                                     pc.SelectedFigure.ReCalc();
+                                    SetProperties(pc.SelectedFigure);
                                     break;
 
                                 case ActionWithFigure.Rotate:
                                     pc.SelectedFigure.CalcAngle(pc.SecondMousePos);
                                     pc.SelectedFigure.ReCalc();
+                                    SetProperties(pc.SelectedFigure);
                                     break;
 
                                 case ActionWithFigure.Scale:
@@ -258,7 +256,9 @@ namespace Dipl_template_winforms
                         case TypeFigures.Line:
                             _core.Add(pc.AddedFigure);
                             //AddFigureInTreeView(pc.AddedFigure);
-                            //SetProperties(pc.AddedFigure);
+                            pc.AddedFigure.Id = _core.Ids.ToString();
+                            pc.AddedFigure.Name = "Line " + pc.AddedFigure.Id;
+                            SetProperties(pc.AddedFigure);
                             pc.AddedFigure = null;
 
                             break;
@@ -266,21 +266,27 @@ namespace Dipl_template_winforms
                         case TypeFigures.Rect:
                             _core.Add(pc.AddedFigure);
                             //AddFigureInTreeView(pc.AddedFigure);
-                            //SetProperties(pc.AddedFigure);
+                            pc.AddedFigure.Id = _core.Ids.ToString();
+                            pc.AddedFigure.Name = "Rectangle " + pc.AddedFigure.Id;
+                            SetProperties(pc.AddedFigure);
                             pc.AddedFigure = null;
                             break;
 
                         case TypeFigures.Ellipsoid:
                             _core.Add(pc.AddedFigure);
                             //AddFigureInTreeView(pc.AddedFigure);
-                            //SetProperties(pc.AddedFigure);
+                            pc.AddedFigure.Id = _core.Ids.ToString();
+                            pc.AddedFigure.Name = "Ellipsoid " + pc.AddedFigure.Id;
+                            SetProperties(pc.AddedFigure);
                             pc.AddedFigure = null;
                             break;
 
                         case TypeFigures.Polygon:
                             _core.Add(pc.AddedFigure);
                             //AddFigureInTreeView(pc.AddedFigure);
-                            //SetProperties(pc.AddedFigure);
+                            pc.AddedFigure.Id = _core.Ids.ToString();
+                            pc.AddedFigure.Name = "Polygon " + pc.AddedFigure.Id;
+                            SetProperties(pc.AddedFigure);
                             pc.AddedFigure = null;
                             break;
 
@@ -392,5 +398,65 @@ namespace Dipl_template_winforms
             }
         }
         #endregion
+
+        #region TAB "OBJECT"
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (pc.SelectedFigure != null && textBox1.Text.Length > 0)
+                pc.SelectedFigure.Name = textBox1.Text;
+            SetProperties(pc.SelectedFigure);
+        }
+        // translate figure at X axis
+        private void nud_posX_ValueChanged(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+            {
+                pc.SelectedFigure.MoveTo = new Vector2d((double)nud_posX.Value, pc.SelectedFigure.MoveTo.Y);
+                pc.SelectedFigure.ReCalc();
+            }
+            glControl1.Invalidate();
+        }
+        // translate figure at Y axis
+        private void nud_posY_ValueChanged(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+            {
+                pc.SelectedFigure.MoveTo = new Vector2d(pc.SelectedFigure.MoveTo.X, (double)nud_posY.Value);
+                pc.SelectedFigure.ReCalc();
+            }
+            glControl1.Invalidate();
+        }
+        private void nud_angle_ValueChanged(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+            {
+                pc.SelectedFigure.Angle = (double)nud_angle.Value;
+                pc.SelectedFigure.ReCalc();
+            }
+            glControl1.Invalidate();
+        }
+        #endregion
+
+        void SetProperties(Figure figure)
+        {
+            if (figure != null)
+            {
+                textBox1.Text = figure.Name;
+                nud_posX.Value = (decimal)figure.MoveTo.X;
+                nud_posY.Value = (decimal)figure.MoveTo.Y;
+                nud_angle.Value = (decimal)figure.Angle;
+            }
+            else
+            {
+                textBox1.Text = "";
+                nud_posX.Value = 0;
+                nud_posY.Value = 0;
+                nud_angle.Value = 0;
+            }
+        }       
     }
 }

@@ -226,6 +226,9 @@ namespace Dipl_template_winforms
                                     break;
 
                                 case ActionWithFigure.Scale:
+                                    pc.SelectedFigure.CalcsScale(pc.SecondMousePos);
+                                    pc.SelectedFigure.ReCalc();
+                                    SetProperties(pc.SelectedFigure);
                                     break;
 
                                 case ActionWithFigure.None:
@@ -442,6 +445,24 @@ namespace Dipl_template_winforms
             }
             glControl1.Invalidate();
         }
+        private void nud_scaleX_ValueChanged(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+            {
+                pc.SelectedFigure.ScaleTo = new Vector2d((double)nud_scaleX.Value, pc.SelectedFigure.ScaleTo.Y);
+                pc.SelectedFigure.ReCalc();
+            }
+            glControl1.Invalidate();
+        }
+        private void nud_scaleY_ValueChanged(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+            {
+                pc.SelectedFigure.ScaleTo = new Vector2d(pc.SelectedFigure.ScaleTo.X, (double)nud_scaleY.Value);
+                pc.SelectedFigure.ReCalc();
+            }
+            glControl1.Invalidate();
+        }
         #endregion
 
         void SetProperties(Figure figure)
@@ -452,6 +473,8 @@ namespace Dipl_template_winforms
                 nud_posX.Value = (decimal)figure.MoveTo.X;
                 nud_posY.Value = (decimal)figure.MoveTo.Y;
                 nud_angle.Value = (decimal)figure.Angle;
+                nud_scaleX.Value = (decimal)figure.ScaleTo.X;
+                nud_scaleY.Value = (decimal)figure.ScaleTo.Y;
             }
             else
             {
@@ -459,6 +482,8 @@ namespace Dipl_template_winforms
                 nud_posX.Value = 0;
                 nud_posY.Value = 0;
                 nud_angle.Value = 0;
+                nud_scaleX.Value = 1;
+                nud_scaleY.Value = 1;
             }
         }       
     }

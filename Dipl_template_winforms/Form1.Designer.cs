@@ -626,6 +626,11 @@
             0,
             0,
             0});
+            this.nud_scaleY.Minimum = new decimal(new int[] {
+            4096,
+            0,
+            0,
+            -2147483648});
             this.nud_scaleY.Name = "nud_scaleY";
             this.nud_scaleY.Size = new System.Drawing.Size(50, 20);
             this.nud_scaleY.TabIndex = 7;
@@ -634,6 +639,7 @@
             0,
             0,
             0});
+            this.nud_scaleY.ValueChanged += new System.EventHandler(this.nud_scaleY_ValueChanged);
             // 
             // nud_scaleX
             // 
@@ -649,6 +655,11 @@
             0,
             0,
             0});
+            this.nud_scaleX.Minimum = new decimal(new int[] {
+            4096,
+            0,
+            0,
+            -2147483648});
             this.nud_scaleX.Name = "nud_scaleX";
             this.nud_scaleX.Size = new System.Drawing.Size(50, 20);
             this.nud_scaleX.TabIndex = 6;
@@ -657,6 +668,7 @@
             0,
             0,
             0});
+            this.nud_scaleX.ValueChanged += new System.EventHandler(this.nud_scaleX_ValueChanged);
             // 
             // label5
             // 

@@ -56,3 +56,4 @@ Z:\Dipl_5_4\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.csproj.CoreC
 Z:\Dipl_5_4\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.csproj.CopyComplete
 Z:\Dipl_5_4\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.exe
 Z:\Dipl_5_4\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.pdb
+Z:\Dipl_5_4\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.csprojAssemblyReference.cache

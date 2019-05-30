@@ -261,6 +261,9 @@ namespace Dipl_template_winforms
         public bool IsDrawPoint { get; set; }
         public ActionWithFigure LabelOFAction { get; private set; }
         public TypeFigures Type { get; set; } = TypeFigures.None;
+
+        
+
         public bool IsSelect { get; set; }
         public bool IsEdit { get; set; } // Редактируют ли сейчас эту фигуру?
         public bool IsRender { get; set; }
@@ -280,6 +283,7 @@ namespace Dipl_template_winforms
         private int indE2 = -1;
         int indP1 = -1, indP2 = -1;
         private int indPoint1 = -1;
+        int indAroundScale = -1;
 
         public void ReCalc()
         {
@@ -682,6 +686,15 @@ namespace Dipl_template_winforms
 
             Angle = MathHelper.RadiansToDegrees(angle);
         }
+        public void CalcsScale(Vector2d secondMousePos)
+        {
+            if (indPoint > -1)
+            {
+                Vector2d m = manipul[indPoint];
+                Vector2d smp = secondMousePos - MoveTo;
+                ScaleTo = new Vector2d(smp.X / m.X, smp.Y / m.Y);
+            }
+        }
         public void SetNewPoint(Vector2d MousePos)
         {
             if (indE1 > -1)
@@ -743,6 +756,7 @@ namespace Dipl_template_winforms
                 {
                     IsDrawPoint = true;
                     indPoint = i;
+                    indAroundScale = FindIndScale(indPoint);
                     return LabelOFAction = ActionWithFigure.Scale;
                 }
                 // for Rotate
@@ -871,6 +885,25 @@ namespace Dipl_template_winforms
             r += "\n";
             return r;
         }       
+
+
+        int FindIndScale(int index)
+        {
+            switch (index)
+            {
+                case 0: return 3;
+                case 1: return 4;
+                case 2: return 5;
+
+                case 3: return 0;
+                case 4: return 1;
+                case 5: return 2;
+
+                case 6: return 7;
+                case 7: return 6;
+            }
+            return -1;
+        }
     }
 
     public class Layer

@@ -40,10 +40,10 @@ namespace Dipl_template_winforms
         public Vector2d BeginControlPoint { get; set; } = new Vector2d(double.NaN);
         public Vector2d EndControlPoint { get; set; } = new Vector2d(double.NaN);
         public bool IsBezie { get; set; } = false;
-        public int BezieSegments { get; set; } = 4;
+        public int BezieSegments { get; set; } = 32;
         public Vector2d[] BeziePoints { get { return _bezieVerteces; } private set { } }
 
-        Vector2d[] _bezieVerteces = new Vector2d[3];
+        Vector2d[] _bezieVerteces = new Vector2d[32 - 1];
 
         public Edge() {; }
         public Edge(Vector2d begin, Vector2d end)

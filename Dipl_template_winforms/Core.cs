@@ -136,7 +136,7 @@ namespace Dipl_template_winforms
                         if (i == 0)
                         {
                             p1 = Begin;
-                            p2 = _bezieVerteces[i];
+                            p2 = _bezieVerteces[i + 1];
                         }
                         else if (i == _bezieVerteces.Length)
                         {
@@ -153,16 +153,41 @@ namespace Dipl_template_winforms
                         X = p2.X - p1.X;
 
                         if (Math.Abs(X) < 0.01)
+                        {
                             if ((point.Y < Begin.Y) && (End.Y < point.Y))
                                 return this;
-                            else
-                                return null;
+                        }
+                        if (Math.Abs(Y) < 0.01)
+                        {
+                            if ((point.X < Begin.X) && (End.X < point.X))
+                                return this;
+                        }
 
                         D = p1.X * p2.Y - p2.X * p1.Y;
 
                         double res = Y * point.X + X * point.Y + D;
-                        if (Math.Abs(res) < 0.1)
+                        if (Math.Abs(res) < 0.01)
                             return this;
+                        //double x = point.X - Begin.X;
+                        //double y = point.Y - Begin.Y;
+
+                        //double z1 = End.X - Begin.X;
+                        //if (Math.Abs(z1) < 0.1)
+                        //    if ((point.Y < Begin.Y) && (End.Y < point.Y))
+                        //        return this;
+
+
+                        //double z2 = End.Y - Begin.Y;
+                        //if (Math.Abs(z2) < 0.1)
+                        //    if ((point.X < Begin.X) && (End.X < point.X))
+                        //        return this;
+
+
+                        //double l1 = x / z1;
+                        //double l2 = y / z2;
+
+                        //if (Math.Abs(l1 - l2) < 0.1)
+                        //    return this;
                     }
                 }
             }
@@ -182,6 +207,30 @@ namespace Dipl_template_winforms
                 double res = Y * point.X + X * point.Y + D;
                 if (Math.Abs(res) < 0.1)
                     return this;
+                //double x = point.X - Begin.X;
+                //double y = point.Y - Begin.Y;
+
+                //double z1 = End.X - Begin.X;
+                //if (Math.Abs(z1) < 0.1)
+                //    if ((point.Y < Begin.Y) && (End.Y < point.Y))
+                //        return this;
+                //    else
+                //        return null;
+
+                //double z2 = End.Y - Begin.Y;
+                //if (Math.Abs(z2) < 0.1)
+                //    if ((point.X < Begin.X) && (End.X < point.X))
+                //        return this;
+                //    else
+                //        return null;
+
+                //double l1 = x / z1;
+                //double l2 = y / z2;
+
+                //if (0.0 < l1 && l1 < 1.0 && 0.0 < l2 && l2 < 1.0)
+                //    return this;
+                //else
+                //    return null;
             }
             return null;
         }
@@ -691,6 +740,35 @@ namespace Dipl_template_winforms
                         }
                     }
                 }
+            }
+            return false;
+        }
+
+        public bool SmoothControlPoints()
+        {
+            if (indE1 > -1) 
+            {
+                var e1 = mainFigure[indE1];
+                var e2 = mainFigure[indE2];
+
+                if (e1.IsBezie && e2.IsBezie)
+                {
+                    var p2 = e2.End;
+                    var p1 = e1.Begin;
+
+                    var p = e1.End;
+
+                    var v1 = p1 - p;
+                    var v2 = p2 - p;
+
+                    Vector2d res = (v1 + v2).Normalized();
+                    res = new Vector2d(res.Y, -res.X);
+
+                    mainFigure[indE1][3] = p - res;
+                    mainFigure[indE2][2] = p + res;
+                    return true;
+                }
+                
             }
             return false;
         }

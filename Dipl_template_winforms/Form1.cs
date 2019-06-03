@@ -681,5 +681,15 @@ namespace Dipl_template_winforms
                 }
                     
         }
+
+        private void tsb_smoothContrPoints_Click(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+                if (pc.SelectedFigure.SmoothControlPoints())
+                {
+                    pc.SelectedFigure.ReCalc();
+                    glControl1.Invalidate();
+                }
+        }
     }
 }

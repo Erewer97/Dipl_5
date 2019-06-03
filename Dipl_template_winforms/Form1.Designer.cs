@@ -122,6 +122,7 @@
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.btn_Add_layer = new System.Windows.Forms.ToolStripMenuItem();
             this.btn_Del_layer = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsb_smoothContrPoints = new System.Windows.Forms.ToolStripButton();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -206,7 +207,7 @@
             // toolStripContainer3.ContentPanel
             // 
             this.toolStripContainer3.ContentPanel.Controls.Add(this.glControl1);
-            this.toolStripContainer3.ContentPanel.Size = new System.Drawing.Size(948, 719);
+            this.toolStripContainer3.ContentPanel.Size = new System.Drawing.Size(956, 719);
             this.toolStripContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
             // 
             // toolStripContainer3.LeftToolStripPanel
@@ -228,7 +229,7 @@
             this.glControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.glControl1.Location = new System.Drawing.Point(0, 0);
             this.glControl1.Name = "glControl1";
-            this.glControl1.Size = new System.Drawing.Size(948, 719);
+            this.glControl1.Size = new System.Drawing.Size(956, 719);
             this.glControl1.TabIndex = 1;
             this.glControl1.VSync = false;
             this.glControl1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.glControl1_KeyDown);
@@ -255,7 +256,7 @@
             this.toolStripButton14});
             this.toolStrip1.Location = new System.Drawing.Point(0, 3);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(32, 322);
+            this.toolStrip1.Size = new System.Drawing.Size(24, 303);
             this.toolStrip1.TabIndex = 1;
             // 
             // toolStripButton3
@@ -380,7 +381,7 @@
             this.toolStripButton13.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton13.Image")));
             this.toolStripButton13.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton13.Name = "toolStripButton13";
-            this.toolStripButton13.Size = new System.Drawing.Size(30, 19);
+            this.toolStripButton13.Size = new System.Drawing.Size(22, 19);
             this.toolStripButton13.Text = " ";
             this.toolStripButton13.Click += new System.EventHandler(this.toolStripButton13_Click);
             // 
@@ -406,10 +407,11 @@
             this.toolStripButton15,
             this.tsb_subdivEdge,
             this.toolStripButton17,
-            this.toolStripButton18});
+            this.toolStripButton18,
+            this.tsb_smoothContrPoints});
             this.toolStrip4.Location = new System.Drawing.Point(3, 0);
             this.toolStrip4.Name = "toolStrip4";
-            this.toolStrip4.Size = new System.Drawing.Size(515, 25);
+            this.toolStrip4.Size = new System.Drawing.Size(643, 25);
             this.toolStrip4.TabIndex = 0;
             // 
             // toolStripLabel3
@@ -1204,6 +1206,16 @@
             this.btn_Del_layer.Size = new System.Drawing.Size(126, 22);
             this.btn_Del_layer.Text = "Удалить";
             // 
+            // tsb_smoothContrPoints
+            // 
+            this.tsb_smoothContrPoints.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsb_smoothContrPoints.Image = ((System.Drawing.Image)(resources.GetObject("tsb_smoothContrPoints.Image")));
+            this.tsb_smoothContrPoints.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsb_smoothContrPoints.Name = "tsb_smoothContrPoints";
+            this.tsb_smoothContrPoints.Size = new System.Drawing.Size(97, 22);
+            this.tsb_smoothContrPoints.Text = "Сгладить ручки";
+            this.tsb_smoothContrPoints.Click += new System.EventHandler(this.tsb_smoothContrPoints_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1366,6 +1378,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButton17;
         private System.Windows.Forms.ToolStripButton toolStripButton18;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ToolStripButton tsb_smoothContrPoints;
     }
 }
 

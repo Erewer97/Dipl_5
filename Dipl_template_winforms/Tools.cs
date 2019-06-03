@@ -161,7 +161,10 @@ namespace Dipl_template_winforms
         public bool IsNewFile { get; set; } = false;
         public bool IsEditMode { get; set; } = false;
         public bool IsSelectingPoint { get; set; } = true;
+        public bool IsMove { get; set; } = true;
         public bool IsMovePoint { get; set; } = false;
+        public bool IsMoveEdge { get; set; } = false;
+        public bool IsShiftPress { get; set; } = false;
         public Figure CurrentFigure { get; set; } = null;
         public Figure AddedFigure { get; set; } = null;
         public TypeFigures CurrentTypeFigure { get; set; } = TypeFigures.None;
@@ -173,7 +176,8 @@ namespace Dipl_template_winforms
         public Vector2d FirstMousePos { get; set; }
         public Vector2d SecondMousePos { get; set; }
         public ActionWithFigure AWF { get; set; } = ActionWithFigure.None;
-
+        public SelectingMode SelectingMode { get; set; } = SelectingMode.Points;
+        public List<Figure> ListSelFig { get; set; } = new List<Figure>();
     }
 
     public class Grid
@@ -269,6 +273,13 @@ namespace Dipl_template_winforms
                     break;
 
                 case TypeFigures.Curve:
+                    f.Edges.Add(new Edge(fmp, smp));
+                    f.Type = TypeFigures.Curve;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.IsClosed = false;
+                    f.Edges[0].ConvertToBezie();
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
                     break;
 
                 default:

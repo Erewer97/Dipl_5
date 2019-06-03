@@ -732,6 +732,22 @@ namespace ConsoleApp1
                 ReCalc();
             }
         }
+        public int Ind { get; set; } = -1;
+        public void SubDiv()
+        {
+            if (Ind > -1)
+            {
+                var e = mainFigure[Ind];
+                var e1 = new Edge(e.Begin, (e.Begin + e.End) / 2.0);
+                var e2 = new Edge((e.Begin + e.End) / 2.0, e.End);
+
+                mainFigure.RemoveAt(Ind);
+                mainFigure.Insert(Ind, e1);
+                mainFigure.Insert(Ind + 1, e2);
+
+                ReCalc();
+            }
+        }
 
         public ActionWithFigure HitOnManipulators(Vector2d mousePos)
         {
@@ -996,19 +1012,21 @@ namespace ConsoleApp1
             {
                 Edges = new List<Edge>()
                 {
-                   new Edge(new Vector2d(0), new Vector2d(1), new Vector2d(1, 0), new Vector2d(1, 0)),
-                   new Edge(new Vector2d(1), new Vector2d(0,1)),
-                   new Edge(new Vector2d(0,1), new Vector2d(0,0.5), new Vector2d(-1, 1), new Vector2d(-1, 0)),
-                   new Edge(new Vector2d(0,0.5), new Vector2d(0,0.2), new Vector2d(0.1, 0.5), new Vector2d(0.1, 0.2)),
-                   new Edge(new Vector2d(0,0.2), new Vector2d(0))
+                   new Edge(new Vector2d(0), new Vector2d(1)),
+                   new Edge(new Vector2d(1), new Vector2d(2)),
+                   new Edge(new Vector2d(2), new Vector2d(3))
                 },
-                Center = new Vector2d(0.5)
+                Center = new Vector2d(0)
             };
             f.TranslateToCenterCoordinates();
             f.ReCalc();
 
-            ExportInGEO eigeo = new ExportInGEO(@"Z:\a.geo");
-            eigeo.WriteInfile(new List<Figure>() { f });
+            Console.WriteLine(f);
+
+            f.Ind = 0;
+            f.SubDiv();
+
+            Console.WriteLine(f);
 
             Console.ReadLine();
         }

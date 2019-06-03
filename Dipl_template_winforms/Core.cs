@@ -17,6 +17,7 @@ namespace Dipl_template_winforms
     public enum TypeFigures { None, Line, Rect, Circle, Curve, Polygon, Ellipsoid }
     public enum Operations { None, Union, Interset }
     public enum ActionWithFigure { None, Move, Rotate, Scale }
+    public enum SelectingMode { Points, Edges }
 
     public static class MathVec
     {
@@ -170,7 +171,7 @@ namespace Dipl_template_winforms
                 Y = Begin.Y - End.Y;
                 X = End.X - Begin.X;
 
-                if (Math.Abs(X) < 0.01)
+                if ((Math.Abs(X) < 0.01) && (Math.Abs(point.X - Begin.X) < 0.01))
                     if ((point.Y < Begin.Y) && (End.Y < point.Y))
                         return this;
                     else
@@ -284,6 +285,7 @@ namespace Dipl_template_winforms
         int indP1 = -1, indP2 = -1;
         private int indPoint1 = -1;
         int indAroundScale = -1;
+        private int indCurrEdge = -1;
 
         public void ReCalc()
         {
@@ -333,7 +335,14 @@ namespace Dipl_template_winforms
             {
                 for (int i = 0; i < Edges.Count; i++)
                 {
-                    Verteces.Add(Edges[i].Begin);
+                    if (!Edges[i].IsBezie)
+                        Verteces.Add(Edges[i].Begin);
+                    else
+                    {
+                        Verteces.Add(Edges[i].Begin);
+                        for (int tt = 0; tt < Edges[i].BeziePoints.Length; tt++)
+                            Verteces.Add(Edges[i].BeziePoints[tt]);
+                    }
                 }
                 Verteces.Add(Edges[Edges.Count - 1].End);
             }
@@ -429,9 +438,16 @@ namespace Dipl_template_winforms
             {
                 for (int i = 0; i < Edges.Count; i++)
                 {
-                    var e = new Edge(Edges[i].End, Edges[i].Begin, Edges[i].EndControlPoint, Edges[i].BeginControlPoint);
-                    Edges[i] = e;
-                    //mainFigure[i] = e;
+                    if (Edges[i].IsBezie)
+                    { 
+                        var e = new Edge(Edges[i].End, Edges[i].Begin, Edges[i].EndControlPoint, Edges[i].BeginControlPoint);
+                        Edges[i] = e;
+                    }
+                    else
+                    {
+                        var e = new Edge(Edges[i].End, Edges[i].Begin);
+                        Edges[i] = e;
+                    }
                 }
 
                 Edges.Reverse();
@@ -474,6 +490,10 @@ namespace Dipl_template_winforms
                     )
                     return true;
             }
+            else
+            {
+                return HitInBorder(v);
+            }
 
             return result;
 
@@ -483,13 +503,17 @@ namespace Dipl_template_winforms
         /// </summary>
         /// <param name="v">Позиция мыши</param>
         /// <returns>Ребро, если попали, иначе null</returns>
-        public Edge HitInBorder(Vector2d v)
+        public bool HitInBorder(Vector2d v)
         {
             Edge r = null;
             for (int i = 0; i < Edges.Count; i++)
                 if ((r = Edges[i].PointAtEdge(v)) != null)
-                    return r;
-            return null;
+                {
+                    indCurrEdge = i;
+                    return true;
+                }
+            indCurrEdge = -1;
+            return false;
         }
         public bool HitInPoint(Vector2d MousePos)
         {
@@ -592,7 +616,14 @@ namespace Dipl_template_winforms
                         }
                         if (MathVec.CompareLenSquared(e, 0.01))
                         {
-                            indE1 = 0; indE2 = 1; indP1 = 1; indP2 = 0; return true;
+                            if (Edges.Count == 1)
+                            {
+                                indE1 = 0; indE2 = 0; indP1 = 1; indP2 = 1; return true;
+                            }
+                            else
+                            {
+                                indE1 = 0; indE2 = 1; indP1 = 1; indP2 = 0; return true;
+                            }
                         }
                         if (Edges[i].IsBezie)
                         {
@@ -663,6 +694,31 @@ namespace Dipl_template_winforms
             }
             return false;
         }
+
+        public void SubDivEdge()
+        {
+            if (indCurrEdge > -1)
+            {
+                Edge e = mainFigure[indCurrEdge];
+                if (e.IsBezie)
+                {
+                    ;
+                }
+                else
+                {
+                    var e1 = new Edge(e.Begin, (e.Begin + e.End) / 2.0);
+                    var e2 = new Edge((e.Begin + e.End) / 2.0, e.End);
+
+                    mainFigure.RemoveAt(indCurrEdge);
+                    mainFigure.Insert(indCurrEdge, e1);
+                    mainFigure.Insert(indCurrEdge + 1, e2);
+
+                    ReCalc();
+                }
+                indCurrEdge = -1;
+            }
+        }
+
         public void CalcAngle(Vector2d secondMousePos)
         {
             Vector2d v = new Vector2d();
@@ -705,10 +761,92 @@ namespace Dipl_template_winforms
         {
             if (indE1 > -1)
             {
+                indCurrEdge = -1;
                 Vector2d v = MultiplyMatrixAndVector(MousePos, TRSI.Inverted());
 
                 mainFigure[indE1][indP1] = v;
                 mainFigure[indE2][indP2] = v;
+
+                if (indP1 == 2 || indP1 == 3)
+                    mainFigure[indE1].CalcBeziePoints();
+
+                Translate();
+                ReCalc();
+            }
+        }
+        public void SetNewEdge(Vector2d secondMousePos, Vector2d firstMousePos)
+        {
+            if (indCurrEdge > -1)
+            {
+                Vector2d s = MultiplyMatrixAndVector(secondMousePos, TRSI.Inverted());
+                Vector2d f = MultiplyMatrixAndVector(firstMousePos, TRSI.Inverted());
+                Vector2d moveTo = s - f;
+
+                Edge e = mainFigure[indCurrEdge];
+                if (e.IsBezie)
+                {
+                    e.Begin = e.Begin + moveTo;
+                    e.End = e.End + moveTo;
+                    e.BeginControlPoint = e.BeginControlPoint + moveTo;
+                    e.EndControlPoint = e.EndControlPoint + moveTo;
+                    e.CalcBeziePoints();
+                }
+                else
+                {
+                    e.Begin = e.Begin + moveTo;
+                    e.End = e.End + moveTo;
+                }
+
+                if (IsClosed)
+                {
+                    if (indCurrEdge == 0)
+                    {
+                        indE1 = 1; indE2 = Edges.Count - 1; indP1 = 0; indP2 = 1;
+                    }
+                    else if (indCurrEdge == Edges.Count - 1)
+                    {
+                        indE1 = 0; indE2 = Edges.Count - 2; indP1 = 0; indP2 = 1;
+                    }
+                    else
+                    {
+                        indE1 = indCurrEdge + 1; indP1 = 0;
+                        indE2 = indCurrEdge - 1; indP2 = 1;
+                    }
+                }
+                else
+                {
+                    if (indCurrEdge == 0)
+                    {
+                        if (mainFigure.Count == 1)
+                        {
+                            ;// indE1 = 0; indE2 = 0; indP1 = 0; indP2 = 1;
+                        }
+                        else
+                        {
+                            indE1 = 1; indE2 = 1; indP1 = 0; indP2 = 0;
+                        }
+                    }
+                    else if (indCurrEdge == Edges.Count - 1)
+                    {
+                        indE1 = Edges.Count - 2; indE2 = Edges.Count - 2; indP1 = 1; indP2 = 1;
+                    }
+                    else
+                    {
+                        indE1 = indCurrEdge + 1; indP1 = 0;
+                        indE2 = indCurrEdge - 1; indP2 = 1;
+                    }
+                }
+
+                if (indE1 > -1)
+                {
+                    if (indE1 == indE2)
+                        mainFigure[indE1][indP1] += moveTo;
+                    else
+                    {
+                        mainFigure[indE1][indP1] += moveTo;
+                        mainFigure[indE2][indP2] += moveTo;
+                    }
+                }
 
                 if (mainFigure.Count > 0)
                 {
@@ -752,7 +890,6 @@ namespace Dipl_template_winforms
                 ReCalc();
             }
         }
-
         public ActionWithFigure HitOnManipulators(Vector2d mousePos)
         {
             for (int i = 0; i < Manipulators.Length - 1; i++)
@@ -807,18 +944,40 @@ namespace Dipl_template_winforms
         }
         public void Draw()
         {     
-            GL.Begin(BeginMode.Polygon);
-            GL.Color3(FillColor);
-            for (int i = 0; i < Verteces.Count; i++)
-                GL.Vertex2(Verteces[i]);
-            GL.End();
-           
-            GL.Begin(BeginMode.LineLoop);
-            GL.LineWidth(LineWidth);
-            GL.Color3(BorderColor);
-            for (int i = 0; i < Verteces.Count; i++)
-                GL.Vertex2(Verteces[i]);
-            GL.End();
+            if (IsClosed)
+            {
+                GL.Begin(BeginMode.Polygon);
+                GL.Color3(FillColor);
+                for (int i = 0; i < Verteces.Count; i++)
+                    GL.Vertex2(Verteces[i]);
+                GL.End();
+
+                GL.Begin(BeginMode.LineLoop);
+                GL.LineWidth(LineWidth);
+                GL.Color3(BorderColor);
+                for (int i = 0; i < Verteces.Count; i++)
+                    GL.Vertex2(Verteces[i]);
+                GL.End();
+            }
+            else if (Type == TypeFigures.Curve)
+            {
+                GL.Begin(BeginMode.LineStrip);
+                GL.LineWidth(LineWidth);
+                GL.Color3(BorderColor);
+                for (int i = 0; i < Verteces.Count; i++)
+                    GL.Vertex2(Verteces[i]);
+                GL.End();
+            }
+            else
+            {
+                GL.Begin(BeginMode.LineLoop);
+                GL.LineWidth(LineWidth);
+                GL.Color3(BorderColor);
+                for (int i = 0; i < Verteces.Count; i++)
+                    GL.Vertex2(Verteces[i]);
+                GL.End();
+            }
+            
 
             if (IsSelect)
             {
@@ -873,9 +1032,20 @@ namespace Dipl_template_winforms
                     GL.Vertex2(Edges[i].End);
                     GL.End();                   
                 }
-
-
                 GL.PopMatrix();
+
+                if (indCurrEdge > -1)
+                {
+                    GL.PushMatrix();
+                    GL.Color3(Color.OrangeRed);
+
+                    GL.Begin(BeginMode.Lines);
+                    GL.Vertex2(Edges[indCurrEdge].Begin);
+                    GL.Vertex2(Edges[indCurrEdge].End);
+                    GL.End();
+
+                    GL.PopMatrix();
+                }
             }
         }
 
@@ -909,6 +1079,52 @@ namespace Dipl_template_winforms
                 case 7: return 6;
             }
             return -1;
+        }
+        void Translate()
+        {
+            if (mainFigure.Count > 0)
+            {
+                double maxx = mainFigure[0].Begin.X,
+                       maxy = mainFigure[0].Begin.Y,
+                       minx = mainFigure[0].Begin.X,
+                       miny = mainFigure[0].Begin.Y;
+
+                foreach (var r in mainFigure)
+                {
+                    if ((r.MaxInEdge().X >= maxx))
+                        maxx = r.MaxInEdge().X;
+                    if ((r.MinInEdge().X <= minx))
+                        minx = r.MinInEdge().X;
+                    if ((r.MaxInEdge().Y >= maxy))
+                        maxy = r.MaxInEdge().Y;
+                    if ((r.MinInEdge().Y <= miny))
+                        miny = r.MinInEdge().Y;
+                }
+
+                maxPointAABB = new Vector2d(maxx, maxy);
+                minPointAABB = new Vector2d(minx, miny);
+
+                manipul[0] = maxPointAABB;
+                manipul[1] = new Vector2d(maxPointAABB.X, (minPointAABB.Y + maxPointAABB.Y) / 2.0);
+                manipul[2] = new Vector2d(maxPointAABB.X, minPointAABB.Y);
+
+                manipul[3] = minPointAABB;
+                manipul[4] = new Vector2d(minPointAABB.X, (minPointAABB.Y + maxPointAABB.Y) / 2.0);
+                manipul[5] = new Vector2d(minPointAABB.X, maxPointAABB.Y);
+
+                manipul[6] = new Vector2d((minPointAABB.X + maxPointAABB.X) / 2.0, minPointAABB.Y);
+                manipul[7] = new Vector2d((minPointAABB.X + maxPointAABB.X) / 2.0, maxPointAABB.Y);
+
+                Center = ((minPointAABB + maxPointAABB) / 2.0);
+
+                manipul[8] = new Vector2d(0);
+            }
+
+            MoveTo = Center + MoveTo;
+            for (int i = 0; i < mainFigure.Count; i++)
+                mainFigure[i] = mainFigure[i] - Center;
+
+            Center = new Vector2d(0);
         }
     }
 

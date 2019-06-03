@@ -67,10 +67,12 @@ namespace Dipl_template_winforms
 
             grid.Draw();
 
+            if (pc.SelectedFigure != null) pc.SelectedFigure.Draw();
+
             _core.Draw();
 
             if (pc.AddedFigure != null) pc.AddedFigure.Draw();
-            if (pc.SelectedFigure != null) pc.SelectedFigure.Draw();
+            
 
             GL.Flush();
             GL.Finish();
@@ -113,37 +115,49 @@ namespace Dipl_template_winforms
                         {
                             if (pc.SelectedFigure != null)
                             {
-                                pc.IsMovePoint = pc.SelectedFigure.HitInPoint(pc.FirstMousePos);
+                                if (pc.SelectingMode == SelectingMode.Points)
+                                    pc.IsMovePoint = pc.SelectedFigure.HitInPoint(pc.FirstMousePos);
+                                else
+                                    pc.IsMoveEdge = pc.SelectedFigure.HitInBorder(pc.FirstMousePos);
                             }
                         }
                         else
                         {
-                            if (pc.SecondFigure != null)
+                            if (pc.IsShiftPress)
                             {
-                                pc.SecondFigure.IsSelect = true;
-                                pc.AWF = pc.SecondFigure.HitOnManipulators(pc.FirstMousePos);
-                                if (pc.AWF != ActionWithFigure.None)
-                                    pc.SelectedFigure = pc.SecondFigure;
-                            }
-
-                            if (pc.AWF == ActionWithFigure.None)
-                                pc.SelectedFigure = _core.Find(pc.FirstMousePos);  // ищем фигуры
-
-                            if (pc.SelectedFigure != null && pc.SecondFigure == null)
-                            {
-                                pc.SecondFigure = pc.SelectedFigure;
-                                pc.SelectedFigure.IsSelect = true;
-                                SetProperties(pc.SelectedFigure);
-                            }
-                            else if (pc.SelectedFigure == null && pc.SecondFigure != null)
-                            {
-                                pc.SecondFigure.IsSelect = false;
-                                pc.SecondFigure = null;
-                                SetProperties(null);
+                                Figure f = _core.Find(pc.FirstMousePos);
+                                if ((f != null) && (!pc.ListSelFig.Contains(f)))
+                                    pc.ListSelFig.Add(f);
                             }
                             else
                             {
+                                if (pc.SecondFigure != null)
+                                {
+                                    pc.SecondFigure.IsSelect = true;
+                                    pc.AWF = pc.SecondFigure.HitOnManipulators(pc.FirstMousePos);
+                                    if (pc.AWF != ActionWithFigure.None)
+                                        pc.SelectedFigure = pc.SecondFigure;
+                                }
 
+                                if (pc.AWF == ActionWithFigure.None)
+                                    pc.SelectedFigure = _core.Find(pc.FirstMousePos);  // ищем фигуры
+
+                                if (pc.SelectedFigure != null && pc.SecondFigure == null)
+                                {
+                                    pc.SecondFigure = pc.SelectedFigure;
+                                    pc.SelectedFigure.IsSelect = true;
+                                    SetProperties(pc.SelectedFigure);
+                                }
+                                else if (pc.SelectedFigure == null && pc.SecondFigure != null)
+                                {
+                                    pc.SecondFigure.IsSelect = false;
+                                    pc.SecondFigure = null;
+                                    SetProperties(null);
+                                }
+                                else
+                                {
+
+                                }
                             }
                         }
                         break;
@@ -206,9 +220,21 @@ namespace Dipl_template_winforms
                     }
                     break;
 
+                case TypeFigures.Curve:
+                    if (pc.AddedFigure != null)
+                    {
+                        pc.AddedFigure = helper.Add(TypeFigures.Curve, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
+                        pc.AddedFigure.FillColor = pc.CurrentFillColor;
+                        pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
+                        //pc.AddedFigure.CalcAABB();
+                    }
+                    break;
+
                 case TypeFigures.None:
                     if (pc.SelectedFigure != null)
                     {
+                        if (pc.SelectedFigure.HitOnManipulators1(pc.SecondMousePos))
+                            Cursor.Current = Cursors.Arrow;
                         if (pc.IsEditMode == false)                           
                         {
                             switch (pc.AWF)
@@ -235,13 +261,23 @@ namespace Dipl_template_winforms
                                 default:
                                     break;
                             }
-                            if (pc.SelectedFigure.HitOnManipulators1(pc.SecondMousePos))
-                                Cursor.Current = Cursors.Arrow;
+                            
                         }
                         else
                         {
-                            if (pc.IsMovePoint)
-                                pc.SelectedFigure.SetNewPoint(pc.SecondMousePos);
+                            if (pc.SelectingMode == SelectingMode.Points)
+                            {
+                                if (pc.IsMovePoint)
+                                    pc.SelectedFigure.SetNewPoint(pc.SecondMousePos);
+                            }
+                            else
+                            {
+                                if (pc.IsMoveEdge)
+                                {
+                                    pc.SelectedFigure.SetNewEdge(pc.SecondMousePos, pc.FirstMousePos);
+                                    pc.FirstMousePos = pc.SecondMousePos;
+                                }
+                            }
                         }
                     }
                     break;
@@ -296,11 +332,22 @@ namespace Dipl_template_winforms
                             pc.AddedFigure = null;
                             break;
 
+                        case TypeFigures.Curve:
+                            _core.Add(pc.AddedFigure);
+                            //AddFigureInTreeView(pc.AddedFigure);
+                            pc.AddedFigure.Id = _core.Ids.ToString();
+                            pc.AddedFigure.Name = "Curve " + pc.AddedFigure.Id;
+                            SetProperties(pc.AddedFigure);
+                            //pc.SelectedFigure = pc.AddedFigure;
+                            pc.AddedFigure = null;
+                            break;
+
                         case TypeFigures.None:
                             if (pc.SelectedFigure != null)
                             {
                                 pc.AWF = ActionWithFigure.None;
                                 pc.IsMovePoint = false;
+                                pc.IsMoveEdge = false;
                             }
                             break;
 
@@ -342,6 +389,22 @@ namespace Dipl_template_winforms
                 pc.SelectedFigure.IsSelect = false;
             }
         }
+        // Select (in Edit mode) Point
+        private void tsb_selectPoint_Click(object sender, EventArgs e)
+        {
+            if (pc.IsEditMode)
+            {
+                pc.SelectingMode = SelectingMode.Points;
+            }
+        }
+        // Select (in Edit mode) Edge
+        private void tsb_selectEdge_Click(object sender, EventArgs e)
+        {
+            if (pc.IsEditMode)
+            {
+                pc.SelectingMode = SelectingMode.Edges;
+            }
+        }
         private void toolStripButton5_Click(object sender, EventArgs e)
         {
             pc.CurrentTypeFigure = TypeFigures.Line;
@@ -362,7 +425,11 @@ namespace Dipl_template_winforms
         {
             pc.CurrentTypeFigure = TypeFigures.Curve;
         }
+        // Удалить выбранную фигуру
+        private void toolStripButton10_Click(object sender, EventArgs e)
+        {
 
+        }
         // for Fill color
         private void toolStripButton14_Click(object sender, EventArgs e)
         {
@@ -485,6 +552,60 @@ namespace Dipl_template_winforms
                 nud_scaleX.Value = 1;
                 nud_scaleY.Value = 1;
             }
-        }       
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void Form1_KeyUp(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void glControl1_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.A:
+                    pc.IsShiftPress = true;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        private void glControl1_KeyUp(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.A:
+                    pc.IsShiftPress = false;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        void Deb(string text, bool append)
+        {
+            if (append)
+            {
+                label1.Text += text + "\n";
+            }
+            else
+            {
+                label1.Text = text + "\n";
+            }
+        }
+
+        private void tsb_subdivEdge_Click(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+                pc.SelectedFigure.SubDivEdge();
+        }
     }
 }

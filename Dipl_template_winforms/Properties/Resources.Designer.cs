@@ -253,6 +253,26 @@ namespace Dipl_template_winforms.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap selectE {
+            get {
+                object obj = ResourceManager.GetObject("selectE", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap selectPoint {
+            get {
+                object obj = ResourceManager.GetObject("selectPoint", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap trash_48 {
             get {
                 object obj = ResourceManager.GetObject("trash_48", resourceCulture);

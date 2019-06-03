@@ -45,6 +45,7 @@ namespace Dipl_template_winforms
 
             grid.IsShow = true;
 
+            treeView1.MouseDown += treeView_MouseDown;
             treeView1.ExpandAll();
 
             if (pc.IsNewFile == false)
@@ -436,7 +437,15 @@ namespace Dipl_template_winforms
         // Удалить выбранную фигуру
         private void toolStripButton10_Click(object sender, EventArgs e)
         {
-
+            if (pc.SelectedFigure != null)
+            {
+                _core.Del(pc.SelectedFigure);
+                treeView1.Nodes.Clear();
+                treeView1.Nodes.AddRange(_core.NodesForTree());
+                pc.SelectedFigure = null;
+                glControl1.Invalidate();              
+                treeView1.ExpandAll();
+            }
         }
         // for Fill color
         private void toolStripButton14_Click(object sender, EventArgs e)
@@ -643,6 +652,34 @@ namespace Dipl_template_winforms
         {
             if (pc.SelectedFigure != null)
                 pc.SelectedFigure.ToLine();
+        }
+
+        private void treeView_MouseDown(object s, MouseEventArgs e)
+        {
+            TreeViewHitTestInfo info = treeView1.HitTest(e.X, e.Y);
+            TreeNode hitNode;
+            if (info.Node != null)
+            {
+                hitNode = info.Node;
+                Figure f = new Figure();
+                if ((f = _core.Find(hitNode.Name)) != null)
+                {
+                    pc.SelectedFigure = f;
+                    pc.SelectedFigure.IsSelect = true;
+                }
+                glControl1.Invalidate();
+            }
+        }
+
+        private void toolStripButton15_Click(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+                if (pc.SelectedFigure.DelElement())
+                {
+                    pc.SelectedFigure.ReCalc();
+                    glControl1.Invalidate();
+                }
+                    
         }
     }
 }

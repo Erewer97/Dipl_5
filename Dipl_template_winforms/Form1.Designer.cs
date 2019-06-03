@@ -206,7 +206,7 @@
             // toolStripContainer3.ContentPanel
             // 
             this.toolStripContainer3.ContentPanel.Controls.Add(this.glControl1);
-            this.toolStripContainer3.ContentPanel.Size = new System.Drawing.Size(956, 719);
+            this.toolStripContainer3.ContentPanel.Size = new System.Drawing.Size(948, 719);
             this.toolStripContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
             // 
             // toolStripContainer3.LeftToolStripPanel
@@ -228,7 +228,7 @@
             this.glControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.glControl1.Location = new System.Drawing.Point(0, 0);
             this.glControl1.Name = "glControl1";
-            this.glControl1.Size = new System.Drawing.Size(956, 719);
+            this.glControl1.Size = new System.Drawing.Size(948, 719);
             this.glControl1.TabIndex = 1;
             this.glControl1.VSync = false;
             this.glControl1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.glControl1_KeyDown);
@@ -255,7 +255,7 @@
             this.toolStripButton14});
             this.toolStrip1.Location = new System.Drawing.Point(0, 3);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(24, 303);
+            this.toolStrip1.Size = new System.Drawing.Size(32, 322);
             this.toolStrip1.TabIndex = 1;
             // 
             // toolStripButton3
@@ -380,7 +380,7 @@
             this.toolStripButton13.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton13.Image")));
             this.toolStripButton13.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton13.Name = "toolStripButton13";
-            this.toolStripButton13.Size = new System.Drawing.Size(22, 19);
+            this.toolStripButton13.Size = new System.Drawing.Size(30, 19);
             this.toolStripButton13.Text = " ";
             this.toolStripButton13.Click += new System.EventHandler(this.toolStripButton13_Click);
             // 
@@ -409,7 +409,7 @@
             this.toolStripButton18});
             this.toolStrip4.Location = new System.Drawing.Point(3, 0);
             this.toolStrip4.Name = "toolStrip4";
-            this.toolStrip4.Size = new System.Drawing.Size(441, 25);
+            this.toolStrip4.Size = new System.Drawing.Size(515, 25);
             this.toolStrip4.TabIndex = 0;
             // 
             // toolStripLabel3
@@ -443,12 +443,13 @@
             // 
             // toolStripButton15
             // 
-            this.toolStripButton15.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton15.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripButton15.Image = global::Dipl_template_winforms.Properties.Resources.trash_48;
             this.toolStripButton15.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton15.Name = "toolStripButton15";
-            this.toolStripButton15.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton15.Text = "toolStripButton15";
+            this.toolStripButton15.Size = new System.Drawing.Size(128, 22);
+            this.toolStripButton15.Text = "Удалить точку/ребро";
+            this.toolStripButton15.Click += new System.EventHandler(this.toolStripButton15_Click);
             // 
             // tsb_subdivEdge
             // 

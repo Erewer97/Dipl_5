@@ -695,6 +695,77 @@ namespace Dipl_template_winforms
             return false;
         }
 
+        public bool DelElement()
+        {
+            if (indCurrEdge > -1)
+            {
+                Vector2d c = (mainFigure[indCurrEdge].Begin + mainFigure[indCurrEdge].End) / 2.0;
+                if (IsClosed)
+                {
+                    if (indCurrEdge == 0)
+                    {
+                        mainFigure[1].Begin = c;
+                        mainFigure[mainFigure.Count - 1].End = c;
+                        mainFigure.RemoveAt(0);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                    else if (indCurrEdge == mainFigure.Count - 1)
+                    {
+                        mainFigure[0].Begin = c;
+                        mainFigure[mainFigure.Count - 2].End = c;
+                        mainFigure.RemoveAt(indCurrEdge);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                    else
+                    {
+                        mainFigure[indCurrEdge + 1].Begin = c;
+                        mainFigure[indCurrEdge - 1].End = c;
+                        mainFigure.RemoveAt(indCurrEdge);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                }
+                else
+                {
+                    ;
+                }
+            }
+            if (indP1 == 1 || indP1 == 0)
+            {
+                if (IsClosed)
+                {
+                    if (indE1 == 0)
+                    {
+                        mainFigure[indE1].End = mainFigure[1].End;
+                        mainFigure.RemoveAt(1);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                    else if (indE1 == mainFigure.Count - 1)
+                    {
+                        mainFigure[indE1].End = mainFigure[0].End;
+                        mainFigure.RemoveAt(0);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                    else
+                    {
+                        mainFigure[indE1].End = mainFigure[indE1 + 1].End;
+                        mainFigure.RemoveAt(indE1 + 1);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                }
+                else
+                {
+                    ;
+                }
+            }
+            return false;
+        }
+
         public void ToLine()
         {
             if (indCurrEdge > -1)

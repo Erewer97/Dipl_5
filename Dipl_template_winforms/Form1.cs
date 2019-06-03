@@ -45,6 +45,8 @@ namespace Dipl_template_winforms
 
             grid.IsShow = true;
 
+            treeView1.ExpandAll();
+
             if (pc.IsNewFile == false)
             {
                 //btn_Add_ellipsoid.Enabled =
@@ -60,6 +62,7 @@ namespace Dipl_template_winforms
         {
             GL.ClearColor(Color.White);
             _core.AddLayer();
+            treeView1.Nodes.AddRange(_core.NodesForTree());
         }
         private void glControl1_Paint(object sender, PaintEventArgs e)
         {
@@ -297,48 +300,52 @@ namespace Dipl_template_winforms
                     {
                         case TypeFigures.Line:
                             _core.Add(pc.AddedFigure);
-                            //AddFigureInTreeView(pc.AddedFigure);
                             pc.AddedFigure.Id = _core.Ids.ToString();
                             pc.AddedFigure.Name = "Line " + pc.AddedFigure.Id;
                             SetProperties(pc.AddedFigure);
+                            treeView1.Nodes.Clear();
+                            treeView1.Nodes.AddRange(_core.NodesForTree());
                             pc.AddedFigure = null;
 
                             break;
 
                         case TypeFigures.Rect:
                             _core.Add(pc.AddedFigure);
-                            //AddFigureInTreeView(pc.AddedFigure);
                             pc.AddedFigure.Id = _core.Ids.ToString();
                             pc.AddedFigure.Name = "Rectangle " + pc.AddedFigure.Id;
                             SetProperties(pc.AddedFigure);
+                            treeView1.Nodes.Clear();
+                            treeView1.Nodes.AddRange(_core.NodesForTree());
                             pc.AddedFigure = null;
                             break;
 
                         case TypeFigures.Ellipsoid:
                             _core.Add(pc.AddedFigure);
-                            //AddFigureInTreeView(pc.AddedFigure);
                             pc.AddedFigure.Id = _core.Ids.ToString();
                             pc.AddedFigure.Name = "Ellipsoid " + pc.AddedFigure.Id;
                             SetProperties(pc.AddedFigure);
+                            treeView1.Nodes.Clear();
+                            treeView1.Nodes.AddRange(_core.NodesForTree());
                             pc.AddedFigure = null;
                             break;
 
                         case TypeFigures.Polygon:
                             _core.Add(pc.AddedFigure);
-                            //AddFigureInTreeView(pc.AddedFigure);
                             pc.AddedFigure.Id = _core.Ids.ToString();
                             pc.AddedFigure.Name = "Polygon " + pc.AddedFigure.Id;
                             SetProperties(pc.AddedFigure);
+                            treeView1.Nodes.Clear();
+                            treeView1.Nodes.AddRange(_core.NodesForTree());
                             pc.AddedFigure = null;
                             break;
 
                         case TypeFigures.Curve:
                             _core.Add(pc.AddedFigure);
-                            //AddFigureInTreeView(pc.AddedFigure);
                             pc.AddedFigure.Id = _core.Ids.ToString();
                             pc.AddedFigure.Name = "Curve " + pc.AddedFigure.Id;
                             SetProperties(pc.AddedFigure);
-                            //pc.SelectedFigure = pc.AddedFigure;
+                            treeView1.Nodes.Clear();
+                            treeView1.Nodes.AddRange(_core.NodesForTree());
                             pc.AddedFigure = null;
                             break;
 
@@ -362,6 +369,7 @@ namespace Dipl_template_winforms
                 default:
                     break;
             }
+            treeView1.ExpandAll();
         }
         #endregion
 
@@ -606,6 +614,35 @@ namespace Dipl_template_winforms
         {
             if (pc.SelectedFigure != null)
                 pc.SelectedFigure.SubDivEdge();
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            _core.AddLayer();
+            treeView1.Nodes.Clear();
+            treeView1.Nodes.AddRange(_core.NodesForTree());
+            treeView1.ExpandAll();
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            _core.DelLayer();
+            treeView1.Nodes.Clear();
+            treeView1.Nodes.AddRange(_core.NodesForTree());
+            glControl1.Invalidate();
+            treeView1.ExpandAll();
+        }
+
+        private void toolStripButton17_Click(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+                pc.SelectedFigure.ToBezie();
+        }
+
+        private void toolStripButton18_Click(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+                pc.SelectedFigure.ToLine();
         }
     }
 }

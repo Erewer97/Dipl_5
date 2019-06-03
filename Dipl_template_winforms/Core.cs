@@ -695,6 +695,23 @@ namespace Dipl_template_winforms
             return false;
         }
 
+        public void ToLine()
+        {
+            if (indCurrEdge > -1)
+            {
+                mainFigure[indCurrEdge].ConvertToLine();
+                ReCalc();
+            }
+        }
+        public void ToBezie()
+        {
+            if (indCurrEdge > -1)
+            {
+                mainFigure[indCurrEdge].ConvertToBezie();
+                ReCalc();
+            }
+        }
+
         public void SubDivEdge()
         {
             if (indCurrEdge > -1)
@@ -1062,7 +1079,6 @@ namespace Dipl_template_winforms
             return r;
         }       
 
-
         int FindIndScale(int index)
         {
             switch (index)
@@ -1193,6 +1209,17 @@ namespace Dipl_template_winforms
         public void DelFigure(Figure figure)
         {
             Figures.Remove(figure);
+        }
+
+        // For TreeVieW
+        public TreeNode[] NodesForTree()
+        {
+            List<TreeNode> r = new List<TreeNode>();
+
+            foreach (Figure f in Figures)
+                r.Add(new TreeNode() { Name = f.Id, Text = f.Name });
+            
+            return r.ToArray();
         }
 
         // Draw all figures in the layer
@@ -1648,13 +1675,6 @@ namespace Dipl_template_winforms
             }
             return t;
         }
-        public void EditFigure(int indexFigure, Figure figure)
-        {
-            if (figure != null && indexFigure > -1)
-            {
-                ;
-            }
-        }
 
         // Methods for layer
         public void AddLayer()
@@ -1679,6 +1699,18 @@ namespace Dipl_template_winforms
             var r = _layers.Find(x => x.Name == name);
             if (r != null)
                 CurrentLayer = r;
+        }
+        public TreeNode[] NodesForTree()
+        {
+            List<TreeNode> r = new List<TreeNode>();
+
+            for (int i = 0; i < _layers.Count; i++)
+            {
+                r.Add(new TreeNode(_layers[i].Name, _layers[i].NodesForTree()));
+
+            }
+
+            return r.ToArray();
         }
 
         public string Debug()

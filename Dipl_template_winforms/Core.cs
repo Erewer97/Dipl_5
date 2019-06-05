@@ -335,6 +335,7 @@ namespace Dipl_template_winforms
         private int indPoint1 = -1;
         int indAroundScale = -1;
         private int indCurrEdge = -1;
+        List<Triangle> _triangles = new List<Triangle>();
 
         public void ReCalc()
         {
@@ -395,6 +396,9 @@ namespace Dipl_template_winforms
                 }
                 Verteces.Add(Edges[Edges.Count - 1].End);
             }
+
+            Triangulate tr = new Triangulate(Verteces.ToArray());
+            _triangles = tr.Triangles;
         }
         public Vector2d MultiplyMatrixAndVector(Vector2d Vector, Matrix4d m)
         {
@@ -1112,10 +1116,21 @@ namespace Dipl_template_winforms
         {     
             if (IsClosed)
             {
-                GL.Begin(BeginMode.Polygon);
+                //GL.Begin(BeginMode.Polygon);
+                //GL.Color3(FillColor);
+                //for (int i = 0; i < Verteces.Count; i++)
+                //    GL.Vertex2(Verteces[i]);
+                //GL.End();
+
+
+                GL.Begin(BeginMode.Triangles);
                 GL.Color3(FillColor);
-                for (int i = 0; i < Verteces.Count; i++)
-                    GL.Vertex2(Verteces[i]);
+                foreach (var t in _triangles)
+                {
+                    GL.Vertex2(t.A);
+                    GL.Vertex2(t.B);
+                    GL.Vertex2(t.C);
+                }
                 GL.End();
 
                 GL.Begin(BeginMode.LineLoop);
@@ -1198,6 +1213,16 @@ namespace Dipl_template_winforms
                     GL.Vertex2(Edges[i].End);
                     GL.End();                   
                 }
+
+                //GL.Begin(BeginMode.LineLoop);
+                //foreach (var t in _triangles)
+                //{
+                //    GL.Vertex2(t.A);
+                //    GL.Vertex2(t.B);
+                //    GL.Vertex2(t.C);
+                //}
+                //GL.End();
+
                 GL.PopMatrix();
 
                 if (indCurrEdge > -1)

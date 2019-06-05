@@ -51,3 +51,13 @@ F:\_____PROGECTS\Dipl_5_4\ConsoleApp1\obj\Debug\ConsoleApp1.csprojResolveAssembl
 F:\_____PROGECTS\Dipl_5_4\ConsoleApp1\obj\Debug\ConsoleApp1.csproj.CoreCompileInputs.cache
 F:\_____PROGECTS\Dipl_5_4\ConsoleApp1\obj\Debug\ConsoleApp1.exe
 F:\_____PROGECTS\Dipl_5_4\ConsoleApp1\obj\Debug\ConsoleApp1.pdb
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\bin\Debug\ConsoleApp1.exe.config
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\bin\Debug\ConsoleApp1.exe
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\bin\Debug\ConsoleApp1.pdb
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\bin\Debug\OpenTK.Compatibility.dll
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\bin\Debug\OpenTK.dll
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\bin\Debug\OpenTK.GLControl.dll
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\obj\Debug\ConsoleApp1.csprojResolveAssemblyReference.cache
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\obj\Debug\ConsoleApp1.csproj.CoreCompileInputs.cache
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\obj\Debug\ConsoleApp1.exe
+F:\_____PROGECTS\Dipl_5_6\ConsoleApp1\obj\Debug\ConsoleApp1.pdb

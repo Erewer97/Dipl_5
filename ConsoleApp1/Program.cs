@@ -17,6 +17,7 @@ namespace ConsoleApp1
     public enum TypeFigures { None, Line, Rect, Circle, Curve, Polygon, Ellipsoid }
     public enum Operations { None, Union, Interset }
     public enum ActionWithFigure { None, Move, Rotate, Scale }
+    public enum SelectingMode { Points, Edges }
 
     public static class MathVec
     {
@@ -51,8 +52,7 @@ namespace ConsoleApp1
         }
         public Edge(Vector2d begin, Vector2d end, Vector2d cp1, Vector2d cp2)
         {
-            Begin = begin; End = end; BeginControlPoint = cp1; EndControlPoint = cp2; IsBezie = true;
-            CalcBeziePoints();
+            Begin = begin; End = end; BeginControlPoint = cp1; EndControlPoint = cp2; IsBezie = true; CalcBeziePoints();
         }
 
         public Vector2d this[int index]
@@ -94,8 +94,8 @@ namespace ConsoleApp1
 
         public void CalcBeziePoints()
         {
-            if (IsBezie == false) IsBezie = true;
             BezierCurveCubic b = new BezierCurveCubic((Vector2)Begin, (Vector2)End, (Vector2)BeginControlPoint, (Vector2)EndControlPoint);
+            if (IsBezie == false) IsBezie = true;
 
             for (int i = 1; i <= BezieSegments - 1; i++)
                 _bezieVerteces[i - 1] = (Vector2d)b.CalculatePoint(i / (float)BezieSegments);
@@ -136,7 +136,7 @@ namespace ConsoleApp1
                         if (i == 0)
                         {
                             p1 = Begin;
-                            p2 = _bezieVerteces[i];
+                            p2 = _bezieVerteces[i + 1];
                         }
                         else if (i == _bezieVerteces.Length)
                         {
@@ -153,16 +153,41 @@ namespace ConsoleApp1
                         X = p2.X - p1.X;
 
                         if (Math.Abs(X) < 0.01)
+                        {
                             if ((point.Y < Begin.Y) && (End.Y < point.Y))
                                 return this;
-                            else
-                                return null;
+                        }
+                        if (Math.Abs(Y) < 0.01)
+                        {
+                            if ((point.X < Begin.X) && (End.X < point.X))
+                                return this;
+                        }
 
                         D = p1.X * p2.Y - p2.X * p1.Y;
 
                         double res = Y * point.X + X * point.Y + D;
-                        if (Math.Abs(res) < 0.1)
+                        if (Math.Abs(res) < 0.01)
                             return this;
+                        //double x = point.X - Begin.X;
+                        //double y = point.Y - Begin.Y;
+
+                        //double z1 = End.X - Begin.X;
+                        //if (Math.Abs(z1) < 0.1)
+                        //    if ((point.Y < Begin.Y) && (End.Y < point.Y))
+                        //        return this;
+
+
+                        //double z2 = End.Y - Begin.Y;
+                        //if (Math.Abs(z2) < 0.1)
+                        //    if ((point.X < Begin.X) && (End.X < point.X))
+                        //        return this;
+
+
+                        //double l1 = x / z1;
+                        //double l2 = y / z2;
+
+                        //if (Math.Abs(l1 - l2) < 0.1)
+                        //    return this;
                     }
                 }
             }
@@ -171,7 +196,7 @@ namespace ConsoleApp1
                 Y = Begin.Y - End.Y;
                 X = End.X - Begin.X;
 
-                if (Math.Abs(X) < 0.01)
+                if ((Math.Abs(X) < 0.01) && (Math.Abs(point.X - Begin.X) < 0.01))
                     if ((point.Y < Begin.Y) && (End.Y < point.Y))
                         return this;
                     else
@@ -182,6 +207,30 @@ namespace ConsoleApp1
                 double res = Y * point.X + X * point.Y + D;
                 if (Math.Abs(res) < 0.1)
                     return this;
+                //double x = point.X - Begin.X;
+                //double y = point.Y - Begin.Y;
+
+                //double z1 = End.X - Begin.X;
+                //if (Math.Abs(z1) < 0.1)
+                //    if ((point.Y < Begin.Y) && (End.Y < point.Y))
+                //        return this;
+                //    else
+                //        return null;
+
+                //double z2 = End.Y - Begin.Y;
+                //if (Math.Abs(z2) < 0.1)
+                //    if ((point.X < Begin.X) && (End.X < point.X))
+                //        return this;
+                //    else
+                //        return null;
+
+                //double l1 = x / z1;
+                //double l2 = y / z2;
+
+                //if (0.0 < l1 && l1 < 1.0 && 0.0 < l2 && l2 < 1.0)
+                //    return this;
+                //else
+                //    return null;
             }
             return null;
         }
@@ -262,12 +311,13 @@ namespace ConsoleApp1
         public bool IsDrawPoint { get; set; }
         public ActionWithFigure LabelOFAction { get; private set; }
         public TypeFigures Type { get; set; } = TypeFigures.None;
+
+
+
         public bool IsSelect { get; set; }
         public bool IsEdit { get; set; } // Редактируют ли сейчас эту фигуру?
         public bool IsRender { get; set; }
         public bool IsDrawCenter { get; set; }
-        //public Color FillColor { get; set; }
-        //public Color BorderColor { get; set; }
         public float LineWidth { get; set; } = 1.0f;
 
 
@@ -280,6 +330,10 @@ namespace ConsoleApp1
         private int indE1 = -1;
         private int indE2 = -1;
         int indP1 = -1, indP2 = -1;
+        private int indPoint1 = -1;
+        int indAroundScale = -1;
+        private int indCurrEdge = -1;
+        public List<Triangle> _triangles = new List<Triangle>();
 
         public void ReCalc()
         {
@@ -329,10 +383,20 @@ namespace ConsoleApp1
             {
                 for (int i = 0; i < Edges.Count; i++)
                 {
-                    Verteces.Add(Edges[i].Begin);
+                    if (!Edges[i].IsBezie)
+                        Verteces.Add(Edges[i].Begin);
+                    else
+                    {
+                        Verteces.Add(Edges[i].Begin);
+                        for (int tt = 0; tt < Edges[i].BeziePoints.Length; tt++)
+                            Verteces.Add(Edges[i].BeziePoints[tt]);
+                    }
                 }
                 Verteces.Add(Edges[Edges.Count - 1].End);
             }
+
+            Triangulate tr = new Triangulate(Verteces.ToArray());
+            _triangles = tr.Triangles;
         }
         public Vector2d MultiplyMatrixAndVector(Vector2d Vector, Matrix4d m)
         {
@@ -425,9 +489,16 @@ namespace ConsoleApp1
             {
                 for (int i = 0; i < Edges.Count; i++)
                 {
-                    var e = new Edge(Edges[i].End, Edges[i].Begin, Edges[i].EndControlPoint, Edges[i].BeginControlPoint);
-                    Edges[i] = e;
-                    //mainFigure[i] = e;
+                    if (Edges[i].IsBezie)
+                    {
+                        var e = new Edge(Edges[i].End, Edges[i].Begin, Edges[i].EndControlPoint, Edges[i].BeginControlPoint);
+                        Edges[i] = e;
+                    }
+                    else
+                    {
+                        var e = new Edge(Edges[i].End, Edges[i].Begin);
+                        Edges[i] = e;
+                    }
                 }
 
                 Edges.Reverse();
@@ -470,6 +541,10 @@ namespace ConsoleApp1
                     )
                     return true;
             }
+            else
+            {
+                return HitInBorder(v);
+            }
 
             return result;
 
@@ -479,15 +554,19 @@ namespace ConsoleApp1
         /// </summary>
         /// <param name="v">Позиция мыши</param>
         /// <returns>Ребро, если попали, иначе null</returns>
-        public Edge HitInBorder(Vector2d v)
+        public bool HitInBorder(Vector2d v)
         {
             Edge r = null;
             for (int i = 0; i < Edges.Count; i++)
                 if ((r = Edges[i].PointAtEdge(v)) != null)
-                    return r;
-            return null;
+                {
+                    indCurrEdge = i;
+                    return true;
+                }
+            indCurrEdge = -1;
+            return false;
         }
-        public void HitInPoint(Vector2d MousePos)
+        public bool HitInPoint(Vector2d MousePos)
         {
             if (IsClosed)
             {
@@ -500,11 +579,11 @@ namespace ConsoleApp1
                     {
                         if (MathVec.CompareLenSquared(b, 0.01))
                         {
-                            indE1 = 0; indE2 = Edges.Count - 1; indP1 = 0; indP2 = 1; return;
+                            indE1 = 0; indE2 = Edges.Count - 1; indP1 = 0; indP2 = 1; return true;
                         }
                         if (MathVec.CompareLenSquared(e, 0.01))
                         {
-                            indE1 = 0; indE2 = 1; indP1 = 1; indP2 = 0; return;
+                            indE1 = 0; indE2 = 1; indP1 = 1; indP2 = 0; return true;
                         }
                         if (Edges[i].IsBezie)
                         {
@@ -513,11 +592,11 @@ namespace ConsoleApp1
 
                             if (MathVec.CompareLenSquared(cp1, 0.01))
                             {
-                                indE1 = 0; indE2 = 0; indP1 = 2; indP2 = 2; return;
+                                indE1 = 0; indE2 = 0; indP1 = 2; indP2 = 2; return true;
                             }
                             if (MathVec.CompareLenSquared(cp2, 0.01))
                             {
-                                indE1 = 0; indE2 = 0; indP1 = 3; indP2 = 3; return;
+                                indE1 = 0; indE2 = 0; indP1 = 3; indP2 = 3; return true;
                             }
                         }
                     }
@@ -525,11 +604,11 @@ namespace ConsoleApp1
                     {
                         if (MathVec.CompareLenSquared(b, 0.01))
                         {
-                            indE1 = Edges.Count - 1; indE2 = Edges.Count - 2; indP1 = 0; indP2 = 1; return;
+                            indE1 = Edges.Count - 1; indE2 = Edges.Count - 2; indP1 = 0; indP2 = 1; return true;
                         }
                         if (MathVec.CompareLenSquared(e, 0.01))
                         {
-                            indE1 = Edges.Count - 1; indE2 = 0; indP1 = 1; indP2 = 0; return;
+                            indE1 = Edges.Count - 1; indE2 = 0; indP1 = 1; indP2 = 0; return true;
                         }
                         if (Edges[i].IsBezie)
                         {
@@ -538,11 +617,11 @@ namespace ConsoleApp1
 
                             if (MathVec.CompareLenSquared(cp1, 0.01))
                             {
-                                indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 2; indP2 = 2; return;
+                                indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 2; indP2 = 2; return true;
                             }
                             if (MathVec.CompareLenSquared(cp2, 0.01))
                             {
-                                indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 3; indP2 = 3; return;
+                                indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 3; indP2 = 3; return true;
                             }
                         }
                     }
@@ -550,11 +629,11 @@ namespace ConsoleApp1
                     {
                         if (MathVec.CompareLenSquared(b, 0.01))
                         {
-                            indE1 = i; indE2 = i + 1; indP1 = 0; indP2 = 1; return;
+                            indE1 = i; indE2 = i + 1; indP1 = 0; indP2 = 1; return true;
                         }
                         if (MathVec.CompareLenSquared(e, 0.01))
                         {
-                            indE1 = i; indE2 = i + 1; indP1 = 1; indP2 = 0; return;
+                            indE1 = i; indE2 = i + 1; indP1 = 1; indP2 = 0; return true;
                         }
                         if (Edges[i].IsBezie)
                         {
@@ -563,11 +642,11 @@ namespace ConsoleApp1
 
                             if (MathVec.CompareLenSquared(cp1, 0.01))
                             {
-                                indE1 = i; indE2 = i; indP1 = 2; indP2 = 2; return;
+                                indE1 = i; indE2 = i; indP1 = 2; indP2 = 2; return true;
                             }
                             if (MathVec.CompareLenSquared(cp2, 0.01))
                             {
-                                indE1 = i; indE2 = i; indP1 = 3; indP2 = 3; return;
+                                indE1 = i; indE2 = i; indP1 = 3; indP2 = 3; return true;
                             }
                         }
                     }
@@ -584,11 +663,18 @@ namespace ConsoleApp1
                     {
                         if (MathVec.CompareLenSquared(b, 0.01))
                         {
-                            indE1 = 0; indE2 = 0; indP1 = 0; indP2 = 0; return;
+                            indE1 = 0; indE2 = 0; indP1 = 0; indP2 = 0; return true;
                         }
                         if (MathVec.CompareLenSquared(e, 0.01))
                         {
-                            indE1 = 0; indE2 = 1; indP1 = 1; indP2 = 0; return;
+                            if (Edges.Count == 1)
+                            {
+                                indE1 = 0; indE2 = 0; indP1 = 1; indP2 = 1; return true;
+                            }
+                            else
+                            {
+                                indE1 = 0; indE2 = 1; indP1 = 1; indP2 = 0; return true;
+                            }
                         }
                         if (Edges[i].IsBezie)
                         {
@@ -597,11 +683,11 @@ namespace ConsoleApp1
 
                             if (MathVec.CompareLenSquared(cp1, 0.01))
                             {
-                                indE1 = 0; indE2 = 0; indP1 = 2; indP2 = 2; return;
+                                indE1 = 0; indE2 = 0; indP1 = 2; indP2 = 2; return true;
                             }
                             if (MathVec.CompareLenSquared(cp2, 0.01))
                             {
-                                indE1 = 0; indE2 = 0; indP1 = 3; indP2 = 3; return;
+                                indE1 = 0; indE2 = 0; indP1 = 3; indP2 = 3; return true;
                             }
                         }
                     }
@@ -609,11 +695,11 @@ namespace ConsoleApp1
                     {
                         if (MathVec.CompareLenSquared(b, 0.01))
                         {
-                            indE1 = Edges.Count - 1; indE2 = Edges.Count - 2; indP1 = 0; indP2 = 1; return;
+                            indE1 = Edges.Count - 1; indE2 = Edges.Count - 2; indP1 = 0; indP2 = 1; return true;
                         }
                         if (MathVec.CompareLenSquared(e, 0.01))
                         {
-                            indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 1; indP2 = 1; return;
+                            indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 1; indP2 = 1; return true;
                         }
                         if (Edges[i].IsBezie)
                         {
@@ -622,11 +708,11 @@ namespace ConsoleApp1
 
                             if (MathVec.CompareLenSquared(cp1, 0.01))
                             {
-                                indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 2; indP2 = 2; return;
+                                indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 2; indP2 = 2; return true;
                             }
                             if (MathVec.CompareLenSquared(cp2, 0.01))
                             {
-                                indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 3; indP2 = 3; return;
+                                indE1 = Edges.Count - 1; indE2 = Edges.Count - 1; indP1 = 3; indP2 = 3; return true;
                             }
                         }
                     }
@@ -634,11 +720,11 @@ namespace ConsoleApp1
                     {
                         if (MathVec.CompareLenSquared(b, 0.01))
                         {
-                            indE1 = i; indE2 = i + 1; indP1 = 0; indP2 = 1; return;
+                            indE1 = i; indE2 = i + 1; indP1 = 0; indP2 = 1; return true;
                         }
                         if (MathVec.CompareLenSquared(e, 0.01))
                         {
-                            indE1 = i; indE2 = i + 1; indP1 = 1; indP2 = 0; return;
+                            indE1 = i; indE2 = i + 1; indP1 = 1; indP2 = 0; return true;
                         }
                         if (Edges[i].IsBezie)
                         {
@@ -647,17 +733,160 @@ namespace ConsoleApp1
 
                             if (MathVec.CompareLenSquared(cp1, 0.01))
                             {
-                                indE1 = i; indE2 = i; indP1 = 2; indP2 = 2; return;
+                                indE1 = i; indE2 = i; indP1 = 2; indP2 = 2; return true;
                             }
                             if (MathVec.CompareLenSquared(cp2, 0.01))
                             {
-                                indE1 = i; indE2 = i; indP1 = 3; indP2 = 3; return;
+                                indE1 = i; indE2 = i; indP1 = 3; indP2 = 3; return true;
                             }
                         }
                     }
                 }
             }
+            return false;
         }
+
+        public bool SmoothControlPoints()
+        {
+            if (indE1 > -1)
+            {
+                var e1 = mainFigure[indE1];
+                var e2 = mainFigure[indE2];
+
+                if (e1.IsBezie && e2.IsBezie)
+                {
+                    var p2 = e2.End;
+                    var p1 = e1.Begin;
+
+                    var p = e1.End;
+
+                    var v1 = p1 - p;
+                    var v2 = p2 - p;
+
+                    Vector2d res = (v1 + v2).Normalized();
+                    res = new Vector2d(res.Y, -res.X);
+
+                    mainFigure[indE1][3] = p - res;
+                    mainFigure[indE2][2] = p + res;
+                    return true;
+                }
+
+            }
+            return false;
+        }
+
+        public bool DelElement()
+        {
+            if (indCurrEdge > -1)
+            {
+                Vector2d c = (mainFigure[indCurrEdge].Begin + mainFigure[indCurrEdge].End) / 2.0;
+                if (IsClosed)
+                {
+                    if (indCurrEdge == 0)
+                    {
+                        mainFigure[1].Begin = c;
+                        mainFigure[mainFigure.Count - 1].End = c;
+                        mainFigure.RemoveAt(0);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                    else if (indCurrEdge == mainFigure.Count - 1)
+                    {
+                        mainFigure[0].Begin = c;
+                        mainFigure[mainFigure.Count - 2].End = c;
+                        mainFigure.RemoveAt(indCurrEdge);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                    else
+                    {
+                        mainFigure[indCurrEdge + 1].Begin = c;
+                        mainFigure[indCurrEdge - 1].End = c;
+                        mainFigure.RemoveAt(indCurrEdge);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                }
+                else
+                {
+                    ;
+                }
+            }
+            if (indP1 == 1 || indP1 == 0)
+            {
+                if (IsClosed)
+                {
+                    if (indE1 == 0)
+                    {
+                        mainFigure[indE1].End = mainFigure[1].End;
+                        mainFigure.RemoveAt(1);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                    else if (indE1 == mainFigure.Count - 1)
+                    {
+                        mainFigure[indE1].End = mainFigure[0].End;
+                        mainFigure.RemoveAt(0);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                    else
+                    {
+                        mainFigure[indE1].End = mainFigure[indE1 + 1].End;
+                        mainFigure.RemoveAt(indE1 + 1);
+                        indCurrEdge = -1;
+                        return true;
+                    }
+                }
+                else
+                {
+                    ;
+                }
+            }
+            return false;
+        }
+
+        public void ToLine()
+        {
+            if (indCurrEdge > -1)
+            {
+                mainFigure[indCurrEdge].ConvertToLine();
+                ReCalc();
+            }
+        }
+        public void ToBezie()
+        {
+            if (indCurrEdge > -1)
+            {
+                mainFigure[indCurrEdge].ConvertToBezie();
+                ReCalc();
+            }
+        }
+
+        public void SubDivEdge()
+        {
+            if (indCurrEdge > -1)
+            {
+                Edge e = mainFigure[indCurrEdge];
+                if (e.IsBezie)
+                {
+                    ;
+                }
+                else
+                {
+                    var e1 = new Edge(e.Begin, (e.Begin + e.End) / 2.0);
+                    var e2 = new Edge((e.Begin + e.End) / 2.0, e.End);
+
+                    mainFigure.RemoveAt(indCurrEdge);
+                    mainFigure.Insert(indCurrEdge, e1);
+                    mainFigure.Insert(indCurrEdge + 1, e2);
+
+                    ReCalc();
+                }
+                indCurrEdge = -1;
+            }
+        }
+
         public void CalcAngle(Vector2d secondMousePos)
         {
             Vector2d v = new Vector2d();
@@ -681,14 +910,111 @@ namespace ConsoleApp1
 
             Angle = MathHelper.RadiansToDegrees(angle);
         }
+        public void CalcsScale(Vector2d secondMousePos)
+        {
+            if (indPoint > -1)
+            {
+                int i = FindIndScale(indPoint);
+                Vector2d m = manipul[indPoint];
+                Vector2d smp = secondMousePos - MoveTo;
+                if (i == 1 || i == 4)
+                    ScaleTo = new Vector2d(smp.X / m.X, ScaleTo.Y);
+                else if (i == 6 || i == 7)
+                    ScaleTo = new Vector2d(ScaleTo.X, smp.Y / m.Y);
+                else
+                    ScaleTo = new Vector2d(smp.X / m.X, smp.Y / m.Y);
+            }
+        }
         public void SetNewPoint(Vector2d MousePos)
         {
             if (indE1 > -1)
             {
+                indCurrEdge = -1;
                 Vector2d v = MultiplyMatrixAndVector(MousePos, TRSI.Inverted());
 
                 mainFigure[indE1][indP1] = v;
                 mainFigure[indE2][indP2] = v;
+
+                if (indP1 == 2 || indP1 == 3)
+                    mainFigure[indE1].CalcBeziePoints();
+
+                Translate();
+                ReCalc();
+            }
+        }
+        public void SetNewEdge(Vector2d secondMousePos, Vector2d firstMousePos)
+        {
+            if (indCurrEdge > -1)
+            {
+                Vector2d s = MultiplyMatrixAndVector(secondMousePos, TRSI.Inverted());
+                Vector2d f = MultiplyMatrixAndVector(firstMousePos, TRSI.Inverted());
+                Vector2d moveTo = s - f;
+
+                Edge e = mainFigure[indCurrEdge];
+                if (e.IsBezie)
+                {
+                    e.Begin = e.Begin + moveTo;
+                    e.End = e.End + moveTo;
+                    e.BeginControlPoint = e.BeginControlPoint + moveTo;
+                    e.EndControlPoint = e.EndControlPoint + moveTo;
+                    e.CalcBeziePoints();
+                }
+                else
+                {
+                    e.Begin = e.Begin + moveTo;
+                    e.End = e.End + moveTo;
+                }
+
+                if (IsClosed)
+                {
+                    if (indCurrEdge == 0)
+                    {
+                        indE1 = 1; indE2 = Edges.Count - 1; indP1 = 0; indP2 = 1;
+                    }
+                    else if (indCurrEdge == Edges.Count - 1)
+                    {
+                        indE1 = 0; indE2 = Edges.Count - 2; indP1 = 0; indP2 = 1;
+                    }
+                    else
+                    {
+                        indE1 = indCurrEdge + 1; indP1 = 0;
+                        indE2 = indCurrEdge - 1; indP2 = 1;
+                    }
+                }
+                else
+                {
+                    if (indCurrEdge == 0)
+                    {
+                        if (mainFigure.Count == 1)
+                        {
+                            ;// indE1 = 0; indE2 = 0; indP1 = 0; indP2 = 1;
+                        }
+                        else
+                        {
+                            indE1 = 1; indE2 = 1; indP1 = 0; indP2 = 0;
+                        }
+                    }
+                    else if (indCurrEdge == Edges.Count - 1)
+                    {
+                        indE1 = Edges.Count - 2; indE2 = Edges.Count - 2; indP1 = 1; indP2 = 1;
+                    }
+                    else
+                    {
+                        indE1 = indCurrEdge + 1; indP1 = 0;
+                        indE2 = indCurrEdge - 1; indP2 = 1;
+                    }
+                }
+
+                if (indE1 > -1)
+                {
+                    if (indE1 == indE2)
+                        mainFigure[indE1][indP1] += moveTo;
+                    else
+                    {
+                        mainFigure[indE1][indP1] += moveTo;
+                        mainFigure[indE2][indP2] += moveTo;
+                    }
+                }
 
                 if (mainFigure.Count > 0)
                 {
@@ -732,23 +1058,6 @@ namespace ConsoleApp1
                 ReCalc();
             }
         }
-        public int Ind { get; set; } = -1;
-        public void SubDiv()
-        {
-            if (Ind > -1)
-            {
-                var e = mainFigure[Ind];
-                var e1 = new Edge(e.Begin, (e.Begin + e.End) / 2.0);
-                var e2 = new Edge((e.Begin + e.End) / 2.0, e.End);
-
-                mainFigure.RemoveAt(Ind);
-                mainFigure.Insert(Ind, e1);
-                mainFigure.Insert(Ind + 1, e2);
-
-                ReCalc();
-            }
-        }
-
         public ActionWithFigure HitOnManipulators(Vector2d mousePos)
         {
             for (int i = 0; i < Manipulators.Length - 1; i++)
@@ -758,6 +1067,7 @@ namespace ConsoleApp1
                 {
                     IsDrawPoint = true;
                     indPoint = i;
+                    indAroundScale = FindIndScale(indPoint);
                     return LabelOFAction = ActionWithFigure.Scale;
                 }
                 // for Rotate
@@ -776,6 +1086,30 @@ namespace ConsoleApp1
             IsDrawPoint = false;
             return LabelOFAction = ActionWithFigure.None;
         }
+        public bool HitOnManipulators1(Vector2d mousePos)
+        {
+            for (int i = 0; i < Manipulators.Length - 1; i++)
+            {
+                // for Scale
+                if ((Manipulators[i] - mousePos).LengthSquared < 0.01)
+                {
+                    indPoint1 = i;
+                    return true;
+                }
+                // for Rotate
+                if ((Manipulators[i] - mousePos).LengthSquared < 0.05)
+                {
+                    indPoint1 = i;
+                    return true;
+                }
+            }
+
+            if ((Manipulators[8] - mousePos).LengthSquared < 0.01)
+                return true;
+
+            indPoint1 = -1;
+            return false;
+        }
 
         public override string ToString()
         {
@@ -786,111 +1120,72 @@ namespace ConsoleApp1
             r += "  Manipuls: \n";
             foreach (var t in Manipulators)
                 r += t.X.ToString("F") + " " + t.Y.ToString("F") + "\n";
-            r += "  Main: \n";
-            foreach (var t in mainFigure)
-                r += t.Begin.ToString() + " " + t.End.ToString() + "\n";
             r += "\n";
             return r;
         }
-    }
 
-    public class ExportInGEO
-    {
-        public string PathToExport { get; set; } = string.Empty;
-        public double Weight { get; set; } = 0.1;
-
-        public ExportInGEO() {; }
-        public ExportInGEO(string pathToExport)
+        int FindIndScale(int index)
         {
-            PathToExport = pathToExport;
-        }
-
-        public void WriteInfile(List<Figure> figures)
-        {
-            if (figures.Count > 0 && PathToExport.Length > 0)
+            switch (index)
             {
-                // сменить локаль для корректного вывода дробных чисел
-                System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+                case 0: return 3;
+                case 1: return 4;
+                case 2: return 5;
 
-                using (StreamWriter sw = new StreamWriter(PathToExport))
-                {
-                    foreach (var f in figures)
-                    {
-                        StringBuilder sb = new StringBuilder("///// Create in\n");
+                case 3: return 0;
+                case 4: return 1;
+                case 5: return 2;
 
-                        // Points(i) = {x, y, 0, Weight};
-                        for (int i = 0, j = 1; i < f.Verteces.Count; i++, j++)
-                            sb.Append("Point(" + j.ToString() + ") = { " +
-                                f.Verteces[i].X.ToString("F") +
-                                ", " +
-                                f.Verteces[i].Y.ToString("F") +
-                                ", 0, " +
-                                Weight.ToString("F") +
-                                " };\n");
-
-                        sb.Append("\n");
-
-                        int k = 1, p1 = 1, p2 = 2;
-                        for (int i = 0; i < f.Verteces.Count; i++)
-                        {
-                            if (p1 == f.Verteces.Count)
-                                p2 = 1;
-                            sb.Append(
-                                "Line(" + 
-                                k.ToString() + 
-                                ") = { " +
-                                p1.ToString() + 
-                                ", " + 
-                                p2.ToString() +
-                                " };\n"
-                                    );
-                            k++; p1++; p2++;
-                        }
-                        //foreach (var e in f.Edges)
-                        //{
-                        //    if (p1 == f.Edges.Count)
-                        //        p2 = 1;
-                        //    if (e.IsBezie)
-                        //        for (int m = 0; m < e.BezieSegments; m++)
-                        //        {
-                        //            if (p1 == f.Verteces.Count)
-                        //                p2 = 1;
-                        //            sb.Append("Line(" + k.ToString() + ") = { " +
-                        //                p1.ToString() + ", " + p2.ToString() +
-                        //                " };\n"
-                        //                );
-                        //            k++;p1++;p2++;
-                        //        }
-                        //    else
-                        //    {
-                        //        if (p1 == f.Verteces.Count)
-                        //            p2 = 1;
-                        //        sb.Append("Line(" + k.ToString() + ") = { " +
-                        //            p1.ToString() + ", " + p2.ToString() +
-                        //            " };\n"
-                        //            );
-                        //        k++;
-                        //        p1++; p2++;
-                        //    }
-                        //}
-                        sb.Append("\n");
-
-                        // формирование петли, состоящей из прямых описанных выше
-                        sb.Append("Curve Loop(1) = { ");
-                        for (int i = 1; i <= k - 2; i++)
-                            sb.Append(i.ToString() + ", ");
-                        sb.Append((k - 1).ToString() + " };\n");
-
-                        sb.Append("\n");
-
-                        sb.Append("Plane Surface(1) = { 1 };");
-
-                        sw.WriteLine(sb.ToString());
-                    }
-                }
+                case 6: return 7;
+                case 7: return 6;
             }
-            else
-                throw new Exception("Not figures or incorrect path to file!");
+            return -1;
+        }
+        void Translate()
+        {
+            if (mainFigure.Count > 0)
+            {
+                double maxx = mainFigure[0].Begin.X,
+                       maxy = mainFigure[0].Begin.Y,
+                       minx = mainFigure[0].Begin.X,
+                       miny = mainFigure[0].Begin.Y;
+
+                foreach (var r in mainFigure)
+                {
+                    if ((r.MaxInEdge().X >= maxx))
+                        maxx = r.MaxInEdge().X;
+                    if ((r.MinInEdge().X <= minx))
+                        minx = r.MinInEdge().X;
+                    if ((r.MaxInEdge().Y >= maxy))
+                        maxy = r.MaxInEdge().Y;
+                    if ((r.MinInEdge().Y <= miny))
+                        miny = r.MinInEdge().Y;
+                }
+
+                maxPointAABB = new Vector2d(maxx, maxy);
+                minPointAABB = new Vector2d(minx, miny);
+
+                manipul[0] = maxPointAABB;
+                manipul[1] = new Vector2d(maxPointAABB.X, (minPointAABB.Y + maxPointAABB.Y) / 2.0);
+                manipul[2] = new Vector2d(maxPointAABB.X, minPointAABB.Y);
+
+                manipul[3] = minPointAABB;
+                manipul[4] = new Vector2d(minPointAABB.X, (minPointAABB.Y + maxPointAABB.Y) / 2.0);
+                manipul[5] = new Vector2d(minPointAABB.X, maxPointAABB.Y);
+
+                manipul[6] = new Vector2d((minPointAABB.X + maxPointAABB.X) / 2.0, minPointAABB.Y);
+                manipul[7] = new Vector2d((minPointAABB.X + maxPointAABB.X) / 2.0, maxPointAABB.Y);
+
+                Center = ((minPointAABB + maxPointAABB) / 2.0);
+
+                manipul[8] = new Vector2d(0);
+            }
+
+            MoveTo = Center + MoveTo;
+            for (int i = 0; i < mainFigure.Count; i++)
+                mainFigure[i] = mainFigure[i] - Center;
+
+            Center = new Vector2d(0);
         }
     }
 
@@ -1003,30 +1298,189 @@ namespace ConsoleApp1
         }
     }
 
+    public class Triangulate
+    {
+        private Vector2d[] points; //вершины нашего многоугольника
+        private Triangle[] triangles; //треугольники, на которые разбит наш многоугольник
+        private bool[] taken; //была ли рассмотрена i-ая вершина многоугольника
+
+        public List<Triangle> Triangles
+        {
+            get
+            {
+                if (triangles != null)
+                    return triangles.ToList();
+                else
+                    return new List<Triangle>();
+            }
+            set { }
+        }
+
+        public Triangulate(Vector2d[] points) //points - х и y координаты
+        {
+            this.points = points; //преобразуем координаты в вершины
+
+            triangles = new Triangle[this.points.Length - 2];
+
+            taken = new bool[this.points.Length];
+
+            if (points.Length > 2)
+                triangulate(); //триангуляция
+        }
+
+        private void triangulate() //триангуляция
+        {
+            int trainPos = 0; //
+            int leftPoints = points.Length; //сколько осталось рассмотреть вершин
+
+            //текущие вершины рассматриваемого треугольника
+            int ai = findNextNotTaken(0);
+            int bi = findNextNotTaken(ai + 1);
+            int ci = findNextNotTaken(bi + 1);
+
+            int count = 0; //количество шагов
+
+            while (leftPoints > 3) //пока не остался один треугольник
+            {
+                if (isLeft(points[ai], points[bi], points[ci]) && canBuildTriangle(ai, bi, ci)) //если можно построить треугольник
+                {
+                    triangles[trainPos++] = new Triangle(points[ai], points[bi], points[ci]); //новый треугольник
+                    taken[bi] = true; //исключаем вершину b
+                    leftPoints--;
+                    bi = ci;
+                    ci = findNextNotTaken(ci + 1); //берем следующую вершину
+                }
+                else
+                { //берем следующие три вершины
+                    ai = findNextNotTaken(ai + 1);
+                    bi = findNextNotTaken(ai + 1);
+                    ci = findNextNotTaken(bi + 1);
+                }
+
+                if (count > points.Length * points.Length)
+                { //если по какой-либо причине (например, многоугольник задан по часовой стрелке) триангуляцию провести невозможно, выходим
+                    triangles = null;
+                    break;
+                }
+
+                count++;
+            }
+
+            if (triangles != null) //если триангуляция была проведена успешно
+                triangles[trainPos] = new Triangle(points[ai], points[bi], points[ci]);
+        }
+
+        private int findNextNotTaken(int startPos) //найти следущую нерассмотренную вершину
+        {
+            startPos %= points.Length;
+            if (!taken[startPos])
+                return startPos;
+
+            int i = (startPos + 1) % points.Length;
+            while (i != startPos)
+            {
+                if (!taken[i])
+                    return i;
+                i = (i + 1) % points.Length;
+            }
+
+            return -1;
+        }
+
+        private bool isLeft(Vector2d a, Vector2d b, Vector2d c) //левая ли тройка векторов
+        {
+            double abX = b.X - a.X;
+            double abY = b.Y - a.Y;
+            double acX = c.X - a.X;
+            double acY = c.Y - a.Y;
+
+            return abX * acY - acX * abY > 0;
+        }
+
+        private bool isPointInside(Vector2d a, Vector2d b, Vector2d c, Vector2d p) //находится ли точка p внутри треугольника abc
+        {
+            double ab = (a.X - p.X) * (b.Y - a.Y) - (b.X - a.X) * (a.Y - p.Y);
+            double bc = (b.X - p.X) * (c.Y - b.Y) - (c.X - b.X) * (b.Y - p.Y);
+            double ca = (c.X - p.X) * (a.Y - c.Y) - (a.X - c.X) * (c.Y - p.Y);
+
+            return (ab >= 0 && bc >= 0 && ca >= 0) || (ab <= 0 && bc <= 0 && ca <= 0);
+        }
+
+        private bool canBuildTriangle(int ai, int bi, int ci) //false - если внутри есть вершина
+        {
+            for (int i = 0; i < points.Length; i++) //рассмотрим все вершины многоугольника
+                if (i != ai && i != bi && i != ci) //кроме троих вершин текущего треугольника
+                    if (isPointInside(points[ai], points[bi], points[ci], points[i]))
+                        return false;
+            return true;
+        }
+
+        public Vector2d[] getPoints() //возвращает вершины
+        {
+            return points;
+        }
+
+        public Triangle[] getTriangles() //возвращает треугольники
+        {
+            return triangles;
+        }
+
+    }
+
+    public class Triangle //треугольник
+    {
+        private Vector2d a, b, c;
+
+        public Vector2d A { get { return a; } set { } }
+        public Vector2d B { get { return b; } set { } }
+        public Vector2d C { get { return c; } set { } }
+
+        public Triangle(Vector2d a, Vector2d b, Vector2d c)
+        {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+        public override string ToString()
+        {
+            return a.ToString() + " " + b.ToString() + " " + c.ToString() + "\n"; 
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
-            Helper helper = new Helper();
-            Figure f = new Figure()
+            List<Vector2d> f = new List<Vector2d>()
             {
-                Edges = new List<Edge>()
-                {
-                   new Edge(new Vector2d(0), new Vector2d(1)),
-                   new Edge(new Vector2d(1), new Vector2d(2)),
-                   new Edge(new Vector2d(2), new Vector2d(3))
-                },
-                Center = new Vector2d(0)
+                new Vector2d(0),
+                new Vector2d(2, 0),
+                new Vector2d(2, 1),
+                new Vector2d(2, 2),
+                new Vector2d(1, 2),
+                new Vector2d(0, 2),
+                //new Vector2d(1),
+                
             };
-            f.TranslateToCenterCoordinates();
-            f.ReCalc();
+            Triangulate tr1 = new Triangulate(f.ToArray());
+            List<Vector2d> g = new List<Vector2d>()
+            {
+                new Vector2d(1),
+                new Vector2d(3, 1),
+                new Vector2d(3, 3),
+                new Vector2d(1, 3),
+                new Vector2d(2)
+            };
+            Triangulate tr2 = new Triangulate(g.ToArray());
 
-            Console.WriteLine(f);
 
-            f.Ind = 0;
-            f.SubDiv();
-
-            Console.WriteLine(f);
+            Console.WriteLine("Fir TR:\n");
+            foreach (var t in tr1.Triangles)
+                Console.WriteLine(t);
+            Console.WriteLine("Sec TR:\n");
+            foreach (var t in tr2.Triangles)
+                Console.WriteLine(t);
 
             Console.ReadLine();
         }

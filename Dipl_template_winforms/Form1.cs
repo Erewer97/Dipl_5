@@ -76,7 +76,8 @@ namespace Dipl_template_winforms
             _core.Draw();
 
             if (pc.AddedFigure != null) pc.AddedFigure.Draw();
-            
+
+            DrawRes();
 
             GL.Flush();
             GL.Finish();
@@ -690,6 +691,34 @@ namespace Dipl_template_winforms
                     pc.SelectedFigure.ReCalc();
                     glControl1.Invalidate();
                 }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (pc.ListSelFig.Count > 1)
+            {
+                var f1 = pc.ListSelFig[0].Verteces;
+                var f2 = pc.ListSelFig[1].Verteces;
+
+                Modificators modificators = new Modificators(f1, f2);
+                modificators.Operation = Operations.Interset;
+
+                pc.res = modificators.Result();
+            }
+        }
+
+        void DrawRes()
+        {
+            if (pc.res != null)
+            {
+                GL.PushMatrix();
+                GL.Begin(BeginMode.LineLoop);
+                GL.Color3(Color.Red);
+                foreach (var v in pc.res)
+                    GL.Vertex2(v);
+                GL.End();
+                GL.PopMatrix();
+            }
         }
     }
 }

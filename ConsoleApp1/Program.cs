@@ -1448,39 +1448,380 @@ namespace ConsoleApp1
         }
     }
 
+    public class Modificators
+    {
+        List<Figure> figures = new List<Figure>();
+        Figure f1, f2;
+        Operations operation = Operations.None;
+        List<Vector2d> figure1 = new List<Vector2d>();
+        List<Vector2d> figure2 = new List<Vector2d>();
+
+        public Operations Operation { get { return operation; } set { operation = value; } }
+
+        public Modificators() {; }
+        public Modificators(List<Vector2d> InputFigure1, List<Vector2d> Figure2) 
+        {
+            figure1 = InputFigure1; figure2 = Figure2;
+        }
+
+        public List<Vertex> Calculate()
+        {
+            int count1 = figure1.Count, count2 = figure2.Count;
+            List<Vertex> res = new List<Vertex>();
+
+            Vector2d v = new Vector2d(double.NaN);
+
+            for (int i = 0, k = 0; i < count1; i++)
+            {
+                for (int j = 0, m = 0; j < count2; j++)
+                {
+                    k = i; m = j;
+                    try
+                    {
+                        if ((j == count2 - 1) && (i == count1 - 1))
+                            v = LinesIntersection(figure1[i], figure1[0], figure2[j], figure2[0]);
+                        else if ((i == count1 - 1) && (j != count2 - 1))
+                        {
+                            m++;
+                            v = LinesIntersection(figure1[i], figure1[0], figure2[j], figure2[m]);
+                        }
+                        else if ((i != count1 - 1) && (j == count2 - 1))
+                        {
+                            k++;
+                            v = LinesIntersection(figure1[i], figure1[k], figure2[j], figure2[0]);
+                        }
+                        else
+                        {
+                            m++; k++;
+                            v = LinesIntersection(figure1[i], figure1[k], figure2[j], figure2[m]);
+                        }
+
+                        if (!double.IsNaN(v.X))
+                        {
+                            res.Add(new Vertex(v, i, j, true));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Write(ex.Message + "\n");
+                    }
+                }
+            }
+
+            return res;
+        }
+        public List<Vertex> Hits()
+        {
+            List<Vertex> res = new List<Vertex>();
+
+            foreach (var v in figure1)
+                if (Hit(v, figure2))
+                    res.Add(new Vertex() { V = v, IsInOtherFigure = true });
+
+            foreach (var v in figure2)
+                if (Hit(v, figure1))
+                    res.Add(new Vertex() { V = v, IsInOtherFigure = true });
+
+            return res;
+        }
+        public List<Vector2d> Result()
+        {
+            List<Vector2d> res = new List<Vector2d>();
+            List<Vertex> F1 = new List<Vertex>();
+            List<Vertex> F2 = new List<Vertex>();
+
+            // помечаем вершины которые попали в другую фигуру 
+            foreach (var v in figure1)
+                if (Hit(v, figure2))
+                    F1.Add(new Vertex() { V = v, IsInOtherFigure = true });
+                else
+                    F1.Add(new Vertex() { V = v, IsInOtherFigure = false });
+
+            foreach (var v in figure2)
+                if (Hit(v, figure1))
+                    F2.Add(new Vertex() { V = v, IsInOtherFigure = true });
+                else
+                    F2.Add(new Vertex() { V = v, IsInOtherFigure = false });
+            //-------------------------------------------------
+
+            // составляем список из точек пересечений
+            List<Vertex> pointsIntersection = Calculate();
+            //-------------------------------------------------
+
+            ChangeList(F1, pointsIntersection, 1);
+            ChangeList(F2, pointsIntersection, 2);
+
+            switch (operation)
+            {
+                case Operations.Interset:
+                    bool exit = false, change = false;
+                    Vertex v = pointsIntersection[0];
+                    int i = F1.IndexOf(v);
+                    int begin = i;
+                    res.Add(v.V);
+                    while (!exit)
+                    {
+                        i++;
+                        v = F1[i];
+
+                        if (v.IsInOtherFigure)
+                            res.Add(v.V);
+
+                        if (begin == i)
+                            exit = true;
+
+                        if (v.IsPointIntersection && (exit == false))
+                        {
+                            res.Add(v.V);
+                            int ind = F2.FindIndex(x => x.V == v.V);
+                            if (ind == F2.Count - 1)
+                            {
+                                ind = 0;
+                                v = F2[ind];
+                                while (!change)
+                                {
+                                    if (v.IsInOtherFigure)
+                                        res.Add(v.V);
+
+                                    if (v.IsPointIntersection)
+                                    {
+                                        //res.Add(v.V);
+                                        change = true;
+                                    }
+
+                                    ind++;
+                                    v = F2[ind];
+                                }
+                            }
+                            else
+                            {
+                                ind++;
+                                v = F2[ind];
+                                while (!change)
+                                {
+                                    if (v.IsInOtherFigure)
+                                        res.Add(v.V);
+
+                                    if (v.IsPointIntersection)
+                                    {
+                                        //res.Add(v.V);
+                                        change = true;
+                                    }
+
+                                    if (ind != F2.Count - 1)
+                                        ind++;
+                                    else
+                                        ind = 0;
+                                    v = F2[ind];
+                                }
+                            }
+
+                            i = -1;
+                            //exit = true;
+                        }                      
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            return res;
+        }
+       
+        public void ChangeList(List<Vertex> inputList, List<Vertex> pointsInter, int numList)
+        {
+            int i = 1;
+            if (numList == 1)
+            {
+                foreach (Vertex v in pointsInter)
+                {
+                    if ((v.IndexIn1 + i) == figure1.Count && (v.IndexIn1 != figure1.Count - i))
+                    {
+                        inputList.Add(v);
+                    }
+                    else
+                    {
+                        inputList.Insert(v.IndexIn1 + i, v);
+                        i++;
+                    }
+                }
+            }
+            else
+            {
+                foreach (Vertex v in pointsInter)
+                {
+                    if ((v.IndexIn2 + i) == figure1.Count && (v.IndexIn2 != figure1.Count - i))
+                    {
+                        inputList.Add(v);
+                    }
+                    else
+                    {
+                        inputList.Insert(v.IndexIn2 + i, v);
+                        i++;
+                    }
+                }
+            }
+        }
+        Vector2d LinesIntersection(Vector2d x1, Vector2d y1, Vector2d x2, Vector2d y2)
+        {
+            Vector2d r = new Vector2d(double.NaN);
+
+            Vector2d
+            a = x1,
+            b = y1,
+            c = x2,
+            d = y2;
+
+            double D = (a.X - b.X) * (d.Y - c.Y) - (d.X - c.X) * (a.Y - b.Y);
+            if (D == 0) // отрезки парралельны
+                //throw new Exception("Линии паралельны");
+                return r;
+
+            double u = ((d.X - b.X) * (d.Y - c.Y) - (d.X - c.X) * (d.Y - b.Y)) / D;
+
+            double v = ((a.X - b.X) * (d.Y - b.Y) - (d.X - b.X) * (a.Y - b.Y)) / D;
+
+            //if (u <= double.MinValue && v <= double.MinValue)
+            //throw new Exception("Линии совпадают"); 
+
+            if ((0 <= u) && (u <= 1) && (0 <= v) && (v <= 1))
+            {
+                double x = u * a.X + (1 - u) * b.X;
+                double y = u * a.Y + (1 - u) * b.Y;
+                r = new Vector2d(x, y);
+            }
+
+            //Console.WriteLine(D + "\n" + u + "\n" + v);
+
+            return r;
+        }
+        public bool Hit(Vector2d v, List<Vector2d> Verteces)
+        {
+            Vector2d Point = v;
+            bool result = false;
+            int j = Verteces.Count - 1;
+
+
+                for (int i = 0; i < Verteces.Count; i++)
+                {
+                    if (
+                        (Verteces[i].Y < Point.Y && Verteces[j].Y >= Point.Y
+                        ||
+                        Verteces[j].Y < Point.Y && Verteces[i].Y >= Point.Y)
+                        &&
+                         (Verteces[i].X + (Point.Y - Verteces[i].Y) / (Verteces[j].Y - Verteces[i].Y) * (Verteces[j].X - Verteces[i].X) < Point.X))
+                        result = !result;
+                    j = i;
+                }
+
+            return result;
+        }
+    }
+
+    public class Vertex
+    {
+        public Vector2d V { get; set; } = new Vector2d(double.NaN);
+        public int IndexIn1 { get; set; } = -1;
+        public int IndexIn2 { get; set; } = -1;
+        public bool IsInOtherFigure { get; set; } = false;
+        public bool IsPointIntersection { get; set; } = false;
+
+        public Vertex() {; }
+        public Vertex(Vector2d v, int i1, int i2, bool pointInterset)
+        {
+            V = v; IndexIn1 = i1; IndexIn2 = i2; IsPointIntersection = pointInterset;
+        }
+
+        public override string ToString()
+        {
+            return "Vert: " + V.ToString() + " I1: " + IndexIn1.ToString() + " I2: " + IndexIn2.ToString() + " Other: " + IsInOtherFigure.ToString()
+                + " Interset: " + IsPointIntersection.ToString() + "\n";
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
         {
-            List<Vector2d> f = new List<Vector2d>()
-            {
-                new Vector2d(0),
-                new Vector2d(2, 0),
-                new Vector2d(2, 1),
-                new Vector2d(2, 2),
-                new Vector2d(1, 2),
-                new Vector2d(0, 2),
-                //new Vector2d(1),
-                
-            };
-            Triangulate tr1 = new Triangulate(f.ToArray());
-            List<Vector2d> g = new List<Vector2d>()
-            {
-                new Vector2d(1),
-                new Vector2d(3, 1),
-                new Vector2d(3, 3),
-                new Vector2d(1, 3),
-                new Vector2d(2)
-            };
-            Triangulate tr2 = new Triangulate(g.ToArray());
+            //List<Vector2d> P = new List<Vector2d>()
+            //{
+            //    new Vector2d(3, 3),
+            //    new Vector2d(7, 3),
+            //    new Vector2d(7, 6),
+            //    new Vector2d(3, 7)
+            //};
+            //List<Vector2d> T = new List<Vector2d>()
+            //{
+            //    new Vector2d(2, 2),
+            //    new Vector2d(7, 2),
+            //    new Vector2d(2, 7)
+            //};
 
+            // second test
+            //List<Vector2d> P = new List<Vector2d>()
+            //{
+            //    new Vector2d(1, 1),
+            //    new Vector2d(4, 1),
+            //    new Vector2d(4, 3),
+            //    new Vector2d(1, 3)
+            //};
+            //List<Vector2d> T = new List<Vector2d>()
+            //{
+            //    new Vector2d(3, 2),
+            //    new Vector2d(6, 2),
+            //    new Vector2d(6, 4),
+            //    new Vector2d(3, 4)
+            //};
 
-            Console.WriteLine("Fir TR:\n");
-            foreach (var t in tr1.Triangles)
-                Console.WriteLine(t);
-            Console.WriteLine("Sec TR:\n");
-            foreach (var t in tr2.Triangles)
-                Console.WriteLine(t);
+            //List<Vector2d> P = new List<Vector2d>()
+            //{
+            //    new Vector2d(1, 1),
+            //    new Vector2d(5, 1),
+            //    new Vector2d(4, 3),
+            //    new Vector2d(3, 4),
+            //    new Vector2d(1, 5)
+            //};
+            //List<Vector2d> T = new List<Vector2d>()
+            //{
+            //    new Vector2d(2, 2),
+            //    new Vector2d(6, 2),
+            //    new Vector2d(5, 4),
+            //    new Vector2d(4, 6)
+            //};
+
+            List<Vector2d> P = new List<Vector2d>()
+            {
+                new Vector2d(0, 0),
+                new Vector2d(4, 0),
+                new Vector2d(7, 3),
+                new Vector2d(4, 6),
+                new Vector2d(0, 6)
+            };
+            List<Vector2d> T = new List<Vector2d>()
+            {
+                new Vector2d(9, 6),
+                new Vector2d(4, 9),
+                new Vector2d(2, 3),
+                new Vector2d(2, -2),
+                new Vector2d(9, -2)
+            };
+
+            Console.WriteLine("P:");
+            foreach (Vector2d v in P)
+                Console.WriteLine(v);
+            Console.WriteLine();
+            Console.WriteLine("T:");
+            foreach (Vector2d v in T)
+                Console.WriteLine(v);
+
+            Modificators modificators = new Modificators(P, T);
+            modificators.Operation = Operations.Interset;
+
+            var r = modificators.Result();
+            Console.WriteLine("Res:");
+            foreach (var v in r)
+                Console.WriteLine(v);
 
             Console.ReadLine();
         }

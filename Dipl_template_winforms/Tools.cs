@@ -178,6 +178,7 @@ namespace Dipl_template_winforms
         public ActionWithFigure AWF { get; set; } = ActionWithFigure.None;
         public SelectingMode SelectingMode { get; set; } = SelectingMode.Points;
         public List<Figure> ListSelFig { get; set; } = new List<Figure>();
+        public List<Vector2d> res { get; set; } = new List<Vector2d>();
     }
 
     public class Grid

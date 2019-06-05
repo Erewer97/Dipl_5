@@ -58,6 +58,7 @@
             this.tsb_subdivEdge = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton17 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton18 = new System.Windows.Forms.ToolStripButton();
+            this.tsb_smoothContrPoints = new System.Windows.Forms.ToolStripButton();
             this.splitContainer2 = new System.Windows.Forms.SplitContainer();
             this.toolStripContainer2 = new System.Windows.Forms.ToolStripContainer();
             this.toolStrip3 = new System.Windows.Forms.ToolStrip();
@@ -122,7 +123,6 @@
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.btn_Add_layer = new System.Windows.Forms.ToolStripMenuItem();
             this.btn_Del_layer = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsb_smoothContrPoints = new System.Windows.Forms.ToolStripButton();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -411,7 +411,7 @@
             this.tsb_smoothContrPoints});
             this.toolStrip4.Location = new System.Drawing.Point(3, 0);
             this.toolStrip4.Name = "toolStrip4";
-            this.toolStrip4.Size = new System.Drawing.Size(643, 25);
+            this.toolStrip4.Size = new System.Drawing.Size(612, 25);
             this.toolStrip4.TabIndex = 0;
             // 
             // toolStripLabel3
@@ -482,6 +482,16 @@
             this.toolStripButton18.Size = new System.Drawing.Size(95, 22);
             this.toolStripButton18.Text = "Ребро в линию";
             this.toolStripButton18.Click += new System.EventHandler(this.toolStripButton18_Click);
+            // 
+            // tsb_smoothContrPoints
+            // 
+            this.tsb_smoothContrPoints.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsb_smoothContrPoints.Image = ((System.Drawing.Image)(resources.GetObject("tsb_smoothContrPoints.Image")));
+            this.tsb_smoothContrPoints.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsb_smoothContrPoints.Name = "tsb_smoothContrPoints";
+            this.tsb_smoothContrPoints.Size = new System.Drawing.Size(97, 22);
+            this.tsb_smoothContrPoints.Text = "Сгладить ручки";
+            this.tsb_smoothContrPoints.Click += new System.EventHandler(this.tsb_smoothContrPoints_Click);
             // 
             // splitContainer2
             // 
@@ -1132,6 +1142,7 @@
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(174, 21);
             this.comboBox1.TabIndex = 0;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // toolStrip2
             // 
@@ -1205,16 +1216,6 @@
             this.btn_Del_layer.Name = "btn_Del_layer";
             this.btn_Del_layer.Size = new System.Drawing.Size(126, 22);
             this.btn_Del_layer.Text = "Удалить";
-            // 
-            // tsb_smoothContrPoints
-            // 
-            this.tsb_smoothContrPoints.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsb_smoothContrPoints.Image = ((System.Drawing.Image)(resources.GetObject("tsb_smoothContrPoints.Image")));
-            this.tsb_smoothContrPoints.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsb_smoothContrPoints.Name = "tsb_smoothContrPoints";
-            this.tsb_smoothContrPoints.Size = new System.Drawing.Size(97, 22);
-            this.tsb_smoothContrPoints.Text = "Сгладить ручки";
-            this.tsb_smoothContrPoints.Click += new System.EventHandler(this.tsb_smoothContrPoints_Click);
             // 
             // Form1
             // 

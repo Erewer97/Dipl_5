@@ -31,6 +31,50 @@ namespace ConsoleApp1
                 return true;
             return false;
         }
+        public static bool VectrCompare(Vector2d a, Vector2d b, Vector2d p)
+        {
+            double mx, my, minx, miny;
+            if (a.X <= b.X) { mx = b.X; minx = a.X; } else { mx = a.X; minx = b.X; };
+            if (a.Y <= b.Y) { my = b.Y; miny = a.Y; } else { my = a.Y; miny = b.Y; };
+
+            if (minx <= p.X && p.X <= mx && miny <= p.Y && p.Y <= my)
+                return true;
+            else
+                return false;
+        }
+
+        public static bool PointOnEdge(Vector2d a, Vector2d b, Vector2d p)
+        {
+            if (VectrCompare(a, b, p))
+            {
+                double x = p.X - a.X;
+                double y = p.Y - a.Y;
+
+                double xz = b.X - a.X;
+                if (Math.Abs(xz) < 0.01)
+                    if ((a.Y <= p.Y && p.Y <= b.Y) || (a.Y >= p.Y && p.Y >= b.Y))
+                        return true;
+                    else
+                        return false;
+
+                double yz = b.Y - a.Y;
+                if (Math.Abs(yz) < 0.01)
+                    if ((a.X <= p.X && p.X <= b.X) || (a.X >= p.X && p.X >= b.X))
+                        return true;
+                    else
+                        return false;
+
+                double X = x / xz;
+                double Y = y / yz;
+
+                if (Math.Abs(X - Y) < 0.01)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
     }
 
     public class Edge
@@ -1548,8 +1592,10 @@ namespace ConsoleApp1
             List<Vertex> pointsIntersection = Calculate();
             //-------------------------------------------------
 
-            ChangeList(F1, pointsIntersection, 1);
-            ChangeList(F2, pointsIntersection, 2);
+            //ChangeList(F1, pointsIntersection, 1);
+            //ChangeList(F2, pointsIntersection, 2);
+            ChangeList(F1, pointsIntersection);
+            ChangeList(F2, pointsIntersection);
 
             switch (operation)
             {
@@ -1662,6 +1708,39 @@ namespace ConsoleApp1
                     }
                 }
             }
+        }
+        public void ChangeList(List<Vertex> inputList, List<Vertex> pointsInter)
+        {
+            bool e = true;
+            int j = 1, k = 0, i = 0;
+            Vertex v = pointsInter[k];
+            while (e)
+            {
+                if (j == inputList.Count && MathVec.PointOnEdge(inputList[i].V, inputList[0].V, v.V))
+                {
+                    inputList.Add(v);
+                    i = -1;
+                    j = 0;
+                    k++;
+                    if (k == pointsInter.Count)
+                        return;
+                    v = pointsInter[k];
+                }
+                else
+                if (MathVec.PointOnEdge(inputList[i].V, inputList[j].V, v.V))
+                {
+                    inputList.Insert(j, v);
+                    i = -1;
+                    j = 0;
+                    k++;
+                    if (k == pointsInter.Count)
+                        return;
+                    v = pointsInter[k];
+                }
+                i++;
+                j++;
+            }
+
         }
         Vector2d LinesIntersection(Vector2d x1, Vector2d y1, Vector2d x2, Vector2d y2)
         {
@@ -1822,6 +1901,7 @@ namespace ConsoleApp1
             Console.WriteLine("Res:");
             foreach (var v in r)
                 Console.WriteLine(v);
+
 
             Console.ReadLine();
         }

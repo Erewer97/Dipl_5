@@ -64,26 +64,7 @@ namespace Dipl_template_winforms
             GL.ClearColor(Color.White);
             _core.AddLayer();
 
-            pc.AddedFigure = helper.Add(TypeFigures.Rect, new List<Vector2d>() { new Vector2d(-0.5,-3.0001), new Vector2d(2.1) });
-            _core.Add(pc.AddedFigure);
-            pc.AddedFigure.Id = _core.Ids.ToString();
-            pc.AddedFigure.Name = "Rect " + pc.AddedFigure.Id;
-            pc.AddedFigure.FillColor = Color.Green;
-            SetProperties(pc.AddedFigure);
-            treeView1.Nodes.Clear();
             treeView1.Nodes.AddRange(_core.NodesForTree());
-            pc.AddedFigure = null;
-
-            pc.AddedFigure = helper.Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(-2, 2), new Vector2d(0.999, 0.001) });
-            _core.Add(pc.AddedFigure);
-            pc.AddedFigure.Id = _core.Ids.ToString();
-            pc.AddedFigure.Name = "Poly " + pc.AddedFigure.Id;
-            pc.AddedFigure.FillColor = Color.BlueViolet;
-            SetProperties(pc.AddedFigure);
-            treeView1.Nodes.Clear();
-            treeView1.Nodes.AddRange(_core.NodesForTree());
-            pc.AddedFigure = null;
-            //treeView1.Nodes.AddRange(_core.NodesForTree());
         }
         private void glControl1_Paint(object sender, PaintEventArgs e)
         {
@@ -99,8 +80,6 @@ namespace Dipl_template_winforms
 
             foreach (var f in pc.ListSelFig)
                 f.Draw();
-
-            DrawRes();
 
             GL.Flush();
             GL.Finish();
@@ -613,7 +592,8 @@ namespace Dipl_template_winforms
         {
             switch (e.KeyCode)
             {
-                case Keys.A:
+                case Keys.ShiftKey:
+                case Keys.Shift:
                     pc.IsShiftPress = true;
                     break;
 
@@ -626,7 +606,8 @@ namespace Dipl_template_winforms
         {
             switch (e.KeyCode)
             {
-                case Keys.A:
+                case Keys.ShiftKey:
+                case Keys.Shift:
                     pc.IsShiftPress = false;
                     break;
 
@@ -734,23 +715,31 @@ namespace Dipl_template_winforms
                     modificators.Operation = Operations.Union;
                 if (comboBox1.SelectedIndex == 2)
                     modificators.Operation = Operations.Sub;
+
                 pc.res = modificators.Result();
                 if (pc.res.Count > 0)
-                    glControl1.Invalidate();
-            }
-        }
+                {
+                    Figure f = new Figure();
 
-        void DrawRes()
-        {
-            if (pc.res != null)
-            {
-                GL.PushMatrix();
-                GL.Begin(BeginMode.LineLoop);
-                GL.Color3(Color.Red);
-                foreach (var v in pc.res)
-                    GL.Vertex2(v);
-                GL.End();
-                GL.PopMatrix();
+                    f.Edges = helper.ConvertToEdges(pc.res);
+                    f.Type = TypeFigures.Polygon;
+                    f.Center = helper.CalcCenter(pc.res);
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
+
+                    f.FillColor = pc.ListSelFig[1].FillColor;
+                    f.BorderColor = pc.ListSelFig[1].BorderColor;
+
+                    
+                    f.Id = _core.Ids.ToString();
+                    f.Name = "BoolenResult " + f.Id;
+                    _core.Add(f);
+                    //SetProperties(pc.AddedFigure);
+                    treeView1.Nodes.Clear();
+                    treeView1.Nodes.AddRange(_core.NodesForTree());
+
+                    glControl1.Invalidate();
+                }
             }
         }
     }

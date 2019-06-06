@@ -273,6 +273,8 @@ namespace Dipl_template_winforms
                     f.ReCalc();
                     break;
 
+                
+
                 case TypeFigures.Curve:
                     f.Edges.Add(new Edge(fmp, smp));
                     f.Type = TypeFigures.Curve;
@@ -373,6 +375,49 @@ namespace Dipl_template_winforms
                     ));
 
             return edges;
+        }
+
+        public List<Edge> ConvertToEdges(List<Vector2d> points)
+        {
+            List<Edge> r = new List<Edge>();
+
+            for (int i = 0, j = 1; i < points.Count; i++, j++)
+            {
+                if (j == points.Count)
+                    j = 0;
+
+                r.Add(new Edge(points[i], points[j]));
+            }
+
+            return r;
+        }
+        public Vector2d CalcCenter(List<Vector2d> points)
+        {
+            Vector2d r = new Vector2d();
+
+            double maxx = points[0].X,
+                       maxy = points[0].Y,
+                       minx = points[0].X,
+                       miny = points[0].Y;
+
+            foreach (var t in points)
+            {
+                if ((t.X >= maxx))
+                    maxx = t.X;
+                if ((t.X <= minx))
+                    minx = t.X;
+                if ((t.Y >= maxy))
+                    maxy = t.Y;
+                if ((t.Y <= miny))
+                    miny = t.Y;
+            }
+
+            Vector2d maxPointAABB = new Vector2d(maxx, maxy);
+            Vector2d minPointAABB = new Vector2d(minx, miny);
+
+            r = (maxPointAABB + minPointAABB) / 2.0;
+
+            return r;
         }
     }
 

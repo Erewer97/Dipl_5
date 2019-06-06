@@ -2007,7 +2007,12 @@ namespace Dipl_template_winforms
                     break;
 
                 case Operations.Union:
-                    res = union(F1, F2, pointsIntersection);
+                    if (F1[0].IsInOtherFigure && F2[0].IsInOtherFigure)
+                        res = union1(F1, F2, pointsIntersection);
+                    else if (F1[0].IsInOtherFigure)
+                        res = union(F2, F1, pointsIntersection);
+                    else
+                        res = union(F1, F2, pointsIntersection);
 
                     return res;
 
@@ -2258,6 +2263,78 @@ namespace Dipl_template_winforms
                     exit = true;
 
                 i++;
+            }
+
+            return res;
+        }
+        public List<Vector2d> union1(List<Vertex> F1, List<Vertex> F2, List<Vertex> pointsIntersection)
+        {
+            List<Vector2d> res = new List<Vector2d>();
+            bool exit = false, change = false;
+
+            int i = F1.FindIndex(x => x.IsPointIntersection == true);
+            Vertex v = F1[i];
+
+            res.Add(v.V);
+            while (!exit)
+            {
+                i++;
+                v = F1[i];
+
+                if (!v.IsInOtherFigure)
+                    res.Add(v.V);
+
+                if (v.IsPointIntersection && (exit == false))
+                {
+                    res.Add(v.V);
+
+                    int ind = F2.FindIndex(x => x.IsPointIntersection == true);
+                    if (ind == F2.Count - 1)
+                    {
+                        ind = 0;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (!v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            ind++;
+                            v = F2[ind];
+                        }
+                    }
+                    else
+                    {
+                        ind++;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (!v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            if (change == false)
+                            {
+                                if (ind != F2.Count - 1)
+                                    ind++;
+                                else
+                                    ind = 0;
+                                v = F2[ind];
+                            }
+                        }
+                    }
+                    exit = true;
+                }
             }
 
             return res;

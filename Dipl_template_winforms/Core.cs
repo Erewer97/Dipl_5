@@ -31,10 +31,11 @@ namespace Dipl_template_winforms
                 return true;
             return false;
         }
-        public static int DCompare(double a, double b)
+        public static bool DCompare(double a, double b)
         {
-            int r = a.CompareTo(b);
-            return r;
+            if (Math.Abs(a - b) <= 0.001)
+                return true;
+            return false;
         }
         public static bool VectrCompare(Vector2d a, Vector2d b, Vector2d p)
         {
@@ -45,7 +46,30 @@ namespace Dipl_template_winforms
             if (minx <= p.X && p.X <= mx && miny <= p.Y && p.Y <= my)
                 return true;
             else
-                return false;
+            {
+                bool bX = DCompare(minx, p.X) && DCompare(mx, p.X);
+                bool bY = DCompare(miny, p.Y) && DCompare(my, p.Y);
+
+                if (bX)
+                {
+                    if (miny <= p.Y && p.Y <= my)
+                        return true;
+                    else if (bY)
+                        return true;
+                    else
+                        return false;
+                }
+                else if (bY)
+                {
+                    if (minx <= p.X && p.X <= mx)
+                        return true;
+                    else if (bX)
+                        return true;
+                    else
+                        return false;
+                }
+            }
+            return false;
         }
 
         public static bool PointOnEdge(Vector2d a, Vector2d b, Vector2d p)
@@ -1969,72 +1993,12 @@ namespace Dipl_template_winforms
             switch (operation)
             {
                 case Operations.Interset:
-                    bool exit = false, change = false;
-                    Vertex v = pointsIntersection[0];
-                    int i = F1.IndexOf(v);
-                    int begin = i;
-                    res.Add(v.V);
-                    while (!exit)
-                    {
-                        i++;
-                        v = F1[i];
-
-                        if (v.IsInOtherFigure)
-                            res.Add(v.V);
-
-                        if (begin == i)
-                            exit = true;
-
-                        if (v.IsPointIntersection && (exit == false))
-                        {
-                            res.Add(v.V);
-                            int ind = F2.FindIndex(x => x.V == v.V);
-                            if (ind == F2.Count - 1)
-                            {
-                                ind = 0;
-                                v = F2[ind];
-                                while (!change)
-                                {
-                                    if (v.IsInOtherFigure)
-                                        res.Add(v.V);
-
-                                    if (v.IsPointIntersection)
-                                    {
-                                        //res.Add(v.V);
-                                        change = true;
-                                    }
-
-                                    ind++;
-                                    v = F2[ind];
-                                }
-                            }
-                            else
-                            {
-                                ind++;
-                                v = F2[ind];
-                                while (!change)
-                                {
-                                    if (v.IsInOtherFigure)
-                                        res.Add(v.V);
-
-                                    if (v.IsPointIntersection)
-                                    {
-                                        //res.Add(v.V);
-                                        change = true;
-                                    }
-
-                                    if (ind != F2.Count - 1)
-                                        ind++;
-                                    else
-                                        ind = 0;
-                                    v = F2[ind];
-                                }
-                            }
-
-                            i = -1;
-                            //exit = true;
-                        }
-                    }
+                    res = intersect(F1, F2, pointsIntersection);
+                    var rr = intersect(F2, F1, pointsIntersection);
+                    if (res.Count == 2)
+                        return rr;
+                    else
+                        return res;
                     break;
 
                 default:
@@ -2043,6 +2007,93 @@ namespace Dipl_template_winforms
 
             return res;
         }
+
+        public List<Vector2d> intersect(List<Vertex> F1, List<Vertex> F2, List<Vertex> pointsIntersection)
+        {
+            List<Vector2d> res = new List<Vector2d>();
+            bool exit = false, change = false;
+            Vertex v = new Vertex();
+            int i = 0;
+            int begin = 0;
+            //res.Add(v.V);
+            while (!exit)
+            {
+                v = F1[i];                
+
+                if (v.IsInOtherFigure)
+                    res.Add(v.V); 
+
+                if (v.IsPointIntersection && (exit == false))
+                {
+                    res.Add(v.V);
+                    //int ind = F2.FindIndex(x => x.V == v.V);
+                    int ind = F2.FindIndex(
+                        x => {
+                            return MathVec.DCompare(x.V.X, v.V.X) && MathVec.DCompare(x.V.Y, v.V.Y);
+                        }
+                    );
+                    if (ind == F2.Count - 1)
+                    {
+                        ind = 0;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            ind++;
+                            v = F2[ind];
+                        }
+                    }
+                    else
+                    {
+                        ind++;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                res.Add(v.V);
+                                change = true;
+                            }
+
+                            if (change == false)
+                            {
+                                if (ind != F2.Count - 1)
+                                    ind++;
+                                else
+                                    ind = 0;
+                                v = F2[ind];
+                            }
+                        }
+                    }
+
+                    i = F1.FindIndex(
+                        x =>
+                        {
+                            return MathVec.DCompare(x.V.X, v.V.X) && MathVec.DCompare(x.V.Y, v.V.Y);
+                        });
+                    //exit = true;
+                }
+
+                if (i == F1.Count - 1)
+                    exit = true;
+
+                i++;
+            }
+
+            return res;
+        }
+
 
         public void ChangeList(List<Vertex> inputList, List<Vertex> pointsInter, int numList)
         {

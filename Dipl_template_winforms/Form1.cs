@@ -63,7 +63,27 @@ namespace Dipl_template_winforms
         {
             GL.ClearColor(Color.White);
             _core.AddLayer();
+
+            pc.AddedFigure = helper.Add(TypeFigures.Rect, new List<Vector2d>() { new Vector2d(-0.5,-3.0001), new Vector2d(2.1) });
+            _core.Add(pc.AddedFigure);
+            pc.AddedFigure.Id = _core.Ids.ToString();
+            pc.AddedFigure.Name = "Rect " + pc.AddedFigure.Id;
+            pc.AddedFigure.FillColor = Color.Green;
+            SetProperties(pc.AddedFigure);
+            treeView1.Nodes.Clear();
             treeView1.Nodes.AddRange(_core.NodesForTree());
+            pc.AddedFigure = null;
+
+            pc.AddedFigure = helper.Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(-2, 2), new Vector2d(0.999, 0.001) });
+            _core.Add(pc.AddedFigure);
+            pc.AddedFigure.Id = _core.Ids.ToString();
+            pc.AddedFigure.Name = "Poly " + pc.AddedFigure.Id;
+            pc.AddedFigure.FillColor = Color.BlueViolet;
+            SetProperties(pc.AddedFigure);
+            treeView1.Nodes.Clear();
+            treeView1.Nodes.AddRange(_core.NodesForTree());
+            pc.AddedFigure = null;
+            //treeView1.Nodes.AddRange(_core.NodesForTree());
         }
         private void glControl1_Paint(object sender, PaintEventArgs e)
         {

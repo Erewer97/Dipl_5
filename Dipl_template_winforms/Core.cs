@@ -31,6 +31,11 @@ namespace Dipl_template_winforms
                 return true;
             return false;
         }
+        public static int DCompare(double a, double b)
+        {
+            int r = a.CompareTo(b);
+            return r;
+        }
         public static bool VectrCompare(Vector2d a, Vector2d b, Vector2d p)
         {
             double mx, my, minx, miny;

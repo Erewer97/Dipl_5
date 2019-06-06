@@ -42,7 +42,17 @@ namespace ConsoleApp1
             else
                 return false;
         }
-
+        public static int DCompare(double a, double b)
+        {
+            int r = a.CompareTo(b);
+            return r;
+        }
+        public static bool DoubEquale(double a, double b, double e)
+        {
+            if (Math.Abs(a - b) <= 4 * e * Math.Max(Math.Abs(a), Math.Abs(b)))
+                return true;
+            return false;
+        }
         public static bool PointOnEdge(Vector2d a, Vector2d b, Vector2d p)
         {
             if (VectrCompare(a, b, p))
@@ -1869,39 +1879,40 @@ namespace ConsoleApp1
             //    new Vector2d(4, 6)
             //};
 
-            List<Vector2d> P = new List<Vector2d>()
-            {
-                new Vector2d(0, 0),
-                new Vector2d(4, 0),
-                new Vector2d(7, 3),
-                new Vector2d(4, 6),
-                new Vector2d(0, 6)
-            };
-            List<Vector2d> T = new List<Vector2d>()
-            {
-                new Vector2d(9, 6),
-                new Vector2d(4, 9),
-                new Vector2d(2, 3),
-                new Vector2d(2, -2),
-                new Vector2d(9, -2)
-            };
+            //List<Vector2d> P = new List<Vector2d>()
+            //{
+            //    new Vector2d(0, 0),
+            //    new Vector2d(4, 0),
+            //    new Vector2d(7, 3),
+            //    new Vector2d(4, 6),
+            //    new Vector2d(0, 6)
+            //};
+            //List<Vector2d> T = new List<Vector2d>()
+            //{
+            //    new Vector2d(9, 6),
+            //    new Vector2d(4, 9),
+            //    new Vector2d(2, 3),
+            //    new Vector2d(2, -2),
+            //    new Vector2d(9, -2)
+            //};
 
-            Console.WriteLine("P:");
-            foreach (Vector2d v in P)
-                Console.WriteLine(v);
-            Console.WriteLine();
-            Console.WriteLine("T:");
-            foreach (Vector2d v in T)
-                Console.WriteLine(v);
+            //Console.WriteLine("P:");
+            //foreach (Vector2d v in P)
+            //    Console.WriteLine(v);
+            //Console.WriteLine();
+            //Console.WriteLine("T:");
+            //foreach (Vector2d v in T)
+            //    Console.WriteLine(v);
 
-            Modificators modificators = new Modificators(P, T);
-            modificators.Operation = Operations.Interset;
+            //Modificators modificators = new Modificators(P, T);
+            //modificators.Operation = Operations.Interset;
 
-            var r = modificators.Result();
-            Console.WriteLine("Res:");
-            foreach (var v in r)
-                Console.WriteLine(v);
+            //var r = modificators.Result();
+            //Console.WriteLine("Res:");
+            //foreach (var v in r)
+            //    Console.WriteLine(v);
 
+            Console.WriteLine(MathVec.DoubEquale(-1.6454785467, -1.64500004785467, 0.00001));
 
             Console.ReadLine();
         }

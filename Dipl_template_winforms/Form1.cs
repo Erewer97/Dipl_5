@@ -97,6 +97,9 @@ namespace Dipl_template_winforms
 
             if (pc.AddedFigure != null) pc.AddedFigure.Draw();
 
+            foreach (var f in pc.ListSelFig)
+                f.Draw();
+
             DrawRes();
 
             GL.Flush();
@@ -152,7 +155,10 @@ namespace Dipl_template_winforms
                             {
                                 Figure f = _core.Find(pc.FirstMousePos);
                                 if ((f != null) && (!pc.ListSelFig.Contains(f)))
+                                {
+                                    f.IsSelect = true;
                                     pc.ListSelFig.Add(f);
+                                }
                             }
                             else
                             {
@@ -178,6 +184,7 @@ namespace Dipl_template_winforms
                                     pc.SecondFigure.IsSelect = false;
                                     pc.SecondFigure = null;
                                     SetProperties(null);
+                                    pc.ListSelFig.Clear();
                                 }
                                 else
                                 {
@@ -721,9 +728,15 @@ namespace Dipl_template_winforms
                 var f2 = pc.ListSelFig[1].Verteces;
 
                 Modificators modificators = new Modificators(f1, f2);
-                modificators.Operation = Operations.Interset;
-
+                if (comboBox1.SelectedIndex == 0)
+                    modificators.Operation = Operations.Interset;
+                if (comboBox1.SelectedIndex == 1)
+                    modificators.Operation = Operations.Union;
+                if (comboBox1.SelectedIndex == 2)
+                    modificators.Operation = Operations.Sub;
                 pc.res = modificators.Result();
+                if (pc.res.Count > 0)
+                    glControl1.Invalidate();
             }
         }
 

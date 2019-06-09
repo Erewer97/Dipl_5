@@ -83,7 +83,6 @@
             this.checkBox_showGrid = new System.Windows.Forms.CheckBox();
             this.tabPage2_obj = new System.Windows.Forms.TabPage();
             this.groupBox_ObjPos = new System.Windows.Forms.GroupBox();
-            this.cb_show_AABB = new System.Windows.Forms.CheckBox();
             this.cb_IsShow = new System.Windows.Forms.CheckBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label14 = new System.Windows.Forms.Label();
@@ -108,12 +107,10 @@
             this.nud_posX = new System.Windows.Forms.NumericUpDown();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label17 = new System.Windows.Forms.Label();
-            this.cb_obj_2 = new System.Windows.Forms.ComboBox();
-            this.label16 = new System.Windows.Forms.Label();
-            this.cb_obj_1 = new System.Windows.Forms.ComboBox();
-            this.label15 = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.button_doneBoolOperation = new System.Windows.Forms.Button();
+            this.button_sub = new System.Windows.Forms.Button();
+            this.button_union = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
             this.btn_CreateFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -123,6 +120,10 @@
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.btn_Add_layer = new System.Windows.Forms.ToolStripMenuItem();
             this.btn_Del_layer = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.X = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Y = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -161,6 +162,8 @@
             this.tabPage2.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.toolStrip2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStripContainer1
@@ -411,7 +414,7 @@
             this.tsb_smoothContrPoints});
             this.toolStrip4.Location = new System.Drawing.Point(3, 0);
             this.toolStrip4.Name = "toolStrip4";
-            this.toolStrip4.Size = new System.Drawing.Size(612, 25);
+            this.toolStrip4.Size = new System.Drawing.Size(573, 25);
             this.toolStrip4.TabIndex = 0;
             // 
             // toolStripLabel3
@@ -449,8 +452,8 @@
             this.toolStripButton15.Image = global::Dipl_template_winforms.Properties.Resources.trash_48;
             this.toolStripButton15.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton15.Name = "toolStripButton15";
-            this.toolStripButton15.Size = new System.Drawing.Size(128, 22);
-            this.toolStripButton15.Text = "Удалить точку/ребро";
+            this.toolStripButton15.Size = new System.Drawing.Size(89, 22);
+            this.toolStripButton15.Text = "Удалить точку";
             this.toolStripButton15.Click += new System.EventHandler(this.toolStripButton15_Click);
             // 
             // tsb_subdivEdge
@@ -595,6 +598,7 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2_obj);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -731,7 +735,6 @@
             // 
             // groupBox_ObjPos
             // 
-            this.groupBox_ObjPos.Controls.Add(this.cb_show_AABB);
             this.groupBox_ObjPos.Controls.Add(this.cb_IsShow);
             this.groupBox_ObjPos.Controls.Add(this.textBox1);
             this.groupBox_ObjPos.Controls.Add(this.label14);
@@ -756,20 +759,10 @@
             this.groupBox_ObjPos.Controls.Add(this.nud_posX);
             this.groupBox_ObjPos.Location = new System.Drawing.Point(6, 2);
             this.groupBox_ObjPos.Name = "groupBox_ObjPos";
-            this.groupBox_ObjPos.Size = new System.Drawing.Size(257, 226);
+            this.groupBox_ObjPos.Size = new System.Drawing.Size(257, 206);
             this.groupBox_ObjPos.TabIndex = 0;
             this.groupBox_ObjPos.TabStop = false;
             this.groupBox_ObjPos.Text = "Свойства объекта:";
-            // 
-            // cb_show_AABB
-            // 
-            this.cb_show_AABB.AutoSize = true;
-            this.cb_show_AABB.Location = new System.Drawing.Point(147, 204);
-            this.cb_show_AABB.Name = "cb_show_AABB";
-            this.cb_show_AABB.Size = new System.Drawing.Size(106, 17);
-            this.cb_show_AABB.TabIndex = 22;
-            this.cb_show_AABB.Text = "Показать AABB";
-            this.cb_show_AABB.UseVisualStyleBackColor = true;
             // 
             // cb_IsShow
             // 
@@ -780,6 +773,7 @@
             this.cb_IsShow.TabIndex = 21;
             this.cb_IsShow.Text = "Скрыть";
             this.cb_IsShow.UseVisualStyleBackColor = true;
+            this.cb_IsShow.CheckedChanged += new System.EventHandler(this.cb_IsShow_CheckedChanged);
             // 
             // textBox1
             // 
@@ -833,6 +827,7 @@
             this.btn_fill_color.Size = new System.Drawing.Size(98, 23);
             this.btn_fill_color.TabIndex = 16;
             this.btn_fill_color.UseVisualStyleBackColor = false;
+            this.btn_fill_color.Click += new System.EventHandler(this.btn_fill_color_Click);
             // 
             // btn_bor_color
             // 
@@ -842,6 +837,7 @@
             this.btn_bor_color.Size = new System.Drawing.Size(99, 23);
             this.btn_bor_color.TabIndex = 15;
             this.btn_bor_color.UseVisualStyleBackColor = false;
+            this.btn_bor_color.Click += new System.EventHandler(this.btn_bor_color_Click);
             // 
             // label11
             // 
@@ -1075,74 +1071,59 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.label17);
-            this.groupBox2.Controls.Add(this.cb_obj_2);
-            this.groupBox2.Controls.Add(this.label16);
-            this.groupBox2.Controls.Add(this.cb_obj_1);
-            this.groupBox2.Controls.Add(this.label15);
-            this.groupBox2.Controls.Add(this.comboBox1);
+            this.groupBox2.Controls.Add(this.button_doneBoolOperation);
+            this.groupBox2.Controls.Add(this.button_sub);
+            this.groupBox2.Controls.Add(this.button_union);
+            this.groupBox2.Controls.Add(this.button1);
             this.groupBox2.Location = new System.Drawing.Point(0, 3);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(257, 272);
+            this.groupBox2.Size = new System.Drawing.Size(276, 272);
             this.groupBox2.TabIndex = 0;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "groupBox2";
+            this.groupBox2.Text = "Операция:";
             // 
-            // label17
+            // button_doneBoolOperation
             // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(131, 49);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(57, 13);
-            this.label17.TabIndex = 5;
-            this.label17.Text = "Объект 2:";
+            this.button_doneBoolOperation.Location = new System.Drawing.Point(174, 19);
+            this.button_doneBoolOperation.Name = "button_doneBoolOperation";
+            this.button_doneBoolOperation.Size = new System.Drawing.Size(96, 50);
+            this.button_doneBoolOperation.TabIndex = 3;
+            this.button_doneBoolOperation.Text = "Принять";
+            this.button_doneBoolOperation.UseVisualStyleBackColor = true;
+            this.button_doneBoolOperation.Click += new System.EventHandler(this.button_doneBoolOperation_Click);
             // 
-            // cb_obj_2
+            // button_sub
             // 
-            this.cb_obj_2.FormattingEnabled = true;
-            this.cb_obj_2.Location = new System.Drawing.Point(134, 65);
-            this.cb_obj_2.Name = "cb_obj_2";
-            this.cb_obj_2.Size = new System.Drawing.Size(117, 21);
-            this.cb_obj_2.TabIndex = 4;
+            this.button_sub.BackgroundImage = global::Dipl_template_winforms.Properties.Resources.sub;
+            this.button_sub.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button_sub.Location = new System.Drawing.Point(118, 19);
+            this.button_sub.Name = "button_sub";
+            this.button_sub.Size = new System.Drawing.Size(50, 50);
+            this.button_sub.TabIndex = 2;
+            this.button_sub.UseVisualStyleBackColor = true;
+            this.button_sub.Click += new System.EventHandler(this.button_sub_Click);
             // 
-            // label16
+            // button_union
             // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(6, 49);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(57, 13);
-            this.label16.TabIndex = 3;
-            this.label16.Text = "Объект 1:";
+            this.button_union.BackgroundImage = global::Dipl_template_winforms.Properties.Resources.union;
+            this.button_union.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button_union.Location = new System.Drawing.Point(62, 19);
+            this.button_union.Name = "button_union";
+            this.button_union.Size = new System.Drawing.Size(50, 50);
+            this.button_union.TabIndex = 1;
+            this.button_union.UseVisualStyleBackColor = true;
+            this.button_union.Click += new System.EventHandler(this.button_union_Click);
             // 
-            // cb_obj_1
+            // button1
             // 
-            this.cb_obj_1.FormattingEnabled = true;
-            this.cb_obj_1.Location = new System.Drawing.Point(9, 65);
-            this.cb_obj_1.Name = "cb_obj_1";
-            this.cb_obj_1.Size = new System.Drawing.Size(117, 21);
-            this.cb_obj_1.TabIndex = 2;
-            // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(6, 22);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(63, 13);
-            this.label15.TabIndex = 1;
-            this.label15.Text = "Операция: ";
-            // 
-            // comboBox1
-            // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
-            "Пересечение",
-            "Объединение",
-            "Разность"});
-            this.comboBox1.Location = new System.Drawing.Point(75, 19);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(174, 21);
-            this.comboBox1.TabIndex = 0;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.button1.BackgroundImage = global::Dipl_template_winforms.Properties.Resources.inter;
+            this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button1.Location = new System.Drawing.Point(6, 19);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(50, 50);
+            this.button1.TabIndex = 0;
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // toolStrip2
             // 
@@ -1217,6 +1198,42 @@
             this.btn_Del_layer.Size = new System.Drawing.Size(126, 22);
             this.btn_Del_layer.Text = "Удалить";
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.dataGridView1);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(279, 388);
+            this.tabPage3.TabIndex = 3;
+            this.tabPage3.Text = "Точки";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // dataGridView1
+            // 
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.X,
+            this.Y});
+            this.dataGridView1.Location = new System.Drawing.Point(6, 6);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.Size = new System.Drawing.Size(267, 376);
+            this.dataGridView1.TabIndex = 0;
+            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
+            this.dataGridView1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyUp);
+            // 
+            // X
+            // 
+            this.X.HeaderText = "X";
+            this.X.Name = "X";
+            this.X.Width = 50;
+            // 
+            // Y
+            // 
+            this.Y.HeaderText = "Y";
+            this.Y.Name = "Y";
+            this.Y.Width = 50;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1277,9 +1294,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.nud_posX)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1312,7 +1330,6 @@
         private System.Windows.Forms.CheckBox checkBox_showGrid;
         private System.Windows.Forms.TabPage tabPage2_obj;
         private System.Windows.Forms.GroupBox groupBox_ObjPos;
-        private System.Windows.Forms.CheckBox cb_show_AABB;
         private System.Windows.Forms.CheckBox cb_IsShow;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label14;
@@ -1337,12 +1354,6 @@
         private System.Windows.Forms.NumericUpDown nud_posX;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.Label label17;
-        private System.Windows.Forms.ComboBox cb_obj_2;
-        private System.Windows.Forms.Label label16;
-        private System.Windows.Forms.ComboBox cb_obj_1;
-        private System.Windows.Forms.Label label15;
-        private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton2;
         private System.Windows.Forms.ToolStripMenuItem btn_CreateFile;
         private System.Windows.Forms.ToolStripMenuItem открытьToolStripMenuItem;
@@ -1380,6 +1391,14 @@
         private System.Windows.Forms.ToolStripButton toolStripButton18;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ToolStripButton tsb_smoothContrPoints;
+        private System.Windows.Forms.Button button_sub;
+        private System.Windows.Forms.Button button_union;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button_doneBoolOperation;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn X;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Y;
     }
 }
 

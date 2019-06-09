@@ -157,13 +157,17 @@ namespace Dipl_template_winforms
                                     pc.SecondFigure = pc.SelectedFigure;
                                     pc.SelectedFigure.IsSelect = true;
                                     SetProperties(pc.SelectedFigure);
+
+                                    dataGridView1.Rows.Clear();
+                                    foreach (Vector2d v in pc.SelectedFigure.Verteces)
+                                        dataGridView1.Rows.Add(v.X.ToString("F"), v.Y.ToString("F"));
                                 }
                                 else if (pc.SelectedFigure == null && pc.SecondFigure != null)
                                 {
                                     pc.SecondFigure.IsSelect = false;
                                     pc.SecondFigure = null;
                                     SetProperties(null);
-                                    pc.ListSelFig.Clear();
+                                    pc.ClearListSelectedFigures();
                                 }
                                 else
                                 {
@@ -176,6 +180,8 @@ namespace Dipl_template_winforms
                     default:
                         break;
                 }
+
+                Deb(pc.ListSelFig.Count.ToString(), false);
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -254,18 +260,21 @@ namespace Dipl_template_winforms
                                     pc.SelectedFigure.MoveTo = pc.SecondMousePos;
                                     pc.SelectedFigure.ReCalc();
                                     SetProperties(pc.SelectedFigure);
+                                    ShowPointsInGridView(pc.SelectedFigure);
                                     break;
 
                                 case ActionWithFigure.Rotate:
                                     pc.SelectedFigure.CalcAngle(pc.SecondMousePos);
                                     pc.SelectedFigure.ReCalc();
                                     SetProperties(pc.SelectedFigure);
+                                    ShowPointsInGridView(pc.SelectedFigure);
                                     break;
 
                                 case ActionWithFigure.Scale:
                                     pc.SelectedFigure.CalcsScale(pc.SecondMousePos);
                                     pc.SelectedFigure.ReCalc();
                                     SetProperties(pc.SelectedFigure);
+                                    ShowPointsInGridView(pc.SelectedFigure);
                                     break;
 
                                 case ActionWithFigure.None:
@@ -627,6 +636,13 @@ namespace Dipl_template_winforms
                 label1.Text = text + "\n";
             }
         }
+        void ShowPointsInGridView(Figure figure)
+        {
+            dataGridView1.Rows.Clear();
+            if (figure != null) 
+                foreach (Vector2d v in figure.Verteces)
+                    dataGridView1.Rows.Add(v.X.ToString("F"), v.Y.ToString("F"));
+        }
 
         private void tsb_subdivEdge_Click(object sender, EventArgs e)
         {
@@ -701,7 +717,45 @@ namespace Dipl_template_winforms
                 }
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void btn_bor_color_Click(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+                using (ColorDialog cd = new ColorDialog())
+                {
+                    if (cd.ShowDialog() == DialogResult.Cancel)
+                        return;
+                    pc.SelectedFigure.BorderColor = btn_bor_color.BackColor = cd.Color;
+                    glControl1.Invalidate();
+                }
+        }
+
+        private void btn_fill_color_Click(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+                using (ColorDialog cd = new ColorDialog())
+                {
+                    if (cd.ShowDialog() == DialogResult.Cancel)
+                        return;
+                    pc.SelectedFigure.FillColor = btn_fill_color.BackColor = cd.Color;
+                    glControl1.Invalidate();
+                }
+        }
+
+        private void cb_IsShow_CheckedChanged(object sender, EventArgs e)
+        {
+            if (pc.SelectedFigure != null)
+            {
+                if (cb_IsShow.Checked)
+                    pc.SelectedFigure.IsRender = false;
+                else
+                    pc.SelectedFigure.IsRender = true;
+
+                glControl1.Invalidate();
+            }
+        }
+
+        #region BUTTONS FOR BOOLEAN OPERATIONS
+        private void button1_Click(object sender, EventArgs e)
         {
             if (pc.ListSelFig.Count > 1)
             {
@@ -709,19 +763,17 @@ namespace Dipl_template_winforms
                 var f2 = pc.ListSelFig[1].Verteces;
 
                 Modificators modificators = new Modificators(f1, f2);
-                if (comboBox1.SelectedIndex == 0)
-                    modificators.Operation = Operations.Interset;
-                if (comboBox1.SelectedIndex == 1)
-                    modificators.Operation = Operations.Union;
-                if (comboBox1.SelectedIndex == 2)
-                    modificators.Operation = Operations.Sub;
+                modificators.Operation = Operations.Interset;
 
                 pc.res = modificators.Result();
                 if (pc.res.Count > 0)
                 {
                     Figure f = new Figure();
 
-                    f.Edges = helper.ConvertToEdges(pc.res);
+                    helper.DeleteDuplicats(pc.res);
+
+
+                    f.Edges = Helper.ConvertToEdges(pc.res);
                     f.Type = TypeFigures.Polygon;
                     f.Center = helper.CalcCenter(pc.res);
                     f.TranslateToCenterCoordinates();
@@ -730,16 +782,218 @@ namespace Dipl_template_winforms
                     f.FillColor = pc.ListSelFig[1].FillColor;
                     f.BorderColor = pc.ListSelFig[1].BorderColor;
 
-                    
+                    pc.ClearListSelectedFigures();
+
                     f.Id = _core.Ids.ToString();
                     f.Name = "BoolenResult " + f.Id;
                     _core.Add(f);
                     //SetProperties(pc.AddedFigure);
                     treeView1.Nodes.Clear();
                     treeView1.Nodes.AddRange(_core.NodesForTree());
+                    treeView1.ExpandAll();
 
                     glControl1.Invalidate();
                 }
+            }
+        }
+
+        private void button_union_Click(object sender, EventArgs e)
+        {
+            if (pc.ListSelFig.Count == 2)
+            {
+                var f1 = pc.ListSelFig[0].Verteces;
+                var f2 = pc.ListSelFig[1].Verteces;
+
+                Modificators modificators = new Modificators(f1, f2);
+                modificators.Operation = Operations.Union;
+
+                pc.res = modificators.Result();
+                if (pc.res.Count > 0)
+                {
+                    Figure f = new Figure();
+
+                    helper.DeleteDuplicats(pc.res);
+
+
+                    f.Edges = Helper.ConvertToEdges(pc.res);
+                    f.Type = TypeFigures.Polygon;
+                    f.Center = helper.CalcCenter(pc.res);
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
+
+                    f.FillColor = pc.ListSelFig[1].FillColor;
+                    f.BorderColor = pc.ListSelFig[1].BorderColor;
+
+                    pc.ClearListSelectedFigures();
+
+                    f.Id = _core.Ids.ToString();
+                    f.Name = "BoolenResult " + f.Id;
+                    _core.Add(f);
+                    //SetProperties(pc.AddedFigure);
+                    treeView1.Nodes.Clear();
+                    treeView1.Nodes.AddRange(_core.NodesForTree());
+                    treeView1.ExpandAll();
+
+                    glControl1.Invalidate();
+                }
+            }
+            else if (pc.ListSelFig.Count > 2)
+            {
+                var f1 = pc.ListSelFig[0].Verteces;
+                var f2 = pc.ListSelFig[1].Verteces;
+
+                Modificators modificators = new Modificators(f1, f2);
+                modificators.Operation = Operations.Union;
+
+                pc.res = modificators.Result();
+                if (pc.res.Count > 0)
+                {
+                    helper.DeleteDuplicats(pc.res);
+
+                    for (int i = 2; i < pc.ListSelFig.Count; i++)
+                    {
+                        var list = pc.ListSelFig[i].Verteces;
+
+                        Modificators m = new Modificators(list, pc.res);
+                        m.Operation = Operations.Union;
+
+                        pc.res = m.Result();
+                        helper.DeleteDuplicats(pc.res);
+                    }
+
+                    if (pc.res.Count > 0)
+                    {
+                        Figure f = new Figure();
+
+                        helper.DeleteDuplicats(pc.res);
+
+
+                        f.Edges = Helper.ConvertToEdges(pc.res);
+                        f.Type = TypeFigures.Polygon;
+                        f.Center = helper.CalcCenter(pc.res);
+                        f.TranslateToCenterCoordinates();
+                        f.ReCalc();
+
+                        f.FillColor = pc.ListSelFig[pc.ListSelFig.Count - 1].FillColor;
+                        f.BorderColor = pc.ListSelFig[pc.ListSelFig.Count - 1].BorderColor;
+
+                        pc.ClearListSelectedFigures();
+
+                        f.Id = _core.Ids.ToString();
+                        f.Name = "BoolenResult " + f.Id;
+                        _core.Add(f);
+                        //SetProperties(pc.AddedFigure);
+                        treeView1.Nodes.Clear();
+                        treeView1.Nodes.AddRange(_core.NodesForTree());
+                        treeView1.ExpandAll();
+
+                        glControl1.Invalidate();
+                    }
+                }               
+            }
+        }
+
+        private void button_sub_Click(object sender, EventArgs e)
+        {
+            if (pc.ListSelFig.Count > 1)
+            {
+                var f1 = pc.ListSelFig[0].Verteces;
+                var f2 = pc.ListSelFig[1].Verteces;
+
+                Modificators modificators = new Modificators(f1, f2);
+                modificators.Operation = Operations.Sub;
+
+                pc.res = modificators.Result();
+                if (pc.res.Count > 0)
+                {
+                    Figure f = new Figure();
+
+                    helper.DeleteDuplicats(pc.res);
+
+
+                    f.Edges = Helper.ConvertToEdges(pc.res);
+                    f.Type = TypeFigures.Polygon;
+                    f.Center = helper.CalcCenter(pc.res);
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
+
+                    f.FillColor = pc.ListSelFig[1].FillColor;
+                    f.BorderColor = pc.ListSelFig[1].BorderColor;
+
+                    pc.ClearListSelectedFigures();
+
+                    f.Id = _core.Ids.ToString();
+                    f.Name = "BoolenResult " + f.Id;
+                    _core.Add(f);
+                    //SetProperties(pc.AddedFigure);
+                    treeView1.Nodes.Clear();
+                    treeView1.Nodes.AddRange(_core.NodesForTree());
+                    treeView1.ExpandAll();
+
+                    glControl1.Invalidate();
+                }
+            }
+        }
+        #endregion
+
+        private void button_doneBoolOperation_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (pc.SelectedFigure != null && pc.SelectingMode == SelectingMode.Points)
+            {
+                System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
+                var t = dataGridView1.CurrentCell;
+                int col = t.ColumnIndex;
+                int row = t.RowIndex - 1;
+
+                string r = dataGridView1[0, row].Value.ToString() + " Y: " + dataGridView1[1, row].Value.ToString();
+                double x = ParseToDouble(dataGridView1[0, row].Value.ToString());
+                double y = ParseToDouble(dataGridView1[1, row].Value.ToString());
+
+                Vector2d v = new Vector2d(x, y);
+
+                //MessageBox.Show(v.ToString(), "Current Cell");
+                if (pc.SelectedFigure.HitInPoint(pc.PointInGridView))
+                    pc.SelectedFigure.SetNewPoint(v);
+
+                glControl1.Invalidate();
+            }
+            
+        }
+        public double ParseToDouble(string value)
+        {
+            double result = Double.NaN;
+            value = value.Trim();
+            if (!double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.GetCultureInfo("ru-RU"), out result))
+            {
+                if (!double.TryParse(value, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.GetCultureInfo("en-US"), out result))
+                {
+                    return Double.NaN;
+                }
+            }
+            return result;
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            var t = dataGridView1.CurrentCell;
+            int col = t.ColumnIndex;
+            int row = t.RowIndex;
+
+            if (dataGridView1[0, row].Value != null)
+            {
+                string r = dataGridView1[0, row].Value.ToString() + " Y: " + dataGridView1[1, row].Value.ToString();
+                double x = ParseToDouble(dataGridView1[0, row].Value.ToString());
+                double y = ParseToDouble(dataGridView1[1, row].Value.ToString());
+
+                pc.PointInGridView = new Vector2d(x, y);
+
+                //MessageBox.Show(v.ToString(), "Current Cell");
             }
         }
     }

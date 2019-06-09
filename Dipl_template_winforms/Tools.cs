@@ -179,6 +179,18 @@ namespace Dipl_template_winforms
         public SelectingMode SelectingMode { get; set; } = SelectingMode.Points;
         public List<Figure> ListSelFig { get; set; } = new List<Figure>();
         public List<Vector2d> res { get; set; } = new List<Vector2d>();
+        public Figure BoolResult { get; set; } = null;
+        public Vector2d PointInGridView { get; set; }
+
+        public void ClearListSelectedFigures()
+        {
+            if (ListSelFig.Count > 0)
+            {
+                for (int i = 0; i < ListSelFig.Count; i++)
+                    ListSelFig[i].IsSelect = false;
+                ListSelFig.Clear();
+            }
+        }
     }
 
     public class Grid
@@ -377,7 +389,7 @@ namespace Dipl_template_winforms
             return edges;
         }
 
-        public List<Edge> ConvertToEdges(List<Vector2d> points)
+        public static List<Edge> ConvertToEdges(List<Vector2d> points)
         {
             List<Edge> r = new List<Edge>();
 
@@ -418,6 +430,17 @@ namespace Dipl_template_winforms
             r = (maxPointAABB + minPointAABB) / 2.0;
 
             return r;
+        }
+        public void DeleteDuplicats(List<Vector2d> points)
+        {
+            int j = 1;
+            for (int i = 0; i < points.Count - 1; i++)
+            {
+
+                    if (MathVec.DCompare(points[i].X, points[j].X) && MathVec.DCompare(points[i].Y, points[j].Y))
+                        points.RemoveAt(j);
+                j++;
+            }
         }
     }
 

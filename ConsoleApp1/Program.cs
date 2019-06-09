@@ -85,6 +85,40 @@ namespace ConsoleApp1
             else
                 return false;
         }
+
+        public static Vector2d LinesIntersection(Vector2d x1, Vector2d y1, Vector2d x2, Vector2d y2)
+        {
+            Vector2d r = new Vector2d(double.NaN);
+
+            Vector2d
+            a = x1,
+            b = y1,
+            c = x2,
+            d = y2;
+
+            double D = (a.X - b.X) * (d.Y - c.Y) - (d.X - c.X) * (a.Y - b.Y);
+            if (D == 0) // отрезки парралельны
+                //throw new Exception("Линии паралельны");
+                return r;
+
+            double u = ((d.X - b.X) * (d.Y - c.Y) - (d.X - c.X) * (d.Y - b.Y)) / D;
+
+            double v = ((a.X - b.X) * (d.Y - b.Y) - (d.X - b.X) * (a.Y - b.Y)) / D;
+
+            //if (u <= double.MinValue && v <= double.MinValue)
+            //throw new Exception("Линии совпадают"); 
+
+            if ((0 <= u) && (u <= 1) && (0 <= v) && (v <= 1))
+            {
+                double x = u * a.X + (1 - u) * b.X;
+                double y = u * a.Y + (1 - u) * b.Y;
+                r = new Vector2d(x, y);
+            }
+
+            //Console.WriteLine(D + "\n" + u + "\n" + v);
+
+            return r;
+        }
     }
 
     public class Edge
@@ -1370,9 +1404,10 @@ namespace ConsoleApp1
             set { }
         }
 
+        public Triangulate() {; }
         public Triangulate(Vector2d[] points) //points - х и y координаты
         {
-            this.points = points; //преобразуем координаты в вершины
+            this.points = points; 
 
             triangles = new Triangle[this.points.Length - 2];
 
@@ -1451,11 +1486,27 @@ namespace ConsoleApp1
             return abX * acY - acX * abY > 0;
         }
 
-        private bool isPointInside(Vector2d a, Vector2d b, Vector2d c, Vector2d p) //находится ли точка p внутри треугольника abc
+        /// <summary>
+        /// находится ли точка p внутри треугольника abc
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="c"></param>
+        /// <param name="p">Точка</param>
+        /// <returns></returns>
+        public bool isPointInside(Vector2d a, Vector2d b, Vector2d c, Vector2d p) //находится ли точка p внутри треугольника abc
         {
             double ab = (a.X - p.X) * (b.Y - a.Y) - (b.X - a.X) * (a.Y - p.Y);
             double bc = (b.X - p.X) * (c.Y - b.Y) - (c.X - b.X) * (b.Y - p.Y);
             double ca = (c.X - p.X) * (a.Y - c.Y) - (a.X - c.X) * (c.Y - p.Y);
+
+            return (ab >= 0 && bc >= 0 && ca >= 0) || (ab <= 0 && bc <= 0 && ca <= 0);
+        }
+        public bool isPointInside(Triangle triangle, Vector2d p) //находится ли точка p внутри треугольника abc
+        {
+            double ab = (triangle.A.X - p.X) * (triangle.B.Y - triangle.A.Y) - (triangle.B.X - triangle.A.X) * (triangle.A.Y - p.Y);
+            double bc = (triangle.B.X - p.X) * (triangle.C.Y - triangle.B.Y) - (triangle.C.X - triangle.B.X) * (triangle.B.Y - p.Y);
+            double ca = (triangle.C.X - p.X) * (triangle.A.Y - triangle.C.Y) - (triangle.A.X - triangle.C.X) * (triangle.C.Y - p.Y);
 
             return (ab >= 0 && bc >= 0 && ca >= 0) || (ab <= 0 && bc <= 0 && ca <= 0);
         }
@@ -1468,17 +1519,6 @@ namespace ConsoleApp1
                         return false;
             return true;
         }
-
-        public Vector2d[] getPoints() //возвращает вершины
-        {
-            return points;
-        }
-
-        public Triangle[] getTriangles() //возвращает треугольники
-        {
-            return triangles;
-        }
-
     }
 
     public class Triangle //треугольник
@@ -1831,90 +1871,121 @@ namespace ConsoleApp1
 
     class Program
     {
+        static public List<Triangle> Sub(List<Triangle> triangles, List<Vector2d> lines)
+        {
+            List<Triangle> res = new List<Triangle>();
+
+            Triangle triangle = triangles[0];
+
+            Vector2d End   = lines[1];
+            Vector2d Begin = lines[0];
+
+            Vector2d p1 = (MathVec.LinesIntersection(triangle.A, triangle.B, End, Begin));
+            Vector2d p2 = (MathVec.LinesIntersection(triangle.B, triangle.C, End, Begin));
+            Vector2d p3 = (MathVec.LinesIntersection(triangle.C, triangle.A, End, Begin));
+
+            List<Triangle> tr = new List<Triangle>();
+            List<Vector2d> lv = new List<Vector2d>();
+            List<Vector2d> lv1 = new List<Vector2d>();
+
+            Triangulate triangulate = new Triangulate();
+
+            if (triangulate.isPointInside(triangle, End))
+                Begin = End;
+
+            int countPointIntersect = 0;
+
+            if (!double.IsNaN(p1.X)) countPointIntersect++;
+            if (!double.IsNaN(p2.X)) countPointIntersect++;
+            if (!double.IsNaN(p3.X)) countPointIntersect++;
+
+            if (countPointIntersect == 2)
+            {
+                if (double.IsNaN(p1.X))
+                {
+                    tr.Add(new Triangle(p2, triangle.C, p3));
+                    lv.AddRange(new List<Vector2d>() { triangle.A, triangle.B, p2, p3 });
+                }
+                if (double.IsNaN(p2.X))
+                {
+                    tr.Add(new Triangle(p3, triangle.A, p1));
+                    lv.AddRange(new List<Vector2d>() { p1, triangle.B, triangle.C, p3 });
+                }
+                if (double.IsNaN(p3.X))
+                {
+                    tr.Add(new Triangle(p1, triangle.B, p2));
+                    lv.AddRange(new List<Vector2d>() { p1, p2, triangle.C, triangle.A });
+                }
+            }
+            if (countPointIntersect == 1)
+            {
+                if (!double.IsNaN(p1.X))
+                {
+                    Console.WriteLine("P1");
+                    tr.Add(new Triangle(triangle.A, p1, Begin));
+                    tr.Add(new Triangle(triangle.B, p1, Begin));
+                    tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                    tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                }
+                if (!double.IsNaN(p2.X))
+                {
+                    Console.WriteLine("P2");
+                    tr.Add(new Triangle(triangle.A, triangle.B, Begin));
+                    tr.Add(new Triangle(triangle.B, p2, Begin));
+                    tr.Add(new Triangle(p2, triangle.C, Begin));
+                    tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                }
+                if (!double.IsNaN(p3.X))
+                {
+                    Console.WriteLine("P3");
+                    tr.Add(new Triangle(triangle.A, Begin, p3));
+                    tr.Add(new Triangle(triangle.A, Begin, triangle.B));
+                    tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                    tr.Add(new Triangle(Begin, triangle.C, p3));
+                }
+            }
+
+            List<Triangle> oo = null;
+            if (lv.Count > 0)
+            {
+                Triangulate ttt = new Triangulate(lv.ToArray());
+                oo = ttt.Triangles;
+            }
+
+            Console.WriteLine(countPointIntersect);
+
+            res.AddRange(tr);
+            if (oo != null)
+                res.AddRange(oo);
+
+            return res;
+        }
+
         static void Main(string[] args)
         {
-            //List<Vector2d> P = new List<Vector2d>()
-            //{
-            //    new Vector2d(3, 3),
-            //    new Vector2d(7, 3),
-            //    new Vector2d(7, 6),
-            //    new Vector2d(3, 7)
-            //};
-            //List<Vector2d> T = new List<Vector2d>()
-            //{
-            //    new Vector2d(2, 2),
-            //    new Vector2d(7, 2),
-            //    new Vector2d(2, 7)
-            //};
+            //Triangle triangle = new Triangle(new Vector2d(0), new Vector2d(4, 1), new Vector2d(2, 3));
 
-            // second test
-            //List<Vector2d> P = new List<Vector2d>()
-            //{
-            //    new Vector2d(1, 1),
-            //    new Vector2d(4, 1),
-            //    new Vector2d(4, 3),
-            //    new Vector2d(1, 3)
-            //};
-            //List<Vector2d> T = new List<Vector2d>()
-            //{
-            //    new Vector2d(3, 2),
-            //    new Vector2d(6, 2),
-            //    new Vector2d(6, 4),
-            //    new Vector2d(3, 4)
-            //};
+            //Vector2d C = new Vector2d(4, 2);
+            //Vector2d K = new Vector2d(1, 2);
 
-            //List<Vector2d> P = new List<Vector2d>()
-            //{
-            //    new Vector2d(1, 1),
-            //    new Vector2d(5, 1),
-            //    new Vector2d(4, 3),
-            //    new Vector2d(3, 4),
-            //    new Vector2d(1, 5)
-            //};
-            //List<Vector2d> T = new List<Vector2d>()
-            //{
-            //    new Vector2d(2, 2),
-            //    new Vector2d(6, 2),
-            //    new Vector2d(5, 4),
-            //    new Vector2d(4, 6)
-            //};
+            Triangle t = new Triangle(new Vector2d(0), new Vector2d(3,0), new Vector2d(1,2));
+            Vector2d L = new Vector2d(1, -1);
+            Vector2d M = new Vector2d(1, 1);
+            Vector2d N = new Vector2d(3, 1);
 
-            //List<Vector2d> P = new List<Vector2d>()
-            //{
-            //    new Vector2d(0, 0),
-            //    new Vector2d(4, 0),
-            //    new Vector2d(7, 3),
-            //    new Vector2d(4, 6),
-            //    new Vector2d(0, 6)
-            //};
-            //List<Vector2d> T = new List<Vector2d>()
-            //{
-            //    new Vector2d(9, 6),
-            //    new Vector2d(4, 9),
-            //    new Vector2d(2, 3),
-            //    new Vector2d(2, -2),
-            //    new Vector2d(9, -2)
-            //};
+            var t1 = Sub(new List<Triangle>() { t }, new List<Vector2d>() { L, M });
+            var t2 = new List<Triangle>();
 
-            //Console.WriteLine("P:");
-            //foreach (Vector2d v in P)
-            //    Console.WriteLine(v);
-            //Console.WriteLine();
-            //Console.WriteLine("T:");
-            //foreach (Vector2d v in T)
-            //    Console.WriteLine(v);
+            foreach (var tt in t1)
+                t2.AddRange(
+                    Sub(new List<Triangle>() { tt }, 
+                        new List<Vector2d>() { M, N }));
 
-            //Modificators modificators = new Modificators(P, T);
-            //modificators.Operation = Operations.Interset;
-
-            //var r = modificators.Result();
-            //Console.WriteLine("Res:");
-            //foreach (var v in r)
-            //    Console.WriteLine(v);
-
-            Console.WriteLine(MathVec.DoubEquale(-1.6454785467, -1.64500004785467, 0.00001));
+            foreach (Triangle a in t2)
+                Console.Write(a);
 
             Console.ReadLine();
         }
+
     }
 }

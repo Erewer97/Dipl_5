@@ -157,5 +157,14 @@
   <ItemGroup>
     <None Include="Resources\selectPoint.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\inter.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sub.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\union.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

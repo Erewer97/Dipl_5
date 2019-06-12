@@ -111,6 +111,10 @@
             this.button_sub = new System.Windows.Forms.Button();
             this.button_union = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.X = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Y = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButton2 = new System.Windows.Forms.ToolStripDropDownButton();
             this.btn_CreateFile = new System.Windows.Forms.ToolStripMenuItem();
@@ -120,10 +124,9 @@
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.btn_Add_layer = new System.Windows.Forms.ToolStripMenuItem();
             this.btn_Del_layer = new System.Windows.Forms.ToolStripMenuItem();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.X = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Y = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.radioButton_attenton = new System.Windows.Forms.RadioButton();
+            this.radioButton_triangles = new System.Windows.Forms.RadioButton();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -161,9 +164,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.nud_posX)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.toolStrip2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.toolStrip2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripContainer1
@@ -1071,13 +1075,14 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.groupBox3);
             this.groupBox2.Controls.Add(this.button_doneBoolOperation);
             this.groupBox2.Controls.Add(this.button_sub);
             this.groupBox2.Controls.Add(this.button_union);
             this.groupBox2.Controls.Add(this.button1);
             this.groupBox2.Location = new System.Drawing.Point(0, 3);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(276, 272);
+            this.groupBox2.Size = new System.Drawing.Size(276, 128);
             this.groupBox2.TabIndex = 0;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Операция:";
@@ -1124,6 +1129,42 @@
             this.button1.TabIndex = 0;
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.dataGridView1);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(279, 388);
+            this.tabPage3.TabIndex = 3;
+            this.tabPage3.Text = "Точки";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // dataGridView1
+            // 
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.X,
+            this.Y});
+            this.dataGridView1.Location = new System.Drawing.Point(6, 6);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.Size = new System.Drawing.Size(267, 376);
+            this.dataGridView1.TabIndex = 0;
+            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
+            this.dataGridView1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyUp);
+            // 
+            // X
+            // 
+            this.X.HeaderText = "X";
+            this.X.Name = "X";
+            this.X.Width = 50;
+            // 
+            // Y
+            // 
+            this.Y.HeaderText = "Y";
+            this.Y.Name = "Y";
+            this.Y.Width = 50;
             // 
             // toolStrip2
             // 
@@ -1198,41 +1239,40 @@
             this.btn_Del_layer.Size = new System.Drawing.Size(126, 22);
             this.btn_Del_layer.Text = "Удалить";
             // 
-            // tabPage3
+            // groupBox3
             // 
-            this.tabPage3.Controls.Add(this.dataGridView1);
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(279, 388);
-            this.tabPage3.TabIndex = 3;
-            this.tabPage3.Text = "Точки";
-            this.tabPage3.UseVisualStyleBackColor = true;
+            this.groupBox3.Controls.Add(this.radioButton_triangles);
+            this.groupBox3.Controls.Add(this.radioButton_attenton);
+            this.groupBox3.Location = new System.Drawing.Point(6, 75);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(264, 47);
+            this.groupBox3.TabIndex = 4;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Алгоритм:";
             // 
-            // dataGridView1
+            // radioButton_attenton
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.X,
-            this.Y});
-            this.dataGridView1.Location = new System.Drawing.Point(6, 6);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(267, 376);
-            this.dataGridView1.TabIndex = 0;
-            this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
-            this.dataGridView1.KeyUp += new System.Windows.Forms.KeyEventHandler(this.dataGridView1_KeyUp);
+            this.radioButton_attenton.AutoSize = true;
+            this.radioButton_attenton.Checked = true;
+            this.radioButton_attenton.Location = new System.Drawing.Point(6, 19);
+            this.radioButton_attenton.Name = "radioButton_attenton";
+            this.radioButton_attenton.Size = new System.Drawing.Size(113, 17);
+            this.radioButton_attenton.TabIndex = 0;
+            this.radioButton_attenton.TabStop = true;
+            this.radioButton_attenton.Text = "Уайлда-Атентона";
+            this.radioButton_attenton.UseVisualStyleBackColor = true;
+            this.radioButton_attenton.CheckedChanged += new System.EventHandler(this.radioButton_attenton_CheckedChanged);
             // 
-            // X
+            // radioButton_triangles
             // 
-            this.X.HeaderText = "X";
-            this.X.Name = "X";
-            this.X.Width = 50;
-            // 
-            // Y
-            // 
-            this.Y.HeaderText = "Y";
-            this.Y.Name = "Y";
-            this.Y.Width = 50;
+            this.radioButton_triangles.AutoSize = true;
+            this.radioButton_triangles.Location = new System.Drawing.Point(136, 19);
+            this.radioButton_triangles.Name = "radioButton_triangles";
+            this.radioButton_triangles.Size = new System.Drawing.Size(122, 17);
+            this.radioButton_triangles.TabIndex = 1;
+            this.radioButton_triangles.Text = "Триангуляционный";
+            this.radioButton_triangles.UseVisualStyleBackColor = true;
+            this.radioButton_triangles.CheckedChanged += new System.EventHandler(this.radioButton_triangles_CheckedChanged);
             // 
             // Form1
             // 
@@ -1294,10 +1334,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.nud_posX)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
-            this.toolStrip2.ResumeLayout(false);
-            this.toolStrip2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.toolStrip2.ResumeLayout(false);
+            this.toolStrip2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1399,6 +1441,9 @@
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridViewTextBoxColumn X;
         private System.Windows.Forms.DataGridViewTextBoxColumn Y;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.RadioButton radioButton_triangles;
+        private System.Windows.Forms.RadioButton radioButton_attenton;
     }
 }
 

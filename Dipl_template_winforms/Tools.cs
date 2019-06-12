@@ -181,6 +181,7 @@ namespace Dipl_template_winforms
         public List<Vector2d> res { get; set; } = new List<Vector2d>();
         public Figure BoolResult { get; set; } = null;
         public Vector2d PointInGridView { get; set; }
+        public bool IsAttenton { get; set; } = true;
 
         public void ClearListSelectedFigures()
         {

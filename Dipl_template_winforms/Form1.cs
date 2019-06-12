@@ -72,9 +72,9 @@ namespace Dipl_template_winforms
 
             grid.Draw();
 
-            if (pc.SelectedFigure != null) pc.SelectedFigure.Draw();
-
             _core.Draw();
+
+            if (pc.SelectedFigure != null) pc.SelectedFigure.DrawSelect();
 
             if (pc.AddedFigure != null) pc.AddedFigure.Draw();
 
@@ -755,6 +755,9 @@ namespace Dipl_template_winforms
         }
 
         #region BUTTONS FOR BOOLEAN OPERATIONS
+
+        TrianglesBool trianglesBool;
+
         private void button1_Click(object sender, EventArgs e)
         {
             if (pc.ListSelFig.Count > 1)
@@ -762,41 +765,51 @@ namespace Dipl_template_winforms
                 var f1 = pc.ListSelFig[0].Verteces;
                 var f2 = pc.ListSelFig[1].Verteces;
 
-                Modificators modificators = new Modificators(f1, f2);
-                modificators.Operation = Operations.Interset;
+                var t1 = pc.ListSelFig[0].Triangles;
+                var t2 = pc.ListSelFig[1].Triangles;
 
-                pc.res = modificators.Result();
-                if (pc.res.Count > 0)
+                if (pc.IsAttenton)
                 {
-                    Figure f = new Figure();
+                    Modificators modificators = new Modificators(f1, f2);
+                    modificators.Operation = Operations.Interset;
 
-                    helper.DeleteDuplicats(pc.res);
+                    pc.res = modificators.Result();
+                    if (pc.res.Count > 0)
+                    {
+                        Figure f = new Figure();
 
+                        helper.DeleteDuplicats(pc.res);
 
-                    f.Edges = Helper.ConvertToEdges(pc.res);
-                    f.Type = TypeFigures.Polygon;
-                    f.Center = helper.CalcCenter(pc.res);
-                    f.TranslateToCenterCoordinates();
-                    f.ReCalc();
+                        f.Edges = Helper.ConvertToEdges(pc.res);
+                        f.Type = TypeFigures.Polygon;
+                        f.Center = helper.CalcCenter(pc.res);
+                        f.TranslateToCenterCoordinates();
+                        f.ReCalc();
 
-                    f.FillColor = pc.ListSelFig[1].FillColor;
-                    f.BorderColor = pc.ListSelFig[1].BorderColor;
+                        f.FillColor = pc.ListSelFig[1].FillColor;
+                        f.BorderColor = pc.ListSelFig[1].BorderColor;
 
-                    pc.ClearListSelectedFigures();
+                        pc.ClearListSelectedFigures();
 
-                    f.Id = _core.Ids.ToString();
-                    f.Name = "BoolenResult " + f.Id;
-                    _core.Add(f);
-                    //SetProperties(pc.AddedFigure);
-                    treeView1.Nodes.Clear();
-                    treeView1.Nodes.AddRange(_core.NodesForTree());
-                    treeView1.ExpandAll();
+                        f.Id = _core.Ids.ToString();
+                        f.Name = "BoolenResult " + f.Id;
+                        SetProperties(f);
+                        _core.Add(f);
+                        
+                        treeView1.Nodes.Clear();
+                        treeView1.Nodes.AddRange(_core.NodesForTree());
+                        treeView1.ExpandAll();
 
-                    glControl1.Invalidate();
+                        glControl1.Invalidate();
+                    }
+                }
+                else
+                {
+                    trianglesBool = new TrianglesBool(t1, t2, f1, f2, Operations.Interset);
                 }
             }
         }
-
+        
         private void button_union_Click(object sender, EventArgs e)
         {
             if (pc.ListSelFig.Count == 2)
@@ -804,38 +817,43 @@ namespace Dipl_template_winforms
                 var f1 = pc.ListSelFig[0].Verteces;
                 var f2 = pc.ListSelFig[1].Verteces;
 
-                Modificators modificators = new Modificators(f1, f2);
-                modificators.Operation = Operations.Union;
-
-                pc.res = modificators.Result();
-                if (pc.res.Count > 0)
+                if (pc.IsAttenton)
                 {
-                    Figure f = new Figure();
+                    Modificators modificators = new Modificators(f1, f2);
+                    modificators.Operation = Operations.Union;
 
-                    helper.DeleteDuplicats(pc.res);
+                    pc.res = modificators.Result();
+                    if (pc.res.Count > 0)
+                    {
+                        Figure f = new Figure();
+
+                        helper.DeleteDuplicats(pc.res);
 
 
-                    f.Edges = Helper.ConvertToEdges(pc.res);
-                    f.Type = TypeFigures.Polygon;
-                    f.Center = helper.CalcCenter(pc.res);
-                    f.TranslateToCenterCoordinates();
-                    f.ReCalc();
+                        f.Edges = Helper.ConvertToEdges(pc.res);
+                        f.Type = TypeFigures.Polygon;
+                        f.Center = helper.CalcCenter(pc.res);
+                        f.TranslateToCenterCoordinates();
+                        f.ReCalc();
 
-                    f.FillColor = pc.ListSelFig[1].FillColor;
-                    f.BorderColor = pc.ListSelFig[1].BorderColor;
+                        f.FillColor = pc.ListSelFig[1].FillColor;
+                        f.BorderColor = pc.ListSelFig[1].BorderColor;
 
-                    pc.ClearListSelectedFigures();
+                        pc.ClearListSelectedFigures();
 
-                    f.Id = _core.Ids.ToString();
-                    f.Name = "BoolenResult " + f.Id;
-                    _core.Add(f);
-                    //SetProperties(pc.AddedFigure);
-                    treeView1.Nodes.Clear();
-                    treeView1.Nodes.AddRange(_core.NodesForTree());
-                    treeView1.ExpandAll();
+                        f.Id = _core.Ids.ToString();
+                        f.Name = "BoolenResult " + f.Id;
+                        _core.Add(f);
+                        //SetProperties(pc.AddedFigure);
+                        treeView1.Nodes.Clear();
+                        treeView1.Nodes.AddRange(_core.NodesForTree());
+                        treeView1.ExpandAll();
 
-                    glControl1.Invalidate();
+                        glControl1.Invalidate();
+                    }
                 }
+                else
+                    trianglesBool = new TrianglesBool(pc.ListSelFig[0], pc.ListSelFig[1], Operations.Union);
             }
             else if (pc.ListSelFig.Count > 2)
             {
@@ -897,42 +915,60 @@ namespace Dipl_template_winforms
         {
             if (pc.ListSelFig.Count > 1)
             {
-                var f1 = pc.ListSelFig[0].Verteces;
-                var f2 = pc.ListSelFig[1].Verteces;
-
-                Modificators modificators = new Modificators(f1, f2);
-                modificators.Operation = Operations.Sub;
-
-                pc.res = modificators.Result();
-                if (pc.res.Count > 0)
+                if (pc.IsAttenton)
                 {
-                    Figure f = new Figure();
+                    var f1 = pc.ListSelFig[0].Verteces;
+                    var f2 = pc.ListSelFig[1].Verteces;
 
-                    helper.DeleteDuplicats(pc.res);
+                    Modificators modificators = new Modificators(f1, f2);
+                    modificators.Operation = Operations.Sub;
+
+                    pc.res = modificators.Result();
+                    if (pc.res.Count > 0)
+                    {
+                        Figure f = new Figure();
+
+                        helper.DeleteDuplicats(pc.res);
 
 
-                    f.Edges = Helper.ConvertToEdges(pc.res);
-                    f.Type = TypeFigures.Polygon;
-                    f.Center = helper.CalcCenter(pc.res);
-                    f.TranslateToCenterCoordinates();
-                    f.ReCalc();
+                        f.Edges = Helper.ConvertToEdges(pc.res);
+                        f.Type = TypeFigures.Polygon;
+                        f.Center = helper.CalcCenter(pc.res);
+                        f.TranslateToCenterCoordinates();
+                        f.ReCalc();
 
-                    f.FillColor = pc.ListSelFig[1].FillColor;
-                    f.BorderColor = pc.ListSelFig[1].BorderColor;
+                        f.FillColor = pc.ListSelFig[1].FillColor;
+                        f.BorderColor = pc.ListSelFig[1].BorderColor;
 
-                    pc.ClearListSelectedFigures();
+                        pc.ClearListSelectedFigures();
 
-                    f.Id = _core.Ids.ToString();
-                    f.Name = "BoolenResult " + f.Id;
-                    _core.Add(f);
-                    //SetProperties(pc.AddedFigure);
-                    treeView1.Nodes.Clear();
-                    treeView1.Nodes.AddRange(_core.NodesForTree());
-                    treeView1.ExpandAll();
+                        f.Id = _core.Ids.ToString();
+                        f.Name = "BoolenResult " + f.Id;
+                        _core.Add(f);
+                        //SetProperties(pc.AddedFigure);
+                        treeView1.Nodes.Clear();
+                        treeView1.Nodes.AddRange(_core.NodesForTree());
+                        treeView1.ExpandAll();
 
-                    glControl1.Invalidate();
+                        glControl1.Invalidate();
+                    }
+                }
+                else
+                {
+
                 }
             }
+        }
+
+        private void radioButton_attenton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_attenton.Checked)
+                pc.IsAttenton = true;
+        }
+        private void radioButton_triangles_CheckedChanged(object sender, EventArgs e)
+        {
+            if (radioButton_triangles.Checked)
+                pc.IsAttenton = false;
         }
         #endregion
 
@@ -996,5 +1032,7 @@ namespace Dipl_template_winforms
                 //MessageBox.Show(v.ToString(), "Current Cell");
             }
         }
+
+        
     }
 }

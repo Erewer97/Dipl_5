@@ -42,6 +42,15 @@ namespace ConsoleApp1
             else
                 return false;
         }
+        public static bool VectrCompare(Vector2d a, Vector2d b)
+        {
+            Vector2d v = AbsSub(a, b);
+
+            if (v.X <= 0.001 && v.Y <= 0.001)
+                return true;
+            else
+                return false;
+        }
         public static int DCompare(double a, double b)
         {
             int r = a.CompareTo(b);
@@ -1869,6 +1878,177 @@ namespace ConsoleApp1
         }
     }
 
+    public class TrianglesBool
+    {
+        public List<Triangle> Result1 { get; set; } = new List<Triangle>();
+        public List<Triangle> Result2 { get; set; } = new List<Triangle>();
+
+        public TrianglesBool() { ; }
+        public TrianglesBool(List<Triangle> Tr1, List<Triangle> Tr2, List<Vector2d> F1, List<Vector2d> F2)
+        {
+            Triangulating(Tr1, Tr2, F1, F2);
+        }
+
+
+        void Subdiv(List<Triangle> triangles, Vector2d v1, Vector2d v2)
+        {
+            List<Triangle> res = new List<Triangle>();
+            List<Triangle> input = triangles.ToList();
+            triangles.Clear();
+
+            foreach (var t in input)
+            {
+                Triangle triangle = t;
+
+                Vector2d End = v1;
+                Vector2d Begin = v2;
+
+                Vector2d p1 = (MathVec.LinesIntersection(triangle.A, triangle.B, End, Begin));
+                Vector2d p2 = (MathVec.LinesIntersection(triangle.B, triangle.C, End, Begin));
+                Vector2d p3 = (MathVec.LinesIntersection(triangle.C, triangle.A, End, Begin));
+
+                List<Triangle> tr = new List<Triangle>();
+                List<Vector2d> lv = new List<Vector2d>();
+
+                Triangulate triangulate = new Triangulate();
+
+                if (triangulate.isPointInside(triangle, End))
+                    Begin = End;
+
+                int countPointIntersect = 0;
+
+                if (!double.IsNaN(p1.X)) countPointIntersect++;
+                if (!double.IsNaN(p2.X)) countPointIntersect++;
+                if (!double.IsNaN(p3.X)) countPointIntersect++;
+
+                if (countPointIntersect == 0)
+                {
+                    res.Add(t);
+                }
+                if (countPointIntersect == 3)
+                {
+                    if (MathVec.VectrCompare(p1, p2))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, p3));
+                        tr.Add(new Triangle(triangle.B, triangle.C, p3));
+                    }
+                    if (MathVec.VectrCompare(p2, p3))
+                    {
+                        tr.Add(new Triangle(triangle.A, p1, triangle.C));
+                        tr.Add(new Triangle(triangle.B, triangle.C, p1));
+                    }
+                    if (MathVec.VectrCompare(p1, p3))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, p2));
+                        tr.Add(new Triangle(triangle.A, triangle.C, p2));
+                    }
+                }
+                if (countPointIntersect == 2)
+                {
+                    if (double.IsNaN(p1.X))
+                    {
+                        if (!MathVec.VectrCompare(p2, p3))
+                        {
+                            tr.Add(new Triangle(p2, triangle.C, p3));
+                            lv.AddRange(new List<Vector2d>() { triangle.A, triangle.B, p2, p3 });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                    if (double.IsNaN(p2.X))
+                    {
+                        if (!MathVec.VectrCompare(p1, p3))
+                        {
+                            tr.Add(new Triangle(p3, triangle.A, p1));
+                            lv.AddRange(new List<Vector2d>() { p1, triangle.B, triangle.C, p3 });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                    if (double.IsNaN(p3.X))
+                    {
+                        if (!MathVec.VectrCompare(p1, p2))
+                        {
+                            tr.Add(new Triangle(p1, triangle.B, p2));
+                            lv.AddRange(new List<Vector2d>() { p1, p2, triangle.C, triangle.A });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                }
+                if (countPointIntersect == 1)
+                {
+                    if (!double.IsNaN(p1.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, p1, Begin));
+                        tr.Add(new Triangle(triangle.B, p1, Begin));
+                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                    }
+                    if (!double.IsNaN(p2.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, Begin));
+                        tr.Add(new Triangle(triangle.B, p2, Begin));
+                        tr.Add(new Triangle(p2, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                    }
+                    if (!double.IsNaN(p3.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, Begin, p3));
+                        tr.Add(new Triangle(triangle.A, Begin, triangle.B));
+                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, p3));
+                    }
+                }
+
+                List<Triangle> oo = null;
+                if (lv.Count > 0)
+                {
+                    Triangulate ttt = new Triangulate(lv.ToArray());
+                    oo = ttt.Triangles;
+                }
+
+                tr.RemoveAll(x => { return MathVec.VectrCompare(x.A, x.B) || MathVec.VectrCompare(x.B, x.C) || MathVec.VectrCompare(x.A, x.C); });
+
+                res.AddRange(tr);
+                if (oo != null)
+                    res.AddRange(oo);
+
+            }
+            triangles.AddRange(res);
+        }
+        public void Triangulating(List<Triangle> tr1, List<Triangle> tr2, List<Vector2d> f1, List<Vector2d> f2)
+        {
+            List<Triangle> res1 = tr1.ToList();
+            List<Triangle> res2 = tr2.ToList();
+
+            for (int i = 0, j = 1; i < f2.Count; i++, j++)
+            {
+                if (j == f2.Count)
+                    Subdiv(res1, f2[i], f2[0]);
+                else
+                    Subdiv(res1, f2[i], f2[j]);
+            }
+
+            for (int i = 0, j = 1; i < f1.Count; i++, j++)
+            {
+                if (j == f1.Count)
+                    Subdiv(res2, f1[i], f1[0]);
+                else
+                    Subdiv(res2, f1[i], f1[j]);
+            }
+
+            Result1 = res1;
+            Result2 = res2;
+        }
+    }
+
     class Program
     {
         static public List<Triangle> Sub(List<Triangle> triangles, List<Vector2d> lines)
@@ -1961,6 +2141,294 @@ namespace ConsoleApp1
             return res;
         }
 
+        static public void Sub1(List<Triangle> triangles, List<Vector2d> lines)
+        {
+            List<Triangle> res = new List<Triangle>();
+            List<Triangle> input = triangles.ToList();
+            triangles.Clear();
+
+            foreach (var t in input)
+            {
+                Triangle triangle = t;
+
+                Vector2d End = lines[1];
+                Vector2d Begin = lines[0];
+
+                Vector2d p1 = (MathVec.LinesIntersection(triangle.A, triangle.B, End, Begin));
+                Vector2d p2 = (MathVec.LinesIntersection(triangle.B, triangle.C, End, Begin));
+                Vector2d p3 = (MathVec.LinesIntersection(triangle.C, triangle.A, End, Begin));
+
+                List<Triangle> tr = new List<Triangle>();
+                List<Vector2d> lv = new List<Vector2d>();
+
+                Triangulate triangulate = new Triangulate();
+
+                if (triangulate.isPointInside(triangle, End))
+                    Begin = End;
+
+                int countPointIntersect = 0;
+
+                if (!double.IsNaN(p1.X)) countPointIntersect++;
+                if (!double.IsNaN(p2.X)) countPointIntersect++;
+                if (!double.IsNaN(p3.X)) countPointIntersect++;
+
+                if (countPointIntersect == 0)
+                {
+                    res.Add(t);
+                }
+                if (countPointIntersect == 3)
+                {
+                    if (MathVec.VectrCompare(p1, p2))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, p3));
+                        tr.Add(new Triangle(triangle.B, triangle.C, p3));
+                    }
+                    if (MathVec.VectrCompare(p2, p3))
+                    {
+                        tr.Add(new Triangle(triangle.A, p1, triangle.C));
+                        tr.Add(new Triangle(triangle.B, triangle.C, p1));
+                    }
+                    if (MathVec.VectrCompare(p1, p3))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, p2));
+                        tr.Add(new Triangle(triangle.A, triangle.C, p2));
+                    }
+                }
+                if (countPointIntersect == 2)
+                {
+                    if (double.IsNaN(p1.X))
+                    {
+                        if (!MathVec.VectrCompare(p2, p3))
+                        {
+                            tr.Add(new Triangle(p2, triangle.C, p3));
+                            lv.AddRange(new List<Vector2d>() { triangle.A, triangle.B, p2, p3 });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                    if (double.IsNaN(p2.X))
+                    {
+                        if (!MathVec.VectrCompare(p1, p3))
+                        {
+                            tr.Add(new Triangle(p3, triangle.A, p1));
+                            lv.AddRange(new List<Vector2d>() { p1, triangle.B, triangle.C, p3 });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                    if (double.IsNaN(p3.X))
+                    {
+                        if (!MathVec.VectrCompare(p1, p2))
+                        {
+                            tr.Add(new Triangle(p1, triangle.B, p2));
+                            lv.AddRange(new List<Vector2d>() { p1, p2, triangle.C, triangle.A });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                }
+                if (countPointIntersect == 1)
+                {
+                    if (!double.IsNaN(p1.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, p1, Begin));
+                        tr.Add(new Triangle(triangle.B, p1, Begin));
+                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                    }
+                    if (!double.IsNaN(p2.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, Begin));
+                        tr.Add(new Triangle(triangle.B, p2, Begin));
+                        tr.Add(new Triangle(p2, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                    }
+                    if (!double.IsNaN(p3.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, Begin, p3));
+                        tr.Add(new Triangle(triangle.A, Begin, triangle.B));
+                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, p3));
+                    }
+                }
+
+                List<Triangle> oo = null;
+                if (lv.Count > 0)
+                {
+                    Triangulate ttt = new Triangulate(lv.ToArray());
+                    oo = ttt.Triangles;
+                }
+
+                tr.RemoveAll(x => { return MathVec.VectrCompare(x.A, x.B) || MathVec.VectrCompare(x.B, x.C) || MathVec.VectrCompare(x.A, x.C); });
+
+                res.AddRange(tr);
+                if (oo != null)
+                    res.AddRange(oo);
+
+            }
+            triangles.AddRange(res);
+        }
+        static public void Subdiv(List<Triangle> triangles, Vector2d v1, Vector2d v2)
+        {
+            List<Triangle> res = new List<Triangle>();
+            List<Triangle> input = triangles.ToList();
+            triangles.Clear();
+
+            foreach (var t in input)
+            {
+                Triangle triangle = t;
+
+                Vector2d End = v1;
+                Vector2d Begin = v2;
+
+                Vector2d p1 = (MathVec.LinesIntersection(triangle.A, triangle.B, End, Begin));
+                Vector2d p2 = (MathVec.LinesIntersection(triangle.B, triangle.C, End, Begin));
+                Vector2d p3 = (MathVec.LinesIntersection(triangle.C, triangle.A, End, Begin));
+
+                List<Triangle> tr = new List<Triangle>();
+                List<Vector2d> lv = new List<Vector2d>();
+
+                Triangulate triangulate = new Triangulate();
+
+                if (triangulate.isPointInside(triangle, End))
+                    Begin = End;
+
+                int countPointIntersect = 0;
+
+                if (!double.IsNaN(p1.X)) countPointIntersect++;
+                if (!double.IsNaN(p2.X)) countPointIntersect++;
+                if (!double.IsNaN(p3.X)) countPointIntersect++;
+
+                if (countPointIntersect == 0)
+                {
+                    res.Add(t);
+                }
+                if (countPointIntersect == 3)
+                {
+                    if (MathVec.VectrCompare(p1, p2))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, p3));
+                        tr.Add(new Triangle(triangle.B, triangle.C, p3));
+                    }
+                    if (MathVec.VectrCompare(p2, p3))
+                    {
+                        tr.Add(new Triangle(triangle.A, p1, triangle.C));
+                        tr.Add(new Triangle(triangle.B, triangle.C, p1));
+                    }
+                    if (MathVec.VectrCompare(p1, p3))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, p2));
+                        tr.Add(new Triangle(triangle.A, triangle.C, p2));
+                    }
+                }
+                if (countPointIntersect == 2)
+                {
+                    if (double.IsNaN(p1.X))
+                    {
+                        if (!MathVec.VectrCompare(p2, p3))
+                        {
+                            tr.Add(new Triangle(p2, triangle.C, p3));
+                            lv.AddRange(new List<Vector2d>() { triangle.A, triangle.B, p2, p3 });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                    if (double.IsNaN(p2.X))
+                    {
+                        if (!MathVec.VectrCompare(p1, p3))
+                        {
+                            tr.Add(new Triangle(p3, triangle.A, p1));
+                            lv.AddRange(new List<Vector2d>() { p1, triangle.B, triangle.C, p3 });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                    if (double.IsNaN(p3.X))
+                    {
+                        if (!MathVec.VectrCompare(p1, p2))
+                        {
+                            tr.Add(new Triangle(p1, triangle.B, p2));
+                            lv.AddRange(new List<Vector2d>() { p1, p2, triangle.C, triangle.A });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                }
+                if (countPointIntersect == 1)
+                {
+                    if (!double.IsNaN(p1.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, p1, Begin));
+                        tr.Add(new Triangle(triangle.B, p1, Begin));
+                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                    }
+                    if (!double.IsNaN(p2.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, Begin));
+                        tr.Add(new Triangle(triangle.B, p2, Begin));
+                        tr.Add(new Triangle(p2, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                    }
+                    if (!double.IsNaN(p3.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, Begin, p3));
+                        tr.Add(new Triangle(triangle.A, Begin, triangle.B));
+                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, p3));
+                    }
+                }
+
+                List<Triangle> oo = null;
+                if (lv.Count > 0)
+                {
+                    Triangulate ttt = new Triangulate(lv.ToArray());
+                    oo = ttt.Triangles;
+                }
+
+                tr.RemoveAll(x => { return MathVec.VectrCompare(x.A, x.B) || MathVec.VectrCompare(x.B, x.C) || MathVec.VectrCompare(x.A, x.C); });
+
+                res.AddRange(tr);
+                if (oo != null)
+                    res.AddRange(oo);
+
+            }
+            triangles.AddRange(res);
+        }
+        static public void Triangulating(List<Triangle> tr1, List<Triangle> tr2, List<Vector2d> f1, List<Vector2d> f2)
+        {
+            List<Triangle> res1 = tr1.ToList();
+            List<Triangle> res2 = tr2.ToList();
+
+            for (int i = 0, j = 1; i < f2.Count; i++, j++)
+            {
+                if (j == f2.Count)
+                    Subdiv(res1, f2[i], f2[0]);
+                else
+                    Subdiv(res1, f2[i], f2[j]);
+            }
+
+            for (int i = 0, j = 1; i < f1.Count; i++, j++)
+            {
+                if (j == f1.Count)
+                    Subdiv(res2, f1[i], f1[0]);
+                else
+                    Subdiv(res2, f1[i], f1[j]);
+            }
+        }
+
         static void Main(string[] args)
         {
             //Triangle triangle = new Triangle(new Vector2d(0), new Vector2d(4, 1), new Vector2d(2, 3));
@@ -1968,20 +2436,28 @@ namespace ConsoleApp1
             //Vector2d C = new Vector2d(4, 2);
             //Vector2d K = new Vector2d(1, 2);
 
-            Triangle t = new Triangle(new Vector2d(0), new Vector2d(3,0), new Vector2d(1,2));
-            Vector2d L = new Vector2d(1, -1);
-            Vector2d M = new Vector2d(1, 1);
-            Vector2d N = new Vector2d(3, 1);
+            Triangle t1 = new Triangle(new Vector2d(1, 3), new Vector2d(1, 1), new Vector2d(3, 1));
+            Triangle t2 = new Triangle(new Vector2d(1, 3), new Vector2d(3, 1), new Vector2d(3, 3));
 
-            var t1 = Sub(new List<Triangle>() { t }, new List<Vector2d>() { L, M });
-            var t2 = new List<Triangle>();
+            List<Triangle> res = new List<Triangle>() { t1, t2 };
 
-            foreach (var tt in t1)
-                t2.AddRange(
-                    Sub(new List<Triangle>() { tt }, 
-                        new List<Vector2d>() { M, N }));
+            List<Vector2d> list = new List<Vector2d>()
+            {
+                new Vector2d(1.5,1.5),
+                new Vector2d(4, 1.5),
+                new Vector2d(4, 4),
+                new Vector2d(2, 4)
+            };
 
-            foreach (Triangle a in t2)
+            for (int i = 0, j = 1; i < list.Count; i++, j++)
+            {
+                if (j == list.Count)
+                    Subdiv(res, list[i], list[0]);
+                else
+                    Subdiv(res, list[i], list[j]);
+            }
+
+            foreach (Triangle a in res)
                 Console.Write(a);
 
             Console.ReadLine();

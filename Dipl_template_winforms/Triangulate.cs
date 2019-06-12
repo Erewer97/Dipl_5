@@ -30,6 +30,7 @@ namespace Dipl_template_winforms
             set { }
         }
 
+        public Triangulate() {; }
         public Triangulate(Vector2d[] points) //points - х и y координаты
         {
             this.points = points; //преобразуем координаты в вершины
@@ -111,11 +112,19 @@ namespace Dipl_template_winforms
             return abX * acY - acX * abY > 0;
         }
 
-        private bool isPointInside(Vector2d a, Vector2d b, Vector2d c, Vector2d p) //находится ли точка p внутри треугольника abc
+        public bool isPointInside(Vector2d a, Vector2d b, Vector2d c, Vector2d p) //находится ли точка p внутри треугольника abc
         {
             double ab = (a.X - p.X) * (b.Y - a.Y) - (b.X - a.X) * (a.Y - p.Y);
             double bc = (b.X - p.X) * (c.Y - b.Y) - (c.X - b.X) * (b.Y - p.Y);
             double ca = (c.X - p.X) * (a.Y - c.Y) - (a.X - c.X) * (c.Y - p.Y);
+
+            return (ab >= 0 && bc >= 0 && ca >= 0) || (ab <= 0 && bc <= 0 && ca <= 0);
+        }
+        public bool isPointInside(Triangle triangle, Vector2d p) //находится ли точка p внутри треугольника abc
+        {
+            double ab = (triangle.A.X - p.X) * (triangle.B.Y - triangle.A.Y) - (triangle.B.X - triangle.A.X) * (triangle.A.Y - p.Y);
+            double bc = (triangle.B.X - p.X) * (triangle.C.Y - triangle.B.Y) - (triangle.C.X - triangle.B.X) * (triangle.B.Y - p.Y);
+            double ca = (triangle.C.X - p.X) * (triangle.A.Y - triangle.C.Y) - (triangle.A.X - triangle.C.X) * (triangle.C.Y - p.Y);
 
             return (ab >= 0 && bc >= 0 && ca >= 0) || (ab <= 0 && bc <= 0 && ca <= 0);
         }
@@ -148,6 +157,8 @@ namespace Dipl_template_winforms
         public Vector2d A { get { return a; } set { } }
         public Vector2d B { get { return b; } set { } }
         public Vector2d C { get { return c; } set { } }
+        public Vector2d Center { get { return (A + B + C) / 3.0; } private set {; } }
+
 
         public Triangle(Vector2d a, Vector2d b, Vector2d c)
         {

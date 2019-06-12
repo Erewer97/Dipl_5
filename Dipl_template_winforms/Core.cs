@@ -104,6 +104,117 @@ namespace Dipl_template_winforms
             else
                 return false;
         }
+
+        public static bool VectrCompare(Vector2d a, Vector2d b)
+        {
+            Vector2d v = AbsSub(a, b);
+
+            if (v.X <= 0.001 && v.Y <= 0.001)
+                return true;
+            else
+                return false;
+        }
+        public static bool DoubEquale(double a, double b, double e)
+        {
+            if (Math.Abs(a - b) <= 4 * e * Math.Max(Math.Abs(a), Math.Abs(b)))
+                return true;
+            return false;
+        }
+
+        public static Vector2d LinesIntersection(Vector2d x1, Vector2d y1, Vector2d x2, Vector2d y2)
+        {
+            Vector2d r = new Vector2d(double.NaN);
+
+            Vector2d
+            a = x1,
+            b = y1,
+            c = x2,
+            d = y2;
+
+            double D = (a.X - b.X) * (d.Y - c.Y) - (d.X - c.X) * (a.Y - b.Y);
+            if (D == 0) // отрезки парралельны
+                //throw new Exception("Линии паралельны");
+                return r;
+
+            double u = ((d.X - b.X) * (d.Y - c.Y) - (d.X - c.X) * (d.Y - b.Y)) / D;
+
+            double v = ((a.X - b.X) * (d.Y - b.Y) - (d.X - b.X) * (a.Y - b.Y)) / D;
+
+            //if (u <= double.MinValue && v <= double.MinValue)
+            //throw new Exception("Линии совпадают"); 
+
+            if ((0 <= u) && (u <= 1) && (0 <= v) && (v <= 1))
+            {
+                double x = u * a.X + (1 - u) * b.X;
+                double y = u * a.Y + (1 - u) * b.Y;
+                r = new Vector2d(x, y);
+            }
+
+            //Console.WriteLine(D + "\n" + u + "\n" + v);
+
+            return r;
+        }
+        public static bool Hit(Vector2d v, List<Vector2d> Verteces)
+        {
+            Vector2d Point = v;
+            bool result = false;
+            int j = Verteces.Count - 1;
+
+
+            for (int i = 0; i < Verteces.Count; i++)
+            {
+                if (
+                    (Verteces[i].Y < Point.Y && Verteces[j].Y >= Point.Y
+                    ||
+                    Verteces[j].Y < Point.Y && Verteces[i].Y >= Point.Y)
+                    &&
+                     (Verteces[i].X + (Point.Y - Verteces[i].Y) / (Verteces[j].Y - Verteces[i].Y) * (Verteces[j].X - Verteces[i].X) < Point.X))
+                    result = !result;
+                j = i;
+            }
+
+            return result;
+        }
+    }
+
+    public class AABB
+    {
+        public Vector2d Max { get; set; }
+        public Vector2d Min { get; set; }
+        public Vector2d Center { get; set; }
+
+        public AABB() { ; }
+        public AABB(List<Vector2d> verteces)
+        {
+            double maxx = verteces[0].X,
+                       maxy = verteces[0].Y,
+                       minx = verteces[0].X,
+                       miny = verteces[0].Y;
+
+            foreach (var r in verteces)
+            {
+                if ((r.X >= maxx))
+                    maxx = r.X;
+                if ((r.X <= minx))
+                    minx = r.X;
+                if ((r.Y >= maxy))
+                    maxy = r.Y;
+                if ((r.Y <= miny))
+                    miny = r.Y;
+            }
+
+            Max = new Vector2d(maxx, maxy);
+            Min = new Vector2d(minx, miny);
+
+            Center = ((Min + Max) / 2.0);
+        }
+
+        public bool HitInAABB(Vector2d v)
+        {
+            if (Min.X <= v.X && v.X <= Max.X && Min.Y <= v.Y && v.Y <= Max.Y)
+                return true;
+            return false;
+        }
     }
 
     public class Edge
@@ -385,7 +496,7 @@ namespace Dipl_template_winforms
         public ActionWithFigure LabelOFAction { get; private set; }
         public TypeFigures Type { get; set; } = TypeFigures.None;
 
-        
+
 
         public bool IsSelect { get; set; }
         public bool IsEdit { get; set; } // Редактируют ли сейчас эту фигуру?
@@ -394,6 +505,8 @@ namespace Dipl_template_winforms
         public Color FillColor { get; set; }
         public Color BorderColor { get; set; }
         public float LineWidth { get; set; } = 1.0f;
+        public List<Triangle> Triangles { get { return _triangles; } private set {; } }
+        public AABB AABB { get; set; }
 
 
         int indPoint = -1;
@@ -472,6 +585,8 @@ namespace Dipl_template_winforms
 
             Triangulate tr = new Triangulate(Verteces.ToArray());
             _triangles = tr.Triangles;
+
+            AABB = new AABB(Verteces);
         }
         public Vector2d MultiplyMatrixAndVector(Vector2d Vector, Matrix4d m)
         {
@@ -1203,33 +1318,6 @@ namespace Dipl_template_winforms
                 GL.End();
             }
             
-
-            if (IsSelect)
-            {
-                //DrawAABB();
-
-                GL.PushMatrix();
-                GL.Color3(Color.Black);
-                GL.PointSize(5.0f);
-                GL.Begin(BeginMode.Points);
-                for (int i = 0; i < Manipulators.Length; i++)
-                    GL.Vertex2(Manipulators[i]);
-                GL.End();
-                if (indPoint1 > -1)
-                {
-                    GL.Begin(BeginMode.LineStrip);
-                    Vector2d c = Manipulators[indPoint1];
-                    for (int i = 0; i < 360; i++)
-                    {
-                        double t = MathHelper.DegreesToRadians(i);
-                        double x = 0.2 * Math.Cos(t);
-                        double y = 0.2 * Math.Sin(t);
-                        GL.Vertex2(c.X + x, c.Y + y);
-                    }
-                    GL.End();
-                }
-                GL.PopMatrix();
-            }
             if (IsEdit)
             {
                 GL.PushMatrix();
@@ -1258,15 +1346,6 @@ namespace Dipl_template_winforms
                     GL.End();                   
                 }
 
-                //GL.Begin(BeginMode.LineLoop);
-                //foreach (var t in _triangles)
-                //{
-                //    GL.Vertex2(t.A);
-                //    GL.Vertex2(t.B);
-                //    GL.Vertex2(t.C);
-                //}
-                //GL.End();
-
                 GL.PopMatrix();
 
                 if (indCurrEdge > -1)
@@ -1281,6 +1360,35 @@ namespace Dipl_template_winforms
 
                     GL.PopMatrix();
                 }
+            }
+        }
+        public void DrawSelect()
+        {
+            if (IsSelect)
+            {
+                GL.PushMatrix();
+                GL.Color3(Color.Black);
+                GL.PointSize(5.0f);
+
+                GL.Begin(BeginMode.Points);
+                for (int i = 0; i < Manipulators.Length; i++)
+                    GL.Vertex2(Manipulators[i]);
+                GL.End();
+
+                if (indPoint1 > -1)
+                {
+                    GL.Begin(BeginMode.LineStrip);
+                    Vector2d c = Manipulators[indPoint1];
+                    for (int i = 0; i < 360; i++)
+                    {
+                        double t = MathHelper.DegreesToRadians(i);
+                        double x = 0.2 * Math.Cos(t);
+                        double y = 0.2 * Math.Sin(t);
+                        GL.Vertex2(c.X + x, c.Y + y);
+                    }
+                    GL.End();
+                }
+                GL.PopMatrix();
             }
         }
 
@@ -1855,6 +1963,31 @@ namespace Dipl_template_winforms
                 + " Interset: " + IsPointIntersection.ToString() + "\n";
         }
     }
+
+    public class Group
+    {
+        public List<Figure> Figures { get; set; } = new List<Figure>();
+        public string ID { get; set; }
+        public AABB AABB { get; set; }
+
+        public Group() { ; }
+
+        public void Add(Figure f)
+        {
+            Figures.Add(f);
+
+        }
+        public void Del(Figure figure)
+        {
+            Figures.Remove(figure);
+        }
+        public void Clear()
+        {
+            Figures.Clear();
+            AABB = new AABB();
+        }
+    }
+
 
     public class Modificators
     {
@@ -2681,6 +2814,220 @@ namespace Dipl_template_winforms
             }
 
             return result;
+        }
+    }
+
+    public class TrianglesBool
+    {
+        public List<Triangle> Result1 { get; set; } = new List<Triangle>();
+        public List<Triangle> Result2 { get; set; } = new List<Triangle>();
+        public List<Triangle> Intersect { get; set; } = new List<Triangle>();
+        public List<Triangle> Union { get; set; } = new List<Triangle>();
+        public List<Triangle> Sub { get; set; } = new List<Triangle>();
+
+        public TrianglesBool() {; }
+        public TrianglesBool(List<Triangle> Tr1, List<Triangle> Tr2, List<Vector2d> F1, List<Vector2d> F2, Operations o)
+        {
+            Triangulating(Tr1, Tr2, F1, F2);
+            CalcCenters(F1, F2, o);
+        }
+        public TrianglesBool(Figure f1, Figure f2, Operations operations)
+        {
+            Triangulating(f1.Triangles, f2.Triangles, f1.Verteces, f2.Verteces);
+            CalcCenters(f1.Verteces, f2.Verteces, operations);
+        }
+
+
+        void Subdiv(List<Triangle> triangles, Vector2d v1, Vector2d v2)
+        {
+            List<Triangle> res = new List<Triangle>();
+            List<Triangle> input = triangles.ToList();
+            triangles.Clear();
+
+            foreach (var t in input)
+            {
+                Triangle triangle = t;
+
+                Vector2d End = v1;
+                Vector2d Begin = v2;
+
+                Vector2d p1 = (MathVec.LinesIntersection(triangle.A, triangle.B, End, Begin));
+                Vector2d p2 = (MathVec.LinesIntersection(triangle.B, triangle.C, End, Begin));
+                Vector2d p3 = (MathVec.LinesIntersection(triangle.C, triangle.A, End, Begin));
+
+                List<Triangle> tr = new List<Triangle>();
+                List<Vector2d> lv = new List<Vector2d>();
+
+                Triangulate triangulate = new Triangulate();
+
+                if (triangulate.isPointInside(triangle, End))
+                    Begin = End;
+
+                int countPointIntersect = 0;
+
+                if (!double.IsNaN(p1.X)) countPointIntersect++;
+                if (!double.IsNaN(p2.X)) countPointIntersect++;
+                if (!double.IsNaN(p3.X)) countPointIntersect++;
+
+                if (countPointIntersect == 0)
+                {
+                    res.Add(t);
+                }
+                if (countPointIntersect == 3)
+                {
+                    if (MathVec.VectrCompare(p1, p2))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, p3));
+                        tr.Add(new Triangle(triangle.B, triangle.C, p3));
+                    }
+                    if (MathVec.VectrCompare(p2, p3))
+                    {
+                        tr.Add(new Triangle(triangle.A, p1, triangle.C));
+                        tr.Add(new Triangle(triangle.B, triangle.C, p1));
+                    }
+                    if (MathVec.VectrCompare(p1, p3))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, p2));
+                        tr.Add(new Triangle(triangle.A, triangle.C, p2));
+                    }
+                }
+                if (countPointIntersect == 2)
+                {
+                    if (double.IsNaN(p1.X))
+                    {
+                        if (!MathVec.VectrCompare(p2, p3))
+                        {
+                            tr.Add(new Triangle(p2, triangle.C, p3));
+                            lv.AddRange(new List<Vector2d>() { triangle.A, triangle.B, p2, p3 });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                    if (double.IsNaN(p2.X))
+                    {
+                        if (!MathVec.VectrCompare(p1, p3))
+                        {
+                            tr.Add(new Triangle(p3, triangle.A, p1));
+                            lv.AddRange(new List<Vector2d>() { p1, triangle.B, triangle.C, p3 });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                    if (double.IsNaN(p3.X))
+                    {
+                        if (!MathVec.VectrCompare(p1, p2))
+                        {
+                            tr.Add(new Triangle(p1, triangle.B, p2));
+                            lv.AddRange(new List<Vector2d>() { p1, p2, triangle.C, triangle.A });
+                        }
+                        else
+                        {
+                            tr.Add(t);
+                        }
+                    }
+                }
+                if (countPointIntersect == 1)
+                {
+                    if (!double.IsNaN(p1.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, p1, Begin));
+                        tr.Add(new Triangle(triangle.B, p1, Begin));
+                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                    }
+                    if (!double.IsNaN(p2.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, triangle.B, Begin));
+                        tr.Add(new Triangle(triangle.B, p2, Begin));
+                        tr.Add(new Triangle(p2, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
+                    }
+                    if (!double.IsNaN(p3.X))
+                    {
+                        tr.Add(new Triangle(triangle.A, Begin, p3));
+                        tr.Add(new Triangle(triangle.A, Begin, triangle.B));
+                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
+                        tr.Add(new Triangle(Begin, triangle.C, p3));
+                    }
+                }
+
+                List<Triangle> oo = null;
+                if (lv.Count > 0)
+                {
+                    Triangulate ttt = new Triangulate(lv.ToArray());
+                    oo = ttt.Triangles;
+                }
+
+                tr.RemoveAll(x => { return MathVec.VectrCompare(x.A, x.B) || MathVec.VectrCompare(x.B, x.C) || MathVec.VectrCompare(x.A, x.C); });
+
+                res.AddRange(tr);
+                if (oo != null)
+                    res.AddRange(oo);
+
+            }
+            triangles.AddRange(res);
+        }
+        public void Triangulating(List<Triangle> tr1, List<Triangle> tr2, List<Vector2d> f1, List<Vector2d> f2)
+        {
+            List<Triangle> res1 = tr1.ToList();
+            List<Triangle> res2 = tr2.ToList();
+
+            for (int i = 0, j = 1; i < f2.Count; i++, j++)
+            {
+                if (j == f2.Count)
+                    Subdiv(res1, f2[i], f2[0]);
+                else
+                    Subdiv(res1, f2[i], f2[j]);
+            }
+
+            for (int i = 0, j = 1; i < f1.Count; i++, j++)
+            {
+                if (j == f1.Count)
+                    Subdiv(res2, f1[i], f1[0]);
+                else
+                    Subdiv(res2, f1[i], f1[j]);
+            }
+
+            Result1 = res1;
+            Result2 = res2;
+        }
+        void CalcCenters(List<Vector2d> f1, List<Vector2d> f2, Operations operations)
+        {
+            if (operations == Operations.Interset)
+            {
+                for (int i = 0; i < Result1.Count; i++)
+                    if (MathVec.Hit(Result1[i].Center, f2))
+                        Intersect.Add(Result1[i]);
+
+                for (int i = 0; i < Result2.Count; i++)
+                    if (MathVec.Hit(Result2[i].Center, f1))
+                        Intersect.Add(Result2[i]);
+            }
+            if (operations == Operations.Union)
+            {
+                for (int i = 0; i < Result1.Count; i++)
+                    Union.Add(Result1[i]);
+
+                for (int i = 0; i < Result2.Count; i++)
+                        Union.Add(Result2[i]);
+            }
+            if (operations == Operations.Sub)
+            {
+                for (int i = 0; i < Result1.Count; i++)
+                    if (!MathVec.Hit(Result1[i].Center, f2))
+                        Intersect.Add(Result1[i]);
+            }
+        }
+        void Verteces()
+        {
+            if (Intersect.Count > 0)
+            {
+
+            }
         }
     }
 

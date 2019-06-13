@@ -1318,49 +1318,7 @@ namespace Dipl_template_winforms
                 GL.End();
             }
             
-            if (IsEdit)
-            {
-                GL.PushMatrix();
-                GL.Color3(Color.OrangeRed);
-                GL.PointSize(5.0f);
-                for (int i = 0; i < Edges.Count; i++)
-                {
-                    if (Edges[i].IsBezie)
-                    {
-                        GL.Begin(BeginMode.Points);
-                        GL.Vertex2(Edges[i].BeginControlPoint);
-                        GL.Vertex2(Edges[i].EndControlPoint);
-                        GL.End();
-
-                        GL.Begin(BeginMode.Lines);
-                        GL.Vertex2(Edges[i].BeginControlPoint);
-                        GL.Vertex2(Edges[i].Begin);
-                        GL.Vertex2(Edges[i].EndControlPoint);
-                        GL.Vertex2(Edges[i].End);
-                        GL.End();
-                    }
-
-                    GL.Begin(BeginMode.Points);
-                    GL.Vertex2(Edges[i].Begin);
-                    GL.Vertex2(Edges[i].End);
-                    GL.End();                   
-                }
-
-                GL.PopMatrix();
-
-                if (indCurrEdge > -1)
-                {
-                    GL.PushMatrix();
-                    GL.Color3(Color.OrangeRed);
-
-                    GL.Begin(BeginMode.Lines);
-                    GL.Vertex2(Edges[indCurrEdge].Begin);
-                    GL.Vertex2(Edges[indCurrEdge].End);
-                    GL.End();
-
-                    GL.PopMatrix();
-                }
-            }
+            
         }
         public void DrawSelect()
         {
@@ -1389,6 +1347,49 @@ namespace Dipl_template_winforms
                     GL.End();
                 }
                 GL.PopMatrix();
+            }
+            if (IsEdit)
+            {
+                GL.PushMatrix();
+                GL.Color3(Color.OrangeRed);
+                GL.PointSize(5.0f);
+                for (int i = 0; i < Edges.Count; i++)
+                {
+                    if (Edges[i].IsBezie)
+                    {
+                        GL.Begin(BeginMode.Points);
+                        GL.Vertex2(Edges[i].BeginControlPoint);
+                        GL.Vertex2(Edges[i].EndControlPoint);
+                        GL.End();
+
+                        GL.Begin(BeginMode.Lines);
+                        GL.Vertex2(Edges[i].BeginControlPoint);
+                        GL.Vertex2(Edges[i].Begin);
+                        GL.Vertex2(Edges[i].EndControlPoint);
+                        GL.Vertex2(Edges[i].End);
+                        GL.End();
+                    }
+
+                    GL.Begin(BeginMode.Points);
+                    GL.Vertex2(Edges[i].Begin);
+                    GL.Vertex2(Edges[i].End);
+                    GL.End();
+                }
+
+                GL.PopMatrix();
+
+                if (indCurrEdge > -1)
+                {
+                    GL.PushMatrix();
+                    GL.Color3(Color.OrangeRed);
+
+                    GL.Begin(BeginMode.Lines);
+                    GL.Vertex2(Edges[indCurrEdge].Begin);
+                    GL.Vertex2(Edges[indCurrEdge].End);
+                    GL.End();
+
+                    GL.PopMatrix();
+                }
             }
         }
 
@@ -1969,6 +1970,7 @@ namespace Dipl_template_winforms
         public List<Figure> Figures { get; set; } = new List<Figure>();
         public string ID { get; set; }
         public AABB AABB { get; set; }
+        public bool IsEmpty { get { if (Figures.Count > 0) return false; else return true; } private set {; } }
 
         public Group() { ; }
 

@@ -47,15 +47,6 @@ namespace Dipl_template_winforms
 
             treeView1.MouseDown += treeView_MouseDown;
             treeView1.ExpandAll();
-
-            if (pc.IsNewFile == false)
-            {
-                //btn_Add_ellipsoid.Enabled =
-                //    btn_Add_line.Enabled =
-                //    btn_Add_polygon.Enabled =
-                //    btn_Add_rect.Enabled =
-                //    false;
-            }
         }
 
         #region GL EVENTS
@@ -79,7 +70,7 @@ namespace Dipl_template_winforms
             if (pc.AddedFigure != null) pc.AddedFigure.Draw();
 
             foreach (var f in pc.ListSelFig)
-                f.Draw();
+                f.DrawSelect();
 
             GL.Flush();
             GL.Finish();
@@ -415,21 +406,24 @@ namespace Dipl_template_winforms
             }
         }
         // Select (in Edit mode) Point
-        private void tsb_selectPoint_Click(object sender, EventArgs e)
+        private void toolStripButton11_Click(object sender, EventArgs e)
         {
             if (pc.IsEditMode)
             {
                 pc.SelectingMode = SelectingMode.Points;
             }
         }
+        
+
         // Select (in Edit mode) Edge
-        private void tsb_selectEdge_Click(object sender, EventArgs e)
+        private void toolStripButton12_Click(object sender, EventArgs e)
         {
             if (pc.IsEditMode)
             {
                 pc.SelectingMode = SelectingMode.Edges;
             }
         }
+
         private void toolStripButton5_Click(object sender, EventArgs e)
         {
             pc.CurrentTypeFigure = TypeFigures.Line;
@@ -460,6 +454,16 @@ namespace Dipl_template_winforms
                 treeView1.Nodes.AddRange(_core.NodesForTree());
                 pc.SelectedFigure = null;
                 glControl1.Invalidate();              
+                treeView1.ExpandAll();
+            }
+            if (!pc.Group.IsEmpty)
+            {
+                foreach (Figure f in pc.Group.Figures)
+                    _core.Del(f);
+                pc.Group.Clear();
+                treeView1.Nodes.Clear();
+                treeView1.Nodes.AddRange(_core.NodesForTree());
+                glControl1.Invalidate();
                 treeView1.ExpandAll();
             }
         }
@@ -506,10 +510,6 @@ namespace Dipl_template_winforms
         #endregion
 
         #region TAB "OBJECT"
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
             if (pc.SelectedFigure != null && textBox1.Text.Length > 0)
@@ -585,16 +585,6 @@ namespace Dipl_template_winforms
                 nud_scaleX.Value = 1;
                 nud_scaleY.Value = 1;
             }
-        }
-
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-
-        }
-
-        private void Form1_KeyUp(object sender, KeyEventArgs e)
-        {
-
         }
 
         private void glControl1_KeyDown(object sender, KeyEventArgs e)
@@ -1033,6 +1023,21 @@ namespace Dipl_template_winforms
             }
         }
 
-        
+        private void btn_Add_layer_Click(object sender, EventArgs e)
+        {
+            _core.AddLayer();
+            treeView1.Nodes.Clear();
+            treeView1.Nodes.AddRange(_core.NodesForTree());
+            treeView1.ExpandAll();
+        }
+
+        private void btn_Del_layer_Click(object sender, EventArgs e)
+        {
+            _core.DelLayer();
+            treeView1.Nodes.Clear();
+            treeView1.Nodes.AddRange(_core.NodesForTree());
+            glControl1.Invalidate();
+            treeView1.ExpandAll();
+        }
     }
 }

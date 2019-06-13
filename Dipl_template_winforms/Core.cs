@@ -114,6 +114,15 @@ namespace Dipl_template_winforms
             else
                 return false;
         }
+        public static bool VectrCompare(Vector2d a, Vector2d b, double c)
+        {
+            Vector2d v = AbsSub(a, b);
+
+            if (v.X <= c && v.Y <= c)
+                return true;
+            else
+                return false;
+        }
         public static bool DoubEquale(double a, double b, double e)
         {
             if (Math.Abs(a - b) <= 4 * e * Math.Max(Math.Abs(a), Math.Abs(b)))
@@ -179,9 +188,9 @@ namespace Dipl_template_winforms
 
     public class AABB
     {
-        public Vector2d Max { get; set; }
-        public Vector2d Min { get; set; }
-        public Vector2d Center { get; set; }
+        public Vector2d Max { get; set; } = new Vector2d(double.NaN);
+        public Vector2d Min { get; set; } = new Vector2d(double.NaN);
+        public Vector2d Center { get; set; } = new Vector2d(double.NaN);
 
         public AABB() { ; }
         public AABB(List<Vector2d> verteces)
@@ -214,6 +223,43 @@ namespace Dipl_template_winforms
             if (Min.X <= v.X && v.X <= Max.X && Min.Y <= v.Y && v.Y <= Max.Y)
                 return true;
             return false;
+        }
+        public void Calc(List<Vector2d> verteces)
+        {
+            double maxx = verteces[0].X,
+                       maxy = verteces[0].Y,
+                       minx = verteces[0].X,
+                       miny = verteces[0].Y;
+
+            foreach (var r in verteces)
+            {
+                if ((r.X >= maxx))
+                    maxx = r.X;
+                if ((r.X <= minx))
+                    minx = r.X;
+                if ((r.Y >= maxy))
+                    maxy = r.Y;
+                if ((r.Y <= miny))
+                    miny = r.Y;
+            }
+
+            Max = new Vector2d(maxx, maxy);
+            Min = new Vector2d(minx, miny);
+
+            Center = ((Min + Max) / 2.0);
+        }
+        public void Draw()
+        {
+            GL.PushMatrix();
+            GL.Begin(BeginMode.Points);
+            GL.PointSize(5f);
+            GL.Vertex2(Max);
+            GL.Vertex2(Min);
+            GL.Vertex2(Center);
+            GL.Vertex2(Max.X, Min.Y);
+            GL.Vertex2(Min.X, Max.Y);
+            GL.End();
+            GL.PopMatrix();
         }
     }
 
@@ -506,7 +552,7 @@ namespace Dipl_template_winforms
         public Color BorderColor { get; set; }
         public float LineWidth { get; set; } = 1.0f;
         public List<Triangle> Triangles { get { return _triangles; } private set {; } }
-        public AABB AABB { get; set; }
+        public AABB AABB { get; set; } = new AABB();
 
 
         int indPoint = -1;
@@ -1969,15 +2015,43 @@ namespace Dipl_template_winforms
     {
         public List<Figure> Figures { get; set; } = new List<Figure>();
         public string ID { get; set; }
-        public AABB AABB { get; set; }
+        public AABB AABB { get; set; } = new AABB();
         public bool IsEmpty { get { if (Figures.Count > 0) return false; else return true; } private set {; } }
+        public Figure SelectingFigure { get; set; } = null;
+        public int CountFigures { get { return Figures.Count; } private set {; } }
 
         public Group() { ; }
 
         public void Add(Figure f)
         {
-            Figures.Add(f);
+            if (f != null && !Figures.Contains(f))
+            {
+                f.IsSelect = true;
+                Figures.Add(f);
+                SelectingFigure = Figures[Figures.Count - 1];
 
+                double mx = Figures[0].AABB.Max.X;
+                double my = Figures[0].AABB.Max.Y;
+
+                double mnx = Figures[0].AABB.Min.X;
+                double mny = Figures[0].AABB.Min.Y;
+
+                foreach (Figure ff in Figures)
+                {
+                    if (ff.AABB.Max.X >= mx)
+                        mx = ff.AABB.Max.X;
+                    if (ff.AABB.Max.Y >= my)
+                        my = ff.AABB.Max.Y;
+
+                    if (ff.AABB.Min.X <= mnx)
+                        mnx = ff.AABB.Min.X;
+                    if (ff.AABB.Min.Y <= mny)
+                        mny = ff.AABB.Min.Y;
+                }
+
+                AABB.Min = new Vector2d(mnx, mny); AABB.Max = new Vector2d(mx, my);
+                AABB.Center = (AABB.Max + AABB.Min) / 2.0;
+            }
         }
         public void Del(Figure figure)
         {
@@ -1985,11 +2059,87 @@ namespace Dipl_template_winforms
         }
         public void Clear()
         {
+            foreach (Figure f in Figures)
+            {
+                f.IsSelect = false;
+                
+            }
             Figures.Clear();
             AABB = new AABB();
         }
-    }
+        public bool HitInCenter(Vector2d v)
+        {
+            if (MathVec.VectrCompare(AABB.Center, v, 0.1))
+                return true;
+            return false;
+        }
+        public void MoveTo(Vector2d v)
+        {
+            Vector2d oldMax = AABB.Max - AABB.Center;
+            Vector2d oldMin = AABB.Min - AABB.Center;
 
+            foreach (Figure f in Figures)
+            {
+                f.MoveTo = f.MoveTo - AABB.Center + v;
+                f.ReCalc();               
+            }
+            AABB.Center = v;
+            AABB.Max = v + oldMax;
+            AABB.Min = v + oldMin;
+        }
+        public void DrawAABB()
+        {
+            GL.PushMatrix();
+            GL.Begin(BeginMode.Points);
+            GL.PointSize(5f);
+            GL.Vertex2(AABB.Max);
+            GL.Vertex2(AABB.Min);
+            GL.Vertex2(AABB.Center);
+            GL.Vertex2(AABB.Max.X, AABB.Min.Y);
+            GL.Vertex2(AABB.Min.X, AABB.Max.Y);
+            GL.End();
+
+            GL.Begin(BeginMode.LineLoop);
+            GL.Vertex2(AABB.Max);
+            GL.Vertex2(AABB.Max.X, AABB.Min.Y);
+            GL.Vertex2(AABB.Min);          
+            GL.Vertex2(AABB.Min.X, AABB.Max.Y);
+            GL.End();
+            GL.PopMatrix();
+        }
+        public bool IsHitInGroup(Vector2d v)
+        {
+            if (AABB.HitInAABB(v))
+            {
+                return true;
+            }
+            return false;
+        }
+        public void ReCalcAABB()
+        {
+            double mx = Figures[0].AABB.Max.X;
+            double my = Figures[0].AABB.Max.Y;
+
+            double mnx = Figures[0].AABB.Min.X;
+            double mny = Figures[0].AABB.Min.Y;
+
+            foreach (Figure ff in Figures)
+            {
+                if (ff.AABB.Max.X >= mx)
+                    mx = ff.AABB.Max.X;
+                if (ff.AABB.Max.Y >= my)
+                    my = ff.AABB.Max.Y;
+
+                if (ff.AABB.Min.X <= mnx)
+                    mnx = ff.AABB.Min.X;
+                if (ff.AABB.Min.Y <= mny)
+                    mny = ff.AABB.Min.Y;
+            }
+
+            AABB.Min = new Vector2d(mnx, mny); AABB.Max = new Vector2d(mx, my);
+            AABB.Center = (AABB.Max + AABB.Min) / 2.0;
+        }
+    }
 
     public class Modificators
     {
@@ -3030,6 +3180,48 @@ namespace Dipl_template_winforms
             {
 
             }
+        }
+        public void Draw()
+        {
+            GL.Begin(BeginMode.Triangles);
+            GL.Color3(Color.Green);
+            foreach(Triangle t in Intersect)
+            {
+                GL.Vertex2(t.A);
+                GL.Vertex2(t.B);
+                GL.Vertex2(t.C);
+            }
+            GL.End();
+
+            GL.Begin(BeginMode.Triangles);
+            GL.Color3(Color.Green);
+            foreach (Triangle t in Union)
+            {
+                GL.Vertex2(t.A);
+                GL.Vertex2(t.B);
+                GL.Vertex2(t.C);
+            }
+            GL.End();
+
+            GL.Begin(BeginMode.Triangles);
+            GL.Color3(Color.Green);
+            foreach (Triangle t in Sub)
+            {
+                GL.Vertex2(t.A);
+                GL.Vertex2(t.B);
+                GL.Vertex2(t.C);
+            }
+            GL.End();
+
+            GL.Begin(BeginMode.LineStrip);
+            GL.Color3(Color.Blue);
+            foreach (Triangle t in Intersect)
+            {
+                GL.Vertex2(t.A);
+                GL.Vertex2(t.B);
+                GL.Vertex2(t.C);
+            }
+            GL.End();
         }
     }
 

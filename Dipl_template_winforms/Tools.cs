@@ -161,7 +161,7 @@ namespace Dipl_template_winforms
         public bool IsNewFile { get; set; } = false;
         public bool IsEditMode { get; set; } = false;
         public bool IsSelectingPoint { get; set; } = true;
-        public bool IsMove { get; set; } = true;
+        public bool IsMove { get; set; } = false;
         public bool IsMovePoint { get; set; } = false;
         public bool IsMoveEdge { get; set; } = false;
         public bool IsShiftPress { get; set; } = false;

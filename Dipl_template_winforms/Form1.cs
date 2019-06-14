@@ -175,8 +175,17 @@ namespace Dipl_template_winforms
                                 if (pc.Group.CountFigures == 1)
                                 {
                                     pc.AWF = pc.Group.SelectingFigure.HitOnManipulators(pc.FirstMousePos);
-                                    if (pc.AWF == ActionWithFigure.None)
-                                        pc.Group.Clear();
+                                    //if (pc.AWF == ActionWithFigure.None)
+                                    //    pc.Group.Clear();
+                                }
+
+                                Figure f = _core.Find(pc.FirstMousePos);
+                                if (f == null)
+                                    pc.Group.Clear();
+                                if (f != null && pc.Group.CountFigures >= 1)
+                                {
+                                    pc.Group.Clear();
+                                    pc.Group.Add(f);
                                 }
                             }
                         }
@@ -462,16 +471,16 @@ namespace Dipl_template_winforms
         // Удалить выбранную фигуру
         private void toolStripButton10_Click(object sender, EventArgs e)
         {
-            if (pc.Group.SelectingFigure != null)
-            {
-                pc.Group.Del(pc.Group.SelectingFigure);
-                _core.Del(pc.Group.SelectingFigure);
-                treeView1.Nodes.Clear();
-                treeView1.Nodes.AddRange(_core.NodesForTree());
-                pc.Group.SelectingFigure = null;
-                glControl1.Invalidate();              
-                treeView1.ExpandAll();
-            }
+            //if (pc.Group.SelectingFigure != null)
+            //{
+            //    pc.Group.Del(pc.Group.SelectingFigure);
+            //    _core.Del(pc.Group.SelectingFigure);
+            //    treeView1.Nodes.Clear();
+            //    treeView1.Nodes.AddRange(_core.NodesForTree());
+            //    pc.Group.SelectingFigure = null;
+            //    glControl1.Invalidate();              
+            //    treeView1.ExpandAll();
+            //}
             if (!pc.Group.IsEmpty)
             {
                 foreach (Figure f in pc.Group.Figures)
@@ -509,7 +518,7 @@ namespace Dipl_template_winforms
         // Экспорт в .geo (для GMSH)
         private void toolStripButton_exportInGEO_Click(object sender, EventArgs e)
         {
-            if (pc.SelectedFigure != null)
+            if (pc.Group.SelectingFigure != null)
             {
                 using (SaveFileDialog sfd = new SaveFileDialog())
                 {
@@ -519,7 +528,7 @@ namespace Dipl_template_winforms
                     string filename = sfd.FileName;
                     // сохраняем текст в файл
                     ExportInGEO exportInGEO = new ExportInGEO(filename);
-                    exportInGEO.WriteInfile(new List<Figure>() { pc.SelectedFigure });
+                    exportInGEO.WriteInfile(new List<Figure>() { pc.Group.SelectingFigure });
                 }
             }
         }
@@ -818,7 +827,7 @@ namespace Dipl_template_winforms
         
         private void button_union_Click(object sender, EventArgs e)
         {
-            if (pc.ListSelFig.Count == 2)
+            if (pc.Group.Figures.Count == 2)
             {
                 var f1 = pc.Group.Figures[0].Verteces;
                 var f2 = pc.Group.Figures[1].Verteces;
@@ -1037,24 +1046,5 @@ namespace Dipl_template_winforms
                 //MessageBox.Show(v.ToString(), "Current Cell");
             }
         }
-
-        private void btn_Add_layer_Click(object sender, EventArgs e)
-        {
-            _core.AddLayer();
-            treeView1.Nodes.Clear();
-            treeView1.Nodes.AddRange(_core.NodesForTree());
-            treeView1.ExpandAll();
-        }
-
-        private void btn_Del_layer_Click(object sender, EventArgs e)
-        {
-            _core.DelLayer();
-            treeView1.Nodes.Clear();
-            treeView1.Nodes.AddRange(_core.NodesForTree());
-            glControl1.Invalidate();
-            treeView1.ExpandAll();
-        }
-
-        
     }
 }

@@ -2064,6 +2064,7 @@ namespace Dipl_template_winforms
                 f.IsSelect = false;
                 
             }
+            SelectingFigure = null;
             Figures.Clear();
             AABB = new AABB();
         }
@@ -2117,27 +2118,30 @@ namespace Dipl_template_winforms
         }
         public void ReCalcAABB()
         {
-            double mx = Figures[0].AABB.Max.X;
-            double my = Figures[0].AABB.Max.Y;
-
-            double mnx = Figures[0].AABB.Min.X;
-            double mny = Figures[0].AABB.Min.Y;
-
-            foreach (Figure ff in Figures)
+            if (Figures.Count > 0)
             {
-                if (ff.AABB.Max.X >= mx)
-                    mx = ff.AABB.Max.X;
-                if (ff.AABB.Max.Y >= my)
-                    my = ff.AABB.Max.Y;
+                double mx = Figures[0].AABB.Max.X;
+                double my = Figures[0].AABB.Max.Y;
 
-                if (ff.AABB.Min.X <= mnx)
-                    mnx = ff.AABB.Min.X;
-                if (ff.AABB.Min.Y <= mny)
-                    mny = ff.AABB.Min.Y;
+                double mnx = Figures[0].AABB.Min.X;
+                double mny = Figures[0].AABB.Min.Y;
+
+                foreach (Figure ff in Figures)
+                {
+                    if (ff.AABB.Max.X >= mx)
+                        mx = ff.AABB.Max.X;
+                    if (ff.AABB.Max.Y >= my)
+                        my = ff.AABB.Max.Y;
+
+                    if (ff.AABB.Min.X <= mnx)
+                        mnx = ff.AABB.Min.X;
+                    if (ff.AABB.Min.Y <= mny)
+                        mny = ff.AABB.Min.Y;
+                }
+
+                AABB.Min = new Vector2d(mnx, mny); AABB.Max = new Vector2d(mx, my);
+                AABB.Center = (AABB.Max + AABB.Min) / 2.0;
             }
-
-            AABB.Min = new Vector2d(mnx, mny); AABB.Max = new Vector2d(mx, my);
-            AABB.Center = (AABB.Max + AABB.Min) / 2.0;
         }
     }
 
@@ -3216,6 +3220,26 @@ namespace Dipl_template_winforms
             GL.Begin(BeginMode.LineStrip);
             GL.Color3(Color.Blue);
             foreach (Triangle t in Intersect)
+            {
+                GL.Vertex2(t.A);
+                GL.Vertex2(t.B);
+                GL.Vertex2(t.C);
+            }
+            GL.End();
+
+            GL.Begin(BeginMode.LineStrip);
+            GL.Color3(Color.Blue);
+            foreach (Triangle t in Union)
+            {
+                GL.Vertex2(t.A);
+                GL.Vertex2(t.B);
+                GL.Vertex2(t.C);
+            }
+            GL.End();
+
+            GL.Begin(BeginMode.LineStrip);
+            GL.Color3(Color.Blue);
+            foreach (Triangle t in Sub)
             {
                 GL.Vertex2(t.A);
                 GL.Vertex2(t.B);

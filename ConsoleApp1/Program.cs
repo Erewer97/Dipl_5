@@ -2049,6 +2049,69 @@ namespace ConsoleApp1
         }
     }
 
+    public class ImportFromGEO
+    {
+        public string Path { get; set; } = "";
+        public double W { get; set; } = -1;
+
+        public ImportFromGEO() { ; }
+        public ImportFromGEO(string pathToFile)
+        {
+            Path = pathToFile;
+        }
+
+        public List<Edge> Result()
+        {
+            List<Edge> r = new List<Edge>();
+            Dictionary<int, Vector2d> points = new Dictionary<int, Vector2d>();
+            string[] lines = null;
+            string l;
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
+            using (StreamReader sr = new StreamReader(Path))
+            {
+                l = sr.ReadToEnd();
+            }
+
+            lines = l.Split(new char[] { '\n' });
+            foreach (string s in lines)
+            {
+                if (s.Length > 0 && s[0] == '/' && s[1] == '/') ;
+                else if (s.Contains("Point"))
+                {                   
+                    string[] ll = s.Split(new char[] { '(', ')', '{', '}', ',' });
+
+                    points.Add(
+                        int.Parse(ll[1]),
+                        new Vector2d(
+                            double.Parse(ll[3]),
+                            double.Parse(ll[4])
+                            )
+                        );
+                }
+                else if (s.Contains("Line"))
+                {
+                    string[] g = s.Split('{', '}', ',');
+
+                    int b = int.Parse(g[1]), e = int.Parse(g[2]);
+
+                    r.Add(
+                        new Edge(points[b], points[e])
+                        );
+                }
+                else if (s.Contains("Plane")) ;
+                else if (s.Contains("Loop")) ;
+                else if (s.Length > 0 && s[0] != '/')
+                {
+                    string[] ll = s.Split(' ', ';');
+                    W = double.Parse(ll[2]);
+                }
+            }
+
+            return r;
+        }
+    }
+
     class Program
     {
         static public List<Triangle> Sub(List<Triangle> triangles, List<Vector2d> lines)
@@ -2436,29 +2499,30 @@ namespace ConsoleApp1
             //Vector2d C = new Vector2d(4, 2);
             //Vector2d K = new Vector2d(1, 2);
 
-            Triangle t1 = new Triangle(new Vector2d(1, 3), new Vector2d(1, 1), new Vector2d(3, 1));
-            Triangle t2 = new Triangle(new Vector2d(1, 3), new Vector2d(3, 1), new Vector2d(3, 3));
+            //Triangle t1 = new Triangle(new Vector2d(0, 3), new Vector2d(0, 0), new Vector2d(3, 0));
+            //Triangle t2 = new Triangle(new Vector2d(0, 3), new Vector2d(3, 0), new Vector2d(3, 3));
 
-            List<Triangle> res = new List<Triangle>() { t1, t2 };
+            //List<Triangle> res = new List<Triangle>() { t1, t2 };
 
-            List<Vector2d> list = new List<Vector2d>()
-            {
-                new Vector2d(1.5,1.5),
-                new Vector2d(4, 1.5),
-                new Vector2d(4, 4),
-                new Vector2d(2, 4)
-            };
+            //List<Vector2d> list = new List<Vector2d>()
+            //{
+            //    new Vector2d(2, 2),
+            //    new Vector2d(4, 0),
+            //    new Vector2d(2.5, 2.5)
+            //};
 
-            for (int i = 0, j = 1; i < list.Count; i++, j++)
-            {
-                if (j == list.Count)
-                    Subdiv(res, list[i], list[0]);
-                else
-                    Subdiv(res, list[i], list[j]);
-            }
+            //for (int i = 0, j = 1; i < list.Count; i++, j++)
+            //{
+            //    if (j == list.Count)
+            //        Subdiv(res, list[i], list[0]);
+            //    else
+            //        Subdiv(res, list[i], list[j]);
+            //}
 
-            foreach (Triangle a in res)
-                Console.Write(a);
+            //foreach (Triangle a in res)
+            //    Console.Write(a);
+
+            ImportFromGEO import = new ImportFromGEO(@"C:\Users\Администратор\Desktop\a.geo");
 
             Console.ReadLine();
         }

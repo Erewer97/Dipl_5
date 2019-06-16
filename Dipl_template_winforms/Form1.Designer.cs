@@ -53,21 +53,18 @@
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.treeView1 = new System.Windows.Forms.TreeView();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.label1 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.radioButton_triangles = new System.Windows.Forms.RadioButton();
+            this.radioButton_attenton = new System.Windows.Forms.RadioButton();
+            this.button_sub = new System.Windows.Forms.Button();
+            this.button_union = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
-            this.label20 = new System.Windows.Forms.Label();
-            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
-            this.label19 = new System.Windows.Forms.Label();
-            this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
-            this.label18 = new System.Windows.Forms.Label();
-            this.button_color_grid = new System.Windows.Forms.Button();
-            this.label12 = new System.Windows.Forms.Label();
             this.checkBox_showGrid = new System.Windows.Forms.CheckBox();
             this.tabPage2_obj = new System.Windows.Forms.TabPage();
             this.groupBox_ObjPos = new System.Windows.Forms.GroupBox();
@@ -93,15 +90,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.nud_posY = new System.Windows.Forms.NumericUpDown();
             this.nud_posX = new System.Windows.Forms.NumericUpDown();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.radioButton_triangles = new System.Windows.Forms.RadioButton();
-            this.radioButton_attenton = new System.Windows.Forms.RadioButton();
-            this.button_doneBoolOperation = new System.Windows.Forms.Button();
-            this.button_sub = new System.Windows.Forms.Button();
-            this.button_union = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.X = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -118,6 +106,9 @@
             this.tsb_smoothContrPoints = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_exportInGEO = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton16 = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel4 = new System.Windows.Forms.ToolStripLabel();
+            this.tstb_W = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
             this.toolStripContainer1.SuspendLayout();
@@ -139,10 +130,9 @@
             this.toolStrip3.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.tabPage2_obj.SuspendLayout();
             this.groupBox_ObjPos.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nud_LineWidth)).BeginInit();
@@ -151,9 +141,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.nud_scaleX)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_posY)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_posX)).BeginInit();
-            this.tabPage2.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.toolStrip4.SuspendLayout();
@@ -203,7 +190,7 @@
             // toolStripContainer3.ContentPanel
             // 
             this.toolStripContainer3.ContentPanel.Controls.Add(this.glControl1);
-            this.toolStripContainer3.ContentPanel.Size = new System.Drawing.Size(948, 719);
+            this.toolStripContainer3.ContentPanel.Size = new System.Drawing.Size(956, 744);
             this.toolStripContainer3.Dock = System.Windows.Forms.DockStyle.Fill;
             // 
             // toolStripContainer3.LeftToolStripPanel
@@ -214,6 +201,7 @@
             this.toolStripContainer3.Size = new System.Drawing.Size(980, 744);
             this.toolStripContainer3.TabIndex = 0;
             this.toolStripContainer3.Text = "toolStripContainer3";
+            this.toolStripContainer3.TopToolStripPanelVisible = false;
             // 
             // glControl1
             // 
@@ -221,7 +209,7 @@
             this.glControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.glControl1.Location = new System.Drawing.Point(0, 0);
             this.glControl1.Name = "glControl1";
-            this.glControl1.Size = new System.Drawing.Size(948, 719);
+            this.glControl1.Size = new System.Drawing.Size(956, 744);
             this.glControl1.TabIndex = 1;
             this.glControl1.VSync = false;
             this.glControl1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.glControl1_KeyDown);
@@ -246,7 +234,7 @@
             this.toolStripButton14});
             this.toolStrip1.Location = new System.Drawing.Point(0, 3);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(32, 276);
+            this.toolStrip1.Size = new System.Drawing.Size(24, 257);
             this.toolStrip1.TabIndex = 1;
             // 
             // toolStripButton3
@@ -255,7 +243,7 @@
             this.toolStripButton3.Image = global::Dipl_template_winforms.Properties.Resources.arrow;
             this.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton3.Name = "toolStripButton3";
-            this.toolStripButton3.Size = new System.Drawing.Size(30, 20);
+            this.toolStripButton3.Size = new System.Drawing.Size(22, 20);
             this.toolStripButton3.Text = "toolStripButton3";
             this.toolStripButton3.Click += new System.EventHandler(this.toolStripButton3_Click);
             // 
@@ -265,14 +253,14 @@
             this.toolStripButton4.Image = global::Dipl_template_winforms.Properties.Resources.editToolIcon;
             this.toolStripButton4.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton4.Name = "toolStripButton4";
-            this.toolStripButton4.Size = new System.Drawing.Size(30, 20);
+            this.toolStripButton4.Size = new System.Drawing.Size(22, 20);
             this.toolStripButton4.Text = "toolStripButton4";
             this.toolStripButton4.Click += new System.EventHandler(this.toolStripButton4_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(30, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(22, 6);
             // 
             // toolStripButton5
             // 
@@ -280,7 +268,7 @@
             this.toolStripButton5.Image = global::Dipl_template_winforms.Properties.Resources.line16;
             this.toolStripButton5.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton5.Name = "toolStripButton5";
-            this.toolStripButton5.Size = new System.Drawing.Size(30, 20);
+            this.toolStripButton5.Size = new System.Drawing.Size(22, 20);
             this.toolStripButton5.Text = "toolStripButton5";
             this.toolStripButton5.Click += new System.EventHandler(this.toolStripButton5_Click);
             // 
@@ -290,7 +278,7 @@
             this.toolStripButton6.Image = global::Dipl_template_winforms.Properties.Resources.rect30;
             this.toolStripButton6.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton6.Name = "toolStripButton6";
-            this.toolStripButton6.Size = new System.Drawing.Size(30, 20);
+            this.toolStripButton6.Size = new System.Drawing.Size(22, 20);
             this.toolStripButton6.Text = "toolStripButton6";
             this.toolStripButton6.Click += new System.EventHandler(this.toolStripButton6_Click);
             // 
@@ -300,7 +288,7 @@
             this.toolStripButton7.Image = global::Dipl_template_winforms.Properties.Resources.oval_48;
             this.toolStripButton7.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton7.Name = "toolStripButton7";
-            this.toolStripButton7.Size = new System.Drawing.Size(30, 20);
+            this.toolStripButton7.Size = new System.Drawing.Size(22, 20);
             this.toolStripButton7.Text = "toolStripButton7";
             this.toolStripButton7.Click += new System.EventHandler(this.toolStripButton7_Click);
             // 
@@ -310,7 +298,7 @@
             this.toolStripButton8.Image = global::Dipl_template_winforms.Properties.Resources.pentagon64;
             this.toolStripButton8.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton8.Name = "toolStripButton8";
-            this.toolStripButton8.Size = new System.Drawing.Size(30, 20);
+            this.toolStripButton8.Size = new System.Drawing.Size(22, 20);
             this.toolStripButton8.Text = "toolStripButton8";
             this.toolStripButton8.Click += new System.EventHandler(this.toolStripButton8_Click);
             // 
@@ -320,14 +308,14 @@
             this.toolStripButton9.Image = global::Dipl_template_winforms.Properties.Resources.pen_48;
             this.toolStripButton9.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton9.Name = "toolStripButton9";
-            this.toolStripButton9.Size = new System.Drawing.Size(30, 20);
+            this.toolStripButton9.Size = new System.Drawing.Size(22, 20);
             this.toolStripButton9.Text = "toolStripButton9";
             this.toolStripButton9.Click += new System.EventHandler(this.toolStripButton9_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(30, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(22, 6);
             // 
             // toolStripButton10
             // 
@@ -335,14 +323,14 @@
             this.toolStripButton10.Image = global::Dipl_template_winforms.Properties.Resources.trash_48;
             this.toolStripButton10.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton10.Name = "toolStripButton10";
-            this.toolStripButton10.Size = new System.Drawing.Size(30, 20);
+            this.toolStripButton10.Size = new System.Drawing.Size(22, 20);
             this.toolStripButton10.Text = "toolStripButton10";
             this.toolStripButton10.Click += new System.EventHandler(this.toolStripButton10_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(30, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(22, 6);
             // 
             // toolStripButton13
             // 
@@ -351,7 +339,7 @@
             this.toolStripButton13.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton13.Image")));
             this.toolStripButton13.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton13.Name = "toolStripButton13";
-            this.toolStripButton13.Size = new System.Drawing.Size(30, 19);
+            this.toolStripButton13.Size = new System.Drawing.Size(22, 19);
             this.toolStripButton13.Text = " ";
             this.toolStripButton13.Click += new System.EventHandler(this.toolStripButton13_Click);
             // 
@@ -362,7 +350,7 @@
             this.toolStripButton14.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton14.Image")));
             this.toolStripButton14.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton14.Name = "toolStripButton14";
-            this.toolStripButton14.Size = new System.Drawing.Size(30, 19);
+            this.toolStripButton14.Size = new System.Drawing.Size(22, 19);
             this.toolStripButton14.Text = " ";
             this.toolStripButton14.Click += new System.EventHandler(this.toolStripButton14_Click);
             // 
@@ -412,11 +400,10 @@
             this.toolStripButton1,
             this.toolStripButton2,
             this.toolStripSeparator4,
-            this.toolStripLabel1,
             this.toolStripLabel2});
             this.toolStrip3.Location = new System.Drawing.Point(3, 0);
             this.toolStrip3.Name = "toolStrip3";
-            this.toolStrip3.Size = new System.Drawing.Size(154, 25);
+            this.toolStrip3.Size = new System.Drawing.Size(64, 25);
             this.toolStrip3.TabIndex = 0;
             // 
             // toolStripButton1
@@ -444,12 +431,6 @@
             this.toolStripSeparator4.Name = "toolStripSeparator4";
             this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
             // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(90, 22);
-            this.toolStripLabel1.Text = "Текущий слой:";
-            // 
             // toolStripLabel2
             // 
             this.toolStripLabel2.Name = "toolStripLabel2";
@@ -467,7 +448,6 @@
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2_obj);
-            this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
@@ -478,7 +458,7 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.label1);
+            this.tabPage1.Controls.Add(this.groupBox2);
             this.tabPage1.Controls.Add(this.groupBox1);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
@@ -488,97 +468,96 @@
             this.tabPage1.Text = "Документ";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // label1
+            // groupBox2
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(19, 158);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "label1";
+            this.groupBox2.Controls.Add(this.groupBox3);
+            this.groupBox2.Controls.Add(this.button_sub);
+            this.groupBox2.Controls.Add(this.button_union);
+            this.groupBox2.Controls.Add(this.button1);
+            this.groupBox2.Location = new System.Drawing.Point(2, 53);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(276, 128);
+            this.groupBox2.TabIndex = 3;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Логические операции:";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.radioButton_triangles);
+            this.groupBox3.Controls.Add(this.radioButton_attenton);
+            this.groupBox3.Location = new System.Drawing.Point(6, 75);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(264, 47);
+            this.groupBox3.TabIndex = 4;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Алгоритм:";
+            // 
+            // radioButton_triangles
+            // 
+            this.radioButton_triangles.AutoSize = true;
+            this.radioButton_triangles.Location = new System.Drawing.Point(136, 19);
+            this.radioButton_triangles.Name = "radioButton_triangles";
+            this.radioButton_triangles.Size = new System.Drawing.Size(122, 17);
+            this.radioButton_triangles.TabIndex = 1;
+            this.radioButton_triangles.Text = "Триангуляционный";
+            this.radioButton_triangles.UseVisualStyleBackColor = true;
+            this.radioButton_triangles.Click += new System.EventHandler(this.radioButton_triangles_CheckedChanged);
+            // 
+            // radioButton_attenton
+            // 
+            this.radioButton_attenton.AutoSize = true;
+            this.radioButton_attenton.Checked = true;
+            this.radioButton_attenton.Location = new System.Drawing.Point(6, 19);
+            this.radioButton_attenton.Name = "radioButton_attenton";
+            this.radioButton_attenton.Size = new System.Drawing.Size(113, 17);
+            this.radioButton_attenton.TabIndex = 0;
+            this.radioButton_attenton.TabStop = true;
+            this.radioButton_attenton.Text = "Уайлда-Атентона";
+            this.radioButton_attenton.UseVisualStyleBackColor = true;
+            this.radioButton_attenton.Click += new System.EventHandler(this.radioButton_attenton_CheckedChanged);
+            // 
+            // button_sub
+            // 
+            this.button_sub.BackgroundImage = global::Dipl_template_winforms.Properties.Resources.sub;
+            this.button_sub.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button_sub.Location = new System.Drawing.Point(193, 19);
+            this.button_sub.Name = "button_sub";
+            this.button_sub.Size = new System.Drawing.Size(76, 50);
+            this.button_sub.TabIndex = 2;
+            this.button_sub.UseVisualStyleBackColor = true;
+            this.button_sub.Click += new System.EventHandler(this.button_sub_Click);
+            // 
+            // button_union
+            // 
+            this.button_union.BackgroundImage = global::Dipl_template_winforms.Properties.Resources.union;
+            this.button_union.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button_union.Location = new System.Drawing.Point(103, 19);
+            this.button_union.Name = "button_union";
+            this.button_union.Size = new System.Drawing.Size(84, 50);
+            this.button_union.TabIndex = 1;
+            this.button_union.UseVisualStyleBackColor = true;
+            this.button_union.Click += new System.EventHandler(this.button_union_Click);
+            // 
+            // button1
+            // 
+            this.button1.BackgroundImage = global::Dipl_template_winforms.Properties.Resources.inter;
+            this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button1.Location = new System.Drawing.Point(6, 19);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(91, 50);
+            this.button1.TabIndex = 0;
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.numericUpDown3);
-            this.groupBox1.Controls.Add(this.label20);
-            this.groupBox1.Controls.Add(this.numericUpDown2);
-            this.groupBox1.Controls.Add(this.label19);
-            this.groupBox1.Controls.Add(this.numericUpDown1);
-            this.groupBox1.Controls.Add(this.label18);
-            this.groupBox1.Controls.Add(this.button_color_grid);
-            this.groupBox1.Controls.Add(this.label12);
             this.groupBox1.Controls.Add(this.checkBox_showGrid);
-            this.groupBox1.Location = new System.Drawing.Point(7, 3);
+            this.groupBox1.Location = new System.Drawing.Point(2, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(257, 121);
+            this.groupBox1.Size = new System.Drawing.Size(276, 44);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Сетка";
-            // 
-            // numericUpDown3
-            // 
-            this.numericUpDown3.Location = new System.Drawing.Point(6, 94);
-            this.numericUpDown3.Name = "numericUpDown3";
-            this.numericUpDown3.Size = new System.Drawing.Size(109, 20);
-            this.numericUpDown3.TabIndex = 8;
-            // 
-            // label20
-            // 
-            this.label20.AutoSize = true;
-            this.label20.Location = new System.Drawing.Point(5, 78);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(89, 13);
-            this.label20.TabIndex = 7;
-            this.label20.Text = "Толщина линии:";
-            // 
-            // numericUpDown2
-            // 
-            this.numericUpDown2.Location = new System.Drawing.Point(194, 44);
-            this.numericUpDown2.Name = "numericUpDown2";
-            this.numericUpDown2.Size = new System.Drawing.Size(53, 20);
-            this.numericUpDown2.TabIndex = 6;
-            // 
-            // label19
-            // 
-            this.label19.AutoSize = true;
-            this.label19.Location = new System.Drawing.Point(137, 46);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(55, 13);
-            this.label19.TabIndex = 5;
-            this.label19.Text = "Шаг по Y:";
-            // 
-            // numericUpDown1
-            // 
-            this.numericUpDown1.Location = new System.Drawing.Point(62, 44);
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(53, 20);
-            this.numericUpDown1.TabIndex = 4;
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(5, 46);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(55, 13);
-            this.label18.TabIndex = 3;
-            this.label18.Text = "Шаг по Х:";
-            // 
-            // button_color_grid
-            // 
-            this.button_color_grid.Location = new System.Drawing.Point(140, 94);
-            this.button_color_grid.Name = "button_color_grid";
-            this.button_color_grid.Size = new System.Drawing.Size(107, 20);
-            this.button_color_grid.TabIndex = 2;
-            this.button_color_grid.UseVisualStyleBackColor = true;
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(137, 78);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(67, 13);
-            this.label12.TabIndex = 1;
-            this.label12.Text = "Цвет сетки:";
             // 
             // checkBox_showGrid
             // 
@@ -591,6 +570,7 @@
             this.checkBox_showGrid.TabIndex = 0;
             this.checkBox_showGrid.Text = "Отображать";
             this.checkBox_showGrid.UseVisualStyleBackColor = true;
+            this.checkBox_showGrid.CheckedChanged += new System.EventHandler(this.checkBox_showGrid_CheckedChanged);
             // 
             // tabPage2_obj
             // 
@@ -928,108 +908,6 @@
             this.nud_posX.TabIndex = 0;
             this.nud_posX.ValueChanged += new System.EventHandler(this.nud_posX_ValueChanged);
             // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.groupBox2);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(279, 388);
-            this.tabPage2.TabIndex = 2;
-            this.tabPage2.Text = "Булевы операции";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.groupBox3);
-            this.groupBox2.Controls.Add(this.button_doneBoolOperation);
-            this.groupBox2.Controls.Add(this.button_sub);
-            this.groupBox2.Controls.Add(this.button_union);
-            this.groupBox2.Controls.Add(this.button1);
-            this.groupBox2.Location = new System.Drawing.Point(0, 3);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(276, 128);
-            this.groupBox2.TabIndex = 0;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Операция:";
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.radioButton_triangles);
-            this.groupBox3.Controls.Add(this.radioButton_attenton);
-            this.groupBox3.Location = new System.Drawing.Point(6, 75);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(264, 47);
-            this.groupBox3.TabIndex = 4;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Алгоритм:";
-            // 
-            // radioButton_triangles
-            // 
-            this.radioButton_triangles.AutoSize = true;
-            this.radioButton_triangles.Location = new System.Drawing.Point(136, 19);
-            this.radioButton_triangles.Name = "radioButton_triangles";
-            this.radioButton_triangles.Size = new System.Drawing.Size(122, 17);
-            this.radioButton_triangles.TabIndex = 1;
-            this.radioButton_triangles.Text = "Триангуляционный";
-            this.radioButton_triangles.UseVisualStyleBackColor = true;
-            this.radioButton_triangles.CheckedChanged += new System.EventHandler(this.radioButton_triangles_CheckedChanged);
-            // 
-            // radioButton_attenton
-            // 
-            this.radioButton_attenton.AutoSize = true;
-            this.radioButton_attenton.Checked = true;
-            this.radioButton_attenton.Location = new System.Drawing.Point(6, 19);
-            this.radioButton_attenton.Name = "radioButton_attenton";
-            this.radioButton_attenton.Size = new System.Drawing.Size(113, 17);
-            this.radioButton_attenton.TabIndex = 0;
-            this.radioButton_attenton.TabStop = true;
-            this.radioButton_attenton.Text = "Уайлда-Атентона";
-            this.radioButton_attenton.UseVisualStyleBackColor = true;
-            this.radioButton_attenton.CheckedChanged += new System.EventHandler(this.radioButton_attenton_CheckedChanged);
-            // 
-            // button_doneBoolOperation
-            // 
-            this.button_doneBoolOperation.Location = new System.Drawing.Point(174, 19);
-            this.button_doneBoolOperation.Name = "button_doneBoolOperation";
-            this.button_doneBoolOperation.Size = new System.Drawing.Size(96, 50);
-            this.button_doneBoolOperation.TabIndex = 3;
-            this.button_doneBoolOperation.Text = "Принять";
-            this.button_doneBoolOperation.UseVisualStyleBackColor = true;
-            this.button_doneBoolOperation.Click += new System.EventHandler(this.button_doneBoolOperation_Click);
-            // 
-            // button_sub
-            // 
-            this.button_sub.BackgroundImage = global::Dipl_template_winforms.Properties.Resources.sub;
-            this.button_sub.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.button_sub.Location = new System.Drawing.Point(118, 19);
-            this.button_sub.Name = "button_sub";
-            this.button_sub.Size = new System.Drawing.Size(50, 50);
-            this.button_sub.TabIndex = 2;
-            this.button_sub.UseVisualStyleBackColor = true;
-            this.button_sub.Click += new System.EventHandler(this.button_sub_Click);
-            // 
-            // button_union
-            // 
-            this.button_union.BackgroundImage = global::Dipl_template_winforms.Properties.Resources.union;
-            this.button_union.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.button_union.Location = new System.Drawing.Point(62, 19);
-            this.button_union.Name = "button_union";
-            this.button_union.Size = new System.Drawing.Size(50, 50);
-            this.button_union.TabIndex = 1;
-            this.button_union.UseVisualStyleBackColor = true;
-            this.button_union.Click += new System.EventHandler(this.button_union_Click);
-            // 
-            // button1
-            // 
-            this.button1.BackgroundImage = global::Dipl_template_winforms.Properties.Resources.inter;
-            this.button1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.button1.Location = new System.Drawing.Point(6, 19);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(50, 50);
-            this.button1.TabIndex = 0;
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // tabPage3
             // 
             this.tabPage3.Controls.Add(this.dataGridView1);
@@ -1080,10 +958,13 @@
             this.toolStripButton18,
             this.tsb_smoothContrPoints,
             this.toolStripSeparator5,
-            this.toolStripButton_exportInGEO});
+            this.toolStripButton_exportInGEO,
+            this.toolStripButton16,
+            this.toolStripLabel4,
+            this.tstb_W});
             this.toolStrip4.Location = new System.Drawing.Point(3, 0);
             this.toolStrip4.Name = "toolStrip4";
-            this.toolStrip4.Size = new System.Drawing.Size(670, 25);
+            this.toolStrip4.Size = new System.Drawing.Size(1057, 25);
             this.toolStrip4.TabIndex = 1;
             // 
             // toolStripLabel3
@@ -1182,6 +1063,29 @@
             this.toolStripButton_exportInGEO.Text = "Экспорт в .geo";
             this.toolStripButton_exportInGEO.Click += new System.EventHandler(this.toolStripButton_exportInGEO_Click);
             // 
+            // toolStripButton16
+            // 
+            this.toolStripButton16.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton16.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton16.Image")));
+            this.toolStripButton16.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton16.Name = "toolStripButton16";
+            this.toolStripButton16.Size = new System.Drawing.Size(96, 22);
+            this.toolStripButton16.Text = "Импорт из .geo";
+            this.toolStripButton16.Click += new System.EventHandler(this.toolStripButton16_Click);
+            // 
+            // toolStripLabel4
+            // 
+            this.toolStripLabel4.Name = "toolStripLabel4";
+            this.toolStripLabel4.Size = new System.Drawing.Size(158, 22);
+            this.toolStripLabel4.Text = "Характеристическая длина:";
+            // 
+            // tstb_W
+            // 
+            this.tstb_W.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tstb_W.Name = "tstb_W";
+            this.tstb_W.Size = new System.Drawing.Size(100, 25);
+            this.tstb_W.Text = "0,0";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1189,7 +1093,7 @@
             this.ClientSize = new System.Drawing.Size(1271, 769);
             this.Controls.Add(this.toolStripContainer1);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Векторный графический редактор";
             this.toolStripContainer1.ContentPanel.ResumeLayout(false);
             this.toolStripContainer1.TopToolStripPanel.ResumeLayout(false);
             this.toolStripContainer1.TopToolStripPanel.PerformLayout();
@@ -1219,12 +1123,11 @@
             this.toolStrip3.PerformLayout();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.tabPage2_obj.ResumeLayout(false);
             this.groupBox_ObjPos.ResumeLayout(false);
             this.groupBox_ObjPos.PerformLayout();
@@ -1234,10 +1137,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.nud_scaleX)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_posY)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nud_posX)).EndInit();
-            this.tabPage2.ResumeLayout(false);
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.toolStrip4.ResumeLayout(false);
@@ -1257,19 +1156,45 @@
         private System.Windows.Forms.ToolStripButton toolStripButton2;
         private System.Windows.Forms.TreeView treeView1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripLabel toolStripLabel2;
+        private System.Windows.Forms.ToolStripContainer toolStripContainer3;
+        private OpenTK.GLControl glControl1;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripButton toolStripButton3;
+        private System.Windows.Forms.ToolStripButton toolStripButton4;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton toolStripButton5;
+        private System.Windows.Forms.ToolStripButton toolStripButton6;
+        private System.Windows.Forms.ToolStripButton toolStripButton7;
+        private System.Windows.Forms.ToolStripButton toolStripButton8;
+        private System.Windows.Forms.ToolStripButton toolStripButton9;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripButton toolStripButton10;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripButton toolStripButton13;
+        private System.Windows.Forms.ToolStripButton toolStripButton14;
+        private System.Windows.Forms.ToolStrip toolStrip4;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel3;
+        private System.Windows.Forms.ToolStripButton toolStripButton11;
+        private System.Windows.Forms.ToolStripButton toolStripButton12;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripButton toolStripButton15;
+        private System.Windows.Forms.ToolStripButton tsb_subdivEdge;
+        private System.Windows.Forms.ToolStripButton toolStripButton17;
+        private System.Windows.Forms.ToolStripButton toolStripButton18;
+        private System.Windows.Forms.ToolStripButton tsb_smoothContrPoints;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripButton toolStripButton_exportInGEO;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.RadioButton radioButton_triangles;
+        private System.Windows.Forms.RadioButton radioButton_attenton;
+        private System.Windows.Forms.Button button_sub;
+        private System.Windows.Forms.Button button_union;
+        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.NumericUpDown numericUpDown3;
-        private System.Windows.Forms.Label label20;
-        private System.Windows.Forms.NumericUpDown numericUpDown2;
-        private System.Windows.Forms.Label label19;
-        private System.Windows.Forms.NumericUpDown numericUpDown1;
-        private System.Windows.Forms.Label label18;
-        private System.Windows.Forms.Button button_color_grid;
-        private System.Windows.Forms.Label label12;
         private System.Windows.Forms.CheckBox checkBox_showGrid;
         private System.Windows.Forms.TabPage tabPage2_obj;
         private System.Windows.Forms.GroupBox groupBox_ObjPos;
@@ -1295,48 +1220,13 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown nud_posY;
         private System.Windows.Forms.NumericUpDown nud_posX;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.ToolStripContainer toolStripContainer3;
-        private OpenTK.GLControl glControl1;
-        private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripButton toolStripButton3;
-        private System.Windows.Forms.ToolStripButton toolStripButton4;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton toolStripButton5;
-        private System.Windows.Forms.ToolStripButton toolStripButton6;
-        private System.Windows.Forms.ToolStripButton toolStripButton7;
-        private System.Windows.Forms.ToolStripButton toolStripButton8;
-        private System.Windows.Forms.ToolStripButton toolStripButton9;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripButton toolStripButton10;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
-        private System.Windows.Forms.ToolStripButton toolStripButton13;
-        private System.Windows.Forms.ToolStripButton toolStripButton14;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button_sub;
-        private System.Windows.Forms.Button button_union;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button_doneBoolOperation;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridViewTextBoxColumn X;
         private System.Windows.Forms.DataGridViewTextBoxColumn Y;
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.RadioButton radioButton_triangles;
-        private System.Windows.Forms.RadioButton radioButton_attenton;
-        private System.Windows.Forms.ToolStrip toolStrip4;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel3;
-        private System.Windows.Forms.ToolStripButton toolStripButton11;
-        private System.Windows.Forms.ToolStripButton toolStripButton12;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
-        private System.Windows.Forms.ToolStripButton toolStripButton15;
-        private System.Windows.Forms.ToolStripButton tsb_subdivEdge;
-        private System.Windows.Forms.ToolStripButton toolStripButton17;
-        private System.Windows.Forms.ToolStripButton toolStripButton18;
-        private System.Windows.Forms.ToolStripButton tsb_smoothContrPoints;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-        private System.Windows.Forms.ToolStripButton toolStripButton_exportInGEO;
+        private System.Windows.Forms.ToolStripButton toolStripButton16;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel4;
+        private System.Windows.Forms.ToolStripTextBox tstb_W;
     }
 }
 

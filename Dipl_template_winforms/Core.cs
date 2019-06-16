@@ -226,27 +226,30 @@ namespace Dipl_template_winforms
         }
         public void Calc(List<Vector2d> verteces)
         {
-            double maxx = verteces[0].X,
+            if (verteces.Count > 0)
+            {
+                double maxx = verteces[0].X,
                        maxy = verteces[0].Y,
                        minx = verteces[0].X,
                        miny = verteces[0].Y;
 
-            foreach (var r in verteces)
-            {
-                if ((r.X >= maxx))
-                    maxx = r.X;
-                if ((r.X <= minx))
-                    minx = r.X;
-                if ((r.Y >= maxy))
-                    maxy = r.Y;
-                if ((r.Y <= miny))
-                    miny = r.Y;
+                foreach (var r in verteces)
+                {
+                    if ((r.X >= maxx))
+                        maxx = r.X;
+                    if ((r.X <= minx))
+                        minx = r.X;
+                    if ((r.Y >= maxy))
+                        maxy = r.Y;
+                    if ((r.Y <= miny))
+                        miny = r.Y;
+                }
+
+                Max = new Vector2d(maxx, maxy);
+                Min = new Vector2d(minx, miny);
+
+                Center = ((Min + Max) / 2.0);
             }
-
-            Max = new Vector2d(maxx, maxy);
-            Min = new Vector2d(minx, miny);
-
-            Center = ((Min + Max) / 2.0);
         }
         public void Draw()
         {
@@ -348,7 +351,7 @@ namespace Dipl_template_winforms
             if (IsBezie)
             {
                 EndControlPoint = BeginControlPoint = new Vector2d(double.NaN);
-                _bezieVerteces = new Vector2d[3];
+                _bezieVerteces = new Vector2d[31];
                 IsBezie = false;
             }
         }
@@ -541,9 +544,6 @@ namespace Dipl_template_winforms
         public bool IsDrawPoint { get; set; }
         public ActionWithFigure LabelOFAction { get; private set; }
         public TypeFigures Type { get; set; } = TypeFigures.None;
-
-
-
         public bool IsSelect { get; set; }
         public bool IsEdit { get; set; } // Редактируют ли сейчас эту фигуру?
         public bool IsRender { get; set; } = true; // Правда - если надо отрисовать, иначе ложь
@@ -553,7 +553,6 @@ namespace Dipl_template_winforms
         public float LineWidth { get; set; } = 1.0f;
         public List<Triangle> Triangles { get { return _triangles; } private set {; } }
         public AABB AABB { get; set; } = new AABB();
-
 
         int indPoint = -1;
         Matrix4d TRS = new Matrix4d();
@@ -568,6 +567,7 @@ namespace Dipl_template_winforms
         int indAroundScale = -1;
         private int indCurrEdge = -1;
         List<Triangle> _triangles = new List<Triangle>();
+        private int indPoint2 = -1;
 
         public void ReCalc()
         {
@@ -578,25 +578,17 @@ namespace Dipl_template_winforms
             var rt = Matrix4d.Mult(r, t);
             TRS = Matrix4d.Mult(s, rt);
 
-            TRSI = TRS;//.Inverted();
+            TRSI = TRS;
             TRSI.Transpose();
 
             Edges = mainFigure.ToList();
             Manipulators = manipul.ToArray();
 
-            if (Center != new Vector2d(0))
-            {
-                for (int i = 0; i < Edges.Count; i++)
-                    Edges[i] = Edges[i] - Center;
-                for (int i = 0; i < Manipulators.Length; i++)
-                    Manipulators[i] = Manipulators[i] - Center;
-            }
-
             for (int i = 0; i < Edges.Count; i++)
-                Edges[i] = MultiplyMatrixAndEdge(mainFigure[i], TRSI) + Center;
+                Edges[i] = MultiplyMatrixAndEdge(mainFigure[i], TRSI);
 
             for (int i = 0; i < Manipulators.Length; i++)
-                Manipulators[i] = MultiplyMatrixAndVector(manipul[i], TRSI) + Center;
+                Manipulators[i] = MultiplyMatrixAndVector(manipul[i], TRSI);
 
             Verteces.Clear();
             if (IsClosed)
@@ -632,7 +624,7 @@ namespace Dipl_template_winforms
             Triangulate tr = new Triangulate(Verteces.ToArray());
             _triangles = tr.Triangles;
 
-            AABB = new AABB(Verteces);
+            AABB.Calc(Verteces);
         }
         public Vector2d MultiplyMatrixAndVector(Vector2d Vector, Matrix4d m)
         {
@@ -1303,7 +1295,7 @@ namespace Dipl_template_winforms
                 // for Rotate
                 if ((Manipulators[i] - mousePos).LengthSquared < 0.05)
                 {
-                    indPoint1 = i;
+                    indPoint2 = i;
                     return true;
                 }
             }
@@ -1311,7 +1303,7 @@ namespace Dipl_template_winforms
             if ((Manipulators[8] - mousePos).LengthSquared < 0.01)
                 return true;
 
-            indPoint1 = -1;
+            indPoint2 = indPoint1 = -1;
             return false;
         }
         public void Draw()
@@ -1321,13 +1313,6 @@ namespace Dipl_template_winforms
 
             if (IsClosed)
             {
-                //GL.Begin(BeginMode.Polygon);
-                //GL.Color3(FillColor);
-                //for (int i = 0; i < Verteces.Count; i++)
-                //    GL.Vertex2(Verteces[i]);
-                //GL.End();
-
-
                 GL.Begin(BeginMode.Triangles);
                 GL.Color3(FillColor);
                 foreach (var t in _triangles)
@@ -1386,12 +1371,26 @@ namespace Dipl_template_winforms
                     for (int i = 0; i < 360; i++)
                     {
                         double t = MathHelper.DegreesToRadians(i);
+                        double x = 0.1 * Math.Cos(t);
+                        double y = 0.1 * Math.Sin(t);
+                        GL.Vertex2(c.X + x, c.Y + y);
+                    }
+                    GL.End();
+                }
+                else if (indPoint2 > -1)
+                {
+                    GL.Begin(BeginMode.LineStrip);
+                    Vector2d c = Manipulators[indPoint2];
+                    for (int i = 0; i < 360; i++)
+                    {
+                        double t = MathHelper.DegreesToRadians(i);
                         double x = 0.2 * Math.Cos(t);
                         double y = 0.2 * Math.Sin(t);
                         GL.Vertex2(c.X + x, c.Y + y);
                     }
                     GL.End();
                 }
+                indPoint2 = indPoint1 = -1;
                 GL.PopMatrix();
             }
             if (IsEdit)
@@ -1987,6 +1986,75 @@ namespace Dipl_template_winforms
             }
             else
                 throw new Exception("Not figures or incorrect path to file!");
+        }
+    }
+
+    public class ImportFromGEO
+    {
+        public string Path { get; set; } = "";
+        public double W { get; set; } = -1;
+        public Vector2d Center { get; set; }
+
+        public ImportFromGEO() {; }
+        public ImportFromGEO(string pathToFile)
+        {
+            Path = pathToFile;
+        }
+
+        public List<Edge> Result()
+        {
+            List<Edge> r = new List<Edge>();
+            Dictionary<int, Vector2d> points = new Dictionary<int, Vector2d>();
+            string[] lines = null;
+            string l;
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
+            using ( System.IO.StreamReader sr = new System.IO.StreamReader(Path))
+            {
+                l = sr.ReadToEnd();
+            }
+
+            lines = l.Split(new char[] { '\n' });
+            foreach (string s in lines)
+            {
+                if (s.Length > 0 && s[0] == '/' && s[1] == '/') ;
+                else if (s.Contains("Point"))
+                {
+                    string[] ll = s.Split(new char[] { '(', ')', '{', '}', ',' });
+
+                    points.Add(
+                        int.Parse(ll[1]),
+                        new Vector2d(
+                            double.Parse(ll[3]),
+                            double.Parse(ll[4])
+                            )
+                        );
+                }
+                else if (s.Contains("Line"))
+                {
+                    string[] g = s.Split('{', '}', ',');
+
+                    int b = int.Parse(g[1]), e = int.Parse(g[2]);
+
+                    r.Add(
+                        new Edge(points[b], points[e])
+                        );
+                }
+                else if (s.Contains("Plane")) ;
+                else if (s.Contains("Loop")) ;
+                else if (s.Length > 0 && s[0] != '/')
+                {
+                    string[] ll = s.Split(' ', ';');
+                    W = double.Parse(ll[2]);
+                }
+            }
+
+            foreach (var u in points.Values)
+                Center += u;
+
+            Center = Center / points.Count;
+
+            return r;
         }
     }
 
@@ -3293,20 +3361,6 @@ namespace Dipl_template_winforms
             }
             return null;
         }
-        public int FindIndex(Vector2d point)
-        {
-            int t = -1;
-            int i = _layers.Count - 1;
-            for (; i > -1; i--)
-            {
-                if ((t = _layers[i].FindFigureIndex(point)) != -1)
-                {
-                    _indL = i;
-                    return t;
-                }
-            }
-            return t;
-        }
 
         // Methods for layer
         public void AddLayer()
@@ -3345,26 +3399,6 @@ namespace Dipl_template_winforms
             return r.ToArray();
         }
 
-        public string Debug()
-        {
-            string s = "";
-
-            foreach (var t in Layers)
-            {
-                s += t.ID + ") " + t.Name + "\n";
-                s += "  " + t.Info();
-            }
-
-            return s;
-        }
-
-        // Read SVG
-        public void LoadFile(string fileName, int glWidth, int glH)
-        {
-            SVG s = new SVG(fileName, glWidth, glH);
-
-            _layers = s.Layers;
-        }
 
         public void Draw()
         {

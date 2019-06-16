@@ -69,7 +69,7 @@ namespace Dipl_template_winforms
 
             if (pc.AddedFigure != null) pc.AddedFigure.Draw();
 
-            pc.Group.DrawAABB();
+            if (pc.Group.CountFigures > 1) pc.Group.DrawAABB();
 
             if (trianglesBool != null) trianglesBool.Draw();
 
@@ -165,7 +165,10 @@ namespace Dipl_template_winforms
                                 if (pc.Group.IsHitInGroup(pc.FirstMousePos))
                                 {
                                     if (pc.Group.HitInCenter(pc.FirstMousePos))
+                                    {
                                         pc.IsMove = true;
+                                        return;
+                                    }
                                     
                                 }
 
@@ -175,12 +178,14 @@ namespace Dipl_template_winforms
                                 if (pc.Group.CountFigures == 1)
                                 {
                                     pc.AWF = pc.Group.SelectingFigure.HitOnManipulators(pc.FirstMousePos);
-                                    //if (pc.AWF == ActionWithFigure.None)
-                                    //    pc.Group.Clear();
+
+                                    dataGridView1.Rows.Clear();
+                                    foreach (Vector2d v in pc.Group.SelectingFigure.Verteces)
+                                        dataGridView1.Rows.Add(v.X.ToString("F"), v.Y.ToString("F"));
                                 }
 
                                 Figure f = _core.Find(pc.FirstMousePos);
-                                if (f == null)
+                                if (f == null && pc.AWF == ActionWithFigure.None)
                                     pc.Group.Clear();
                                 if (f != null && pc.Group.CountFigures >= 1)
                                 {
@@ -194,8 +199,6 @@ namespace Dipl_template_winforms
                     default:
                         break;
                 }
-
-                Deb(pc.Group.Figures.Count.ToString(), false);
             }
             else if (e.Button == MouseButtons.Right)
             {
@@ -262,12 +265,15 @@ namespace Dipl_template_winforms
                     break;
 
                 case TypeFigures.None:
+
                     if (pc.IsMove)
                         pc.Group.MoveTo(pc.SecondMousePos);
                     if (pc.Group.SelectingFigure != null)
                     {
+                        pc.Group.SelectingFigure.HitOnManipulators1(pc.SecondMousePos);
                         if (pc.IsEditMode == false)                           
                         {
+                            
                             switch (pc.AWF)
                             {
                                 case ActionWithFigure.Move:
@@ -527,64 +533,107 @@ namespace Dipl_template_winforms
                     // получаем выбранный файл
                     string filename = sfd.FileName;
                     // сохраняем текст в файл
+                    double w = double.Parse(tstb_W.Text, System.Globalization.CultureInfo.InvariantCulture);
+
                     ExportInGEO exportInGEO = new ExportInGEO(filename);
+                    exportInGEO.Weight = w;
                     exportInGEO.WriteInfile(new List<Figure>() { pc.Group.SelectingFigure });
                 }
             }
+        }
+        private void toolStripButton16_Click(object sender, EventArgs e)
+        {
+            List<Edge> list = null;
+            Vector2d c = new Vector2d(0);
+
+            _core.AddLayer();
+
+            using (OpenFileDialog ofd = new OpenFileDialog())
+            {
+                if (ofd.ShowDialog() == DialogResult.Cancel)
+                    return;
+                // получаем выбранный файл
+                string filename = ofd.FileName;
+                // экспортируем текст из файл
+                ImportFromGEO i = new ImportFromGEO(filename);
+                
+                list = i.Result();
+                tstb_W.Text = i.W.ToString("F");
+                c = i.Center;
+            }
+
+            Figure f = new Figure();
+            f.Edges = list.ToList();
+            f.Type = TypeFigures.Polygon;
+            f.Center = c;
+            f.TranslateToCenterCoordinates();
+            f.ReCalc();
+
+            f.FillColor = pc.CurrentFillColor;
+            f.BorderColor = pc.CurrentBorderColor;
+
+            f.Id = _core.Ids.ToString();
+            f.Name = "Polygon " + f.Id;
+            SetProperties(f);
+            _core.Add(f);
+
+
+            treeView1.Nodes.Clear();
+            treeView1.Nodes.AddRange(_core.NodesForTree());
         }
         #endregion
 
         #region TAB "OBJECT"
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (pc.SelectedFigure != null && textBox1.Text.Length > 0)
+            if (pc.Group.SelectingFigure != null && textBox1.Text.Length > 0)
                 pc.SelectedFigure.Name = textBox1.Text;
             SetProperties(pc.SelectedFigure);
         }
         // translate figure at X axis
         private void nud_posX_ValueChanged(object sender, EventArgs e)
         {
-            if (pc.SelectedFigure != null)
+            if (pc.Group.SelectingFigure != null)
             {
-                pc.SelectedFigure.MoveTo = new Vector2d((double)nud_posX.Value, pc.SelectedFigure.MoveTo.Y);
-                pc.SelectedFigure.ReCalc();
+                pc.Group.SelectingFigure.MoveTo = new Vector2d((double)nud_posX.Value, pc.Group.SelectingFigure.MoveTo.Y);
+                pc.Group.SelectingFigure.ReCalc();
             }
             glControl1.Invalidate();
         }
         // translate figure at Y axis
         private void nud_posY_ValueChanged(object sender, EventArgs e)
         {
-            if (pc.SelectedFigure != null)
+            if (pc.Group.SelectingFigure != null)
             {
-                pc.SelectedFigure.MoveTo = new Vector2d(pc.SelectedFigure.MoveTo.X, (double)nud_posY.Value);
-                pc.SelectedFigure.ReCalc();
+                pc.Group.SelectingFigure.MoveTo = new Vector2d(pc.Group.SelectingFigure.MoveTo.X, (double)nud_posY.Value);
+                pc.Group.SelectingFigure.ReCalc();
             }
             glControl1.Invalidate();
         }
         private void nud_angle_ValueChanged(object sender, EventArgs e)
         {
-            if (pc.SelectedFigure != null)
+            if (pc.Group.SelectingFigure != null)
             {
-                pc.SelectedFigure.Angle = (double)nud_angle.Value;
-                pc.SelectedFigure.ReCalc();
+                pc.Group.SelectingFigure.Angle = (double)nud_angle.Value;
+                pc.Group.SelectingFigure.ReCalc();
             }
             glControl1.Invalidate();
         }
         private void nud_scaleX_ValueChanged(object sender, EventArgs e)
         {
-            if (pc.SelectedFigure != null)
+            if (pc.Group.SelectingFigure != null)
             {
-                pc.SelectedFigure.ScaleTo = new Vector2d((double)nud_scaleX.Value, pc.SelectedFigure.ScaleTo.Y);
-                pc.SelectedFigure.ReCalc();
+                pc.Group.SelectingFigure.ScaleTo = new Vector2d((double)nud_scaleX.Value, pc.Group.SelectingFigure.ScaleTo.Y);
+                pc.Group.SelectingFigure.ReCalc();
             }
             glControl1.Invalidate();
         }
         private void nud_scaleY_ValueChanged(object sender, EventArgs e)
         {
-            if (pc.SelectedFigure != null)
+            if (pc.Group.SelectingFigure != null)
             {
-                pc.SelectedFigure.ScaleTo = new Vector2d(pc.SelectedFigure.ScaleTo.X, (double)nud_scaleY.Value);
-                pc.SelectedFigure.ReCalc();
+                pc.Group.SelectingFigure.ScaleTo = new Vector2d(pc.Group.SelectingFigure.ScaleTo.X, (double)nud_scaleY.Value);
+                pc.Group.SelectingFigure.ReCalc();
             }
             glControl1.Invalidate();
         }
@@ -640,17 +689,6 @@ namespace Dipl_template_winforms
             }
         }
 
-        void Deb(string text, bool append)
-        {
-            if (append)
-            {
-                label1.Text += text + "\n";
-            }
-            else
-            {
-                label1.Text = text + "\n";
-            }
-        }
         void ShowPointsInGridView(Figure figure)
         {
             dataGridView1.Rows.Clear();
@@ -707,6 +745,9 @@ namespace Dipl_template_winforms
                     pc.Group.SelectingFigure = f;
                     pc.Group.SelectingFigure.IsSelect = true;
                 }
+
+                _core.FindLayer(hitNode.Text);
+
                 glControl1.Invalidate();
             }
         }
@@ -1046,5 +1087,16 @@ namespace Dipl_template_winforms
                 //MessageBox.Show(v.ToString(), "Current Cell");
             }
         }
+
+        private void checkBox_showGrid_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox_showGrid.Checked)
+                grid.IsShow = true;
+            else
+                grid.IsShow = false;
+            glControl1.Invalidate();
+        }
+
+        
     }
 }

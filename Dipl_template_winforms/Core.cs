@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using OpenTK;
+using System.Diagnostics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Platform.Windows;
 using System.Xml;
@@ -324,7 +325,17 @@ namespace Dipl_template_winforms
 
             return false;
         }
+        double LenToLine(Vector2d a, Vector2d b, Vector2d p)
+        {
+            double ch1 = (p.X - a.X) * (b.X - a.X);
+            double ch2 = (p.Y - a.Y) * (b.Y - a.Y);
+            double znamenatel = (b.X - a.X) * (b.X - a.X) + (b.Y - a.Y) * (b.Y - a.Y);
 
+            double t = (ch1 + ch2) / znamenatel;
+            if (Math.Abs(t) <= 0.5)
+                return 1;
+            return -1;
+        }
         public void CalcBeziePoints()
         {
             BezierCurveCubic b = new BezierCurveCubic((Vector2)Begin, (Vector2)End, (Vector2)BeginControlPoint, (Vector2)EndControlPoint);
@@ -382,45 +393,8 @@ namespace Dipl_template_winforms
                             p2 = _bezieVerteces[i];
                         }
 
-                        Y = p1.Y - p2.Y;
-                        X = p2.X - p1.X;
-
-                        if (Math.Abs(X) < 0.01)
-                        {
-                            if ((point.Y < Begin.Y) && (End.Y < point.Y))
-                                return this;
-                        }
-                        if (Math.Abs(Y) < 0.01)
-                        {
-                            if ((point.X < Begin.X) && (End.X < point.X))
-                                return this;
-                        }
-
-                        D = p1.X * p2.Y - p2.X * p1.Y;
-
-                        double res = Y * point.X + X * point.Y + D;
-                        if (Math.Abs(res) < 0.01)
+                        if (LenToLine(p1, p2, point) == 1)
                             return this;
-                        //double x = point.X - Begin.X;
-                        //double y = point.Y - Begin.Y;
-
-                        //double z1 = End.X - Begin.X;
-                        //if (Math.Abs(z1) < 0.1)
-                        //    if ((point.Y < Begin.Y) && (End.Y < point.Y))
-                        //        return this;
-
-
-                        //double z2 = End.Y - Begin.Y;
-                        //if (Math.Abs(z2) < 0.1)
-                        //    if ((point.X < Begin.X) && (End.X < point.X))
-                        //        return this;
-
-
-                        //double l1 = x / z1;
-                        //double l2 = y / z2;
-
-                        //if (Math.Abs(l1 - l2) < 0.1)
-                        //    return this;
                     }
                 }
             }
@@ -1066,7 +1040,27 @@ namespace Dipl_template_winforms
                 Edge e = mainFigure[indCurrEdge];
                 if (e.IsBezie)
                 {
-                    ;
+                    Vector2d A = e.Begin;
+                    Vector2d D = e.End;
+
+                    Vector2d B = e.BeginControlPoint;
+                    Vector2d C = e.EndControlPoint;
+
+                    Vector2d E = (A + B) / 2;
+                    Vector2d F = (B + C) / 2;
+                    Vector2d G = (C + D) / 2;
+                    Vector2d H = (E + F) / 2;
+                    Vector2d J = (F + G) / 2;
+                    Vector2d K = (H + J) / 2;
+
+                    var e1 = new Edge(A, K, E, H);
+                    var e2 = new Edge(K, D, J, G);
+
+                    mainFigure.RemoveAt(indCurrEdge);
+                    mainFigure.Insert(indCurrEdge, e1);
+                    mainFigure.Insert(indCurrEdge + 1, e2);
+
+                    ReCalc();
                 }
                 else
                 {
@@ -1428,10 +1422,26 @@ namespace Dipl_template_winforms
                     GL.PushMatrix();
                     GL.Color3(Color.OrangeRed);
 
-                    GL.Begin(BeginMode.Lines);
-                    GL.Vertex2(Edges[indCurrEdge].Begin);
-                    GL.Vertex2(Edges[indCurrEdge].End);
-                    GL.End();
+                    if (Edges[indCurrEdge].IsBezie)
+                    {
+                        GL.Begin(BeginMode.LineStrip);
+                        GL.Vertex2(Edges[indCurrEdge].Begin);
+
+                        foreach (var r in Edges[indCurrEdge].BeziePoints)
+                            GL.Vertex2(r);
+
+                        GL.Vertex2(Edges[indCurrEdge].End);
+                        GL.End();
+                    }
+                    else
+                    {
+                        GL.Begin(BeginMode.Lines);
+                        GL.Vertex2(Edges[indCurrEdge].Begin);
+                        GL.Vertex2(Edges[indCurrEdge].End);
+                        GL.End();
+                    }
+
+                    
 
                     GL.PopMatrix();
                 }
@@ -2222,6 +2232,7 @@ namespace Dipl_template_winforms
         List<Vector2d> figure2 = new List<Vector2d>();
 
         public Operations Operation { get { return operation; } set { operation = value; } }
+        public string ResTime { get; private set; }
 
         public Modificators() {; }
         public Modificators(List<Vector2d> InputFigure1, List<Vector2d> Figure2)
@@ -2291,6 +2302,9 @@ namespace Dipl_template_winforms
         }
         public List<Vector2d> Result()
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             List<Vector2d> res = new List<Vector2d>();
             List<Vertex> F1 = new List<Vertex>();
             List<Vertex> F2 = new List<Vertex>();
@@ -2313,8 +2327,6 @@ namespace Dipl_template_winforms
             List<Vertex> pointsIntersection = Calculate();
             //-------------------------------------------------
 
-            //ChangeList(F1, pointsIntersection, 1);
-            //ChangeList(F2, pointsIntersection, 2);
             ChangeList(F1, pointsIntersection);
             ChangeList(F2, pointsIntersection);
 
@@ -2327,6 +2339,15 @@ namespace Dipl_template_winforms
                         res = intersect(F2, F1, pointsIntersection);
                     else
                         res = intersect1(F1, F2, pointsIntersection);
+
+                    stopWatch.Stop();
+                    // Get the elapsed time as a TimeSpan value.
+                    TimeSpan ts = stopWatch.Elapsed;
+
+                    // Format and display the TimeSpan value.
+                    ResTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                        ts.Hours, ts.Minutes, ts.Seconds,
+                        ts.Milliseconds / 10);
 
                     if (res.Count > 2)
                         return res;
@@ -2342,6 +2363,15 @@ namespace Dipl_template_winforms
                     else
                         res = union(F1, F2, pointsIntersection);
 
+                    stopWatch.Stop();
+                    // Get the elapsed time as a TimeSpan value.
+                    ts = stopWatch.Elapsed;
+
+                    // Format and display the TimeSpan value.
+                    ResTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                        ts.Hours, ts.Minutes, ts.Seconds,
+                        ts.Milliseconds / 10);
+
                     return res;
 
                     break;
@@ -2353,6 +2383,15 @@ namespace Dipl_template_winforms
                         res = sub2(F1, F2, pointsIntersection);
                     else
                         res = sub(F1, F2, pointsIntersection);
+
+                    stopWatch.Stop();
+                    // Get the elapsed time as a TimeSpan value.
+                    ts = stopWatch.Elapsed;
+
+                    // Format and display the TimeSpan value.
+                    ResTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                        ts.Hours, ts.Minutes, ts.Seconds,
+                        ts.Milliseconds / 10);
 
                     return res;
 
@@ -2916,40 +2955,6 @@ namespace Dipl_template_winforms
             return res;
         }
 
-        public void ChangeList(List<Vertex> inputList, List<Vertex> pointsInter, int numList)
-        {
-            int i = 1;
-            if (numList == 1)
-            {
-                foreach (Vertex v in pointsInter)
-                {
-                    if ((v.IndexIn1 + i) == figure1.Count && (v.IndexIn1 != figure1.Count - i))
-                    {
-                        inputList.Add(v);
-                    }
-                    else
-                    {
-                        inputList.Insert(v.IndexIn1 + i, v);
-                        i++;
-                    }
-                }
-            }
-            else
-            {
-                foreach (Vertex v in pointsInter)
-                {
-                    if ((v.IndexIn2 + i) == figure1.Count && (v.IndexIn2 != figure1.Count - i))
-                    {
-                        inputList.Add(v);
-                    }
-                    else
-                    {
-                        inputList.Insert(v.IndexIn2 + i, v);
-                        i++;
-                    }
-                }
-            }
-        }
         public void ChangeList(List<Vertex> inputList, List<Vertex> pointsInter)
         {
             bool e = true;

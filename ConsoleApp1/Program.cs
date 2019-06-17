@@ -2492,6 +2492,18 @@ namespace ConsoleApp1
             }
         }
 
+        static double LenToLine(Vector2d a, Vector2d b, Vector2d p)
+        {
+            double ch1 = (p.X - a.X) * (b.X - a.X);
+            double ch2 = (p.Y - a.Y) * (b.Y - a.Y);
+            double znamenatel = (b.X - a.X) * (b.X - a.X) + (b.Y - a.Y) * (b.Y - a.Y);
+
+            double t = (ch1 + ch2) / znamenatel;
+            if (t <= 0.01)
+                return 1;
+            return -1;
+        }
+
         static void Main(string[] args)
         {
             //Triangle triangle = new Triangle(new Vector2d(0), new Vector2d(4, 1), new Vector2d(2, 3));
@@ -2522,7 +2534,12 @@ namespace ConsoleApp1
             //foreach (Triangle a in res)
             //    Console.Write(a);
 
-            ImportFromGEO import = new ImportFromGEO(@"C:\Users\Администратор\Desktop\a.geo");
+            Vector2d a = new Vector2d(0);
+            Vector2d b = new Vector2d(1);
+            Vector2d p = new Vector2d(2, 0);
+            Console.WriteLine(
+                LenToLine(a,b,p)
+                );
 
             Console.ReadLine();
         }

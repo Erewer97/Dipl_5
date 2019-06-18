@@ -220,7 +220,6 @@ namespace Dipl_template_winforms
                     {
                         pc.AddedFigure = helper.Add(TypeFigures.Line, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
                         pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
-                        //pc.AddedFigure.CalcAABB();
                     }
                     break;
 
@@ -230,7 +229,6 @@ namespace Dipl_template_winforms
                         pc.AddedFigure = helper.Add(TypeFigures.Rect, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
                         pc.AddedFigure.FillColor = pc.CurrentFillColor;
                         pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
-                        //pc.AddedFigure.CalcAABB();
                     }
                     break;
 
@@ -240,7 +238,6 @@ namespace Dipl_template_winforms
                         pc.AddedFigure = helper.Add(TypeFigures.Ellipsoid, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
                         pc.AddedFigure.FillColor = pc.CurrentFillColor;
                         pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
-                        //pc.AddedFigure.CalcAABB();
                     }
                     break;
 
@@ -250,7 +247,6 @@ namespace Dipl_template_winforms
                         pc.AddedFigure = helper.Add(TypeFigures.Polygon, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
                         pc.AddedFigure.FillColor = pc.CurrentFillColor;
                         pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
-                        //pc.AddedFigure.CalcAABB();
                     }
                     break;
 
@@ -260,14 +256,17 @@ namespace Dipl_template_winforms
                         pc.AddedFigure = helper.Add(TypeFigures.Curve, new List<Vector2d>() { pc.FirstMousePos, pc.SecondMousePos });
                         pc.AddedFigure.FillColor = pc.CurrentFillColor;
                         pc.AddedFigure.BorderColor = pc.CurrentBorderColor;
-                        //pc.AddedFigure.CalcAABB();
                     }
                     break;
 
                 case TypeFigures.None:
 
-                    if (pc.IsMove)
+                    if (pc.IsMove)                     
+                    {
                         pc.Group.MoveTo(pc.SecondMousePos);
+                        SetProperties(pc.Group.SelectingFigure);
+                        ShowPointsInGridView(pc.Group.SelectingFigure);
+                    }
                     if (pc.Group.SelectingFigure != null)
                     {
                         pc.Group.SelectingFigure.HitOnManipulators1(pc.SecondMousePos);
@@ -586,9 +585,11 @@ namespace Dipl_template_winforms
         #region TAB "OBJECT"
         private void textBox1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (pc.Group.SelectingFigure != null && textBox1.Text.Length > 0)
-                pc.SelectedFigure.Name = textBox1.Text;
-            SetProperties(pc.SelectedFigure);
+            if (pc.Group.SelectingFigure != null && textBox1.Text.Length > 0 && e.KeyCode == Keys.Enter)
+            {
+                pc.Group.SelectingFigure.Name = textBox1.Text;
+                SetProperties(pc.Group.SelectingFigure);
+            }
         }
         // translate figure at X axis
         private void nud_posX_ValueChanged(object sender, EventArgs e)
@@ -830,7 +831,12 @@ namespace Dipl_template_winforms
                     modificators.Operation = Operations.Interset;
 
                     pc.res = modificators.Result();
-                    MessageBox.Show(modificators.ResTime);
+
+                    Color fill = pc.Group.Figures[1].FillColor;
+                    Color border = pc.Group.Figures[1].BorderColor;
+
+                    pc.Group.Clear();
+
                     if (pc.res.Count > 0)
                     {
                         Figure f = new Figure();
@@ -843,10 +849,8 @@ namespace Dipl_template_winforms
                         f.TranslateToCenterCoordinates();
                         f.ReCalc();
 
-                        f.FillColor   = pc.Group.Figures[1].FillColor;
-                        f.BorderColor = pc.Group.Figures[1].BorderColor;
-
-                        pc.ClearListSelectedFigures();
+                        f.FillColor   = fill;
+                        f.BorderColor = border;
 
                         f.Id = _core.Ids.ToString();
                         f.Name = "BoolenResult " + f.Id;
@@ -863,7 +867,40 @@ namespace Dipl_template_winforms
                 else
                 {
                     trianglesBool = new TrianglesBool(t1, t2, f1, f2, Operations.Interset);
-                    MessageBox.Show(trianglesBool.ResTime);
+                    pc.res = trianglesBool.Result();
+
+                    Color fill = pc.Group.Figures[1].FillColor;
+                    Color border = pc.Group.Figures[1].BorderColor;
+
+                    pc.Group.Clear();
+
+                    if (pc.res.Count > 0)
+                    {
+                        Figure f = new Figure();
+
+                        helper.DeleteDuplicats(pc.res);
+
+                        f.Edges = Helper.ConvertToEdges(pc.res);
+                        f.Type = TypeFigures.Polygon;
+                        f.Center = helper.CalcCenter(pc.res);
+                        f.TranslateToCenterCoordinates();
+                        f.ReCalc();
+
+                        f.FillColor = fill;
+                        f.BorderColor = border;
+
+                        f.Id = _core.Ids.ToString();
+                        f.Name = "TriangleBoolenResult " + f.Id;
+                        SetProperties(f);
+                        _core.Add(f);
+
+                        treeView1.Nodes.Clear();
+                        treeView1.Nodes.AddRange(_core.NodesForTree());
+                        treeView1.ExpandAll();
+
+                        glControl1.Invalidate();
+                    }
+
                 }
             }
         }
@@ -881,7 +918,12 @@ namespace Dipl_template_winforms
                     modificators.Operation = Operations.Union;
 
                     pc.res = modificators.Result();
-                    MessageBox.Show(modificators.ResTime);
+
+                    Color fill = pc.Group.Figures[1].FillColor;
+                    Color border = pc.Group.Figures[1].BorderColor;
+
+                    pc.Group.Clear();
+
                     if (pc.res.Count > 0)
                     {
                         Figure f = new Figure();
@@ -895,15 +937,12 @@ namespace Dipl_template_winforms
                         f.TranslateToCenterCoordinates();
                         f.ReCalc();
 
-                        f.FillColor = pc.Group.Figures[1].FillColor;
-                        f.BorderColor = pc.Group.Figures[1].BorderColor;
-
-                        pc.ClearListSelectedFigures();
+                        f.FillColor = fill;
+                        f.BorderColor = border;
 
                         f.Id = _core.Ids.ToString();
                         f.Name = "BoolenResult " + f.Id;
                         _core.Add(f);
-                        //SetProperties(pc.AddedFigure);
                         treeView1.Nodes.Clear();
                         treeView1.Nodes.AddRange(_core.NodesForTree());
                         treeView1.ExpandAll();
@@ -914,62 +953,7 @@ namespace Dipl_template_winforms
                 else
                 {
                     trianglesBool = new TrianglesBool(pc.Group.Figures[0], pc.Group.Figures[1], Operations.Union);
-                    MessageBox.Show(trianglesBool.ResTime);
                 }
-            }
-            else if (pc.Group.Figures.Count > 2)
-            {
-                var f1 = pc.Group.Figures[0].Verteces;
-                var f2 = pc.Group.Figures[1].Verteces;
-
-                Modificators modificators = new Modificators(f1, f2);
-                modificators.Operation = Operations.Union;
-
-                pc.res = modificators.Result();
-                if (pc.res.Count > 0)
-                {
-                    helper.DeleteDuplicats(pc.res);
-
-                    for (int i = 2; i < pc.Group.Figures.Count; i++)
-                    {
-                        var list = pc.Group.Figures[i].Verteces;
-
-                        Modificators m = new Modificators(list, pc.res);
-                        m.Operation = Operations.Union;
-
-                        pc.res = m.Result();
-                        helper.DeleteDuplicats(pc.res);
-                    }
-
-                    if (pc.res.Count > 0)
-                    {
-                        Figure f = new Figure();
-
-                        helper.DeleteDuplicats(pc.res);
-
-
-                        f.Edges = Helper.ConvertToEdges(pc.res);
-                        f.Type = TypeFigures.Polygon;
-                        f.Center = helper.CalcCenter(pc.res);
-                        f.TranslateToCenterCoordinates();
-                        f.ReCalc();
-
-                        f.FillColor   = pc.Group.Figures[pc.Group.Figures.Count - 1].FillColor;
-                        f.BorderColor = pc.Group.Figures[pc.Group.Figures.Count - 1].BorderColor;
-
-                        pc.ClearListSelectedFigures();
-
-                        f.Id = _core.Ids.ToString();
-                        f.Name = "BoolenResult " + f.Id;
-                        _core.Add(f);
-                        //SetProperties(pc.AddedFigure);
-                        treeView1.Nodes.Clear();
-                        treeView1.Nodes.AddRange(_core.NodesForTree());
-                        treeView1.ExpandAll();
-
-                        glControl1.Invalidate();
-                    }
-                }               
             }
         }
 
@@ -986,7 +970,12 @@ namespace Dipl_template_winforms
                     modificators.Operation = Operations.Sub;
 
                     pc.res = modificators.Result();
-                    MessageBox.Show(modificators.ResTime);
+
+                    Color fill = pc.Group.Figures[1].FillColor;
+                    Color border = pc.Group.Figures[1].BorderColor;
+
+                    pc.Group.Clear();
+
                     if (pc.res.Count > 0)
                     {
                         Figure f = new Figure();
@@ -999,8 +988,8 @@ namespace Dipl_template_winforms
                         f.TranslateToCenterCoordinates();
                         f.ReCalc();
 
-                        f.FillColor   = pc.Group.Figures[1].FillColor;
-                        f.BorderColor = pc.Group.Figures[1].BorderColor;
+                        f.FillColor = fill;
+                        f.BorderColor = border;
 
                         f.Id = _core.Ids.ToString();
                         f.Name = "BoolenResult " + f.Id;
@@ -1018,7 +1007,6 @@ namespace Dipl_template_winforms
                 else
                 {
                     trianglesBool = new TrianglesBool(pc.Group.Figures[0], pc.Group.Figures[1], Operations.Sub);
-                    MessageBox.Show(trianglesBool.ResTime);
                 }
             }
         }
@@ -1091,8 +1079,6 @@ namespace Dipl_template_winforms
                 double y = ParseToDouble(dataGridView1[1, row].Value.ToString());
 
                 pc.PointInGridView = new Vector2d(x, y);
-
-                //MessageBox.Show(v.ToString(), "Current Cell");
             }
         }
 
@@ -1105,6 +1091,11 @@ namespace Dipl_template_winforms
             glControl1.Invalidate();
         }
 
-        
+        private void nud_LineWidth_ValueChanged(object sender, EventArgs e)
+        {
+            if (pc.Group.SelectingFigure != null)
+                pc.Group.SelectingFigure.LineWidth = (float)nud_LineWidth.Value;
+            glControl1.Invalidate();
+        }
     }
 }

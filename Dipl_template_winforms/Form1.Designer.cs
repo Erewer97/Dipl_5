@@ -623,6 +623,7 @@
             this.cb_IsShow.TabIndex = 21;
             this.cb_IsShow.Text = "Скрыть";
             this.cb_IsShow.UseVisualStyleBackColor = true;
+            this.cb_IsShow.Visible = false;
             this.cb_IsShow.CheckedChanged += new System.EventHandler(this.cb_IsShow_CheckedChanged);
             // 
             // textBox1
@@ -667,6 +668,7 @@
             0,
             0,
             0});
+            this.nud_LineWidth.ValueChanged += new System.EventHandler(this.nud_LineWidth_ValueChanged);
             // 
             // btn_fill_color
             // 
@@ -964,7 +966,7 @@
             this.tstb_W});
             this.toolStrip4.Location = new System.Drawing.Point(3, 0);
             this.toolStrip4.Name = "toolStrip4";
-            this.toolStrip4.Size = new System.Drawing.Size(1057, 25);
+            this.toolStrip4.Size = new System.Drawing.Size(1026, 25);
             this.toolStrip4.TabIndex = 1;
             // 
             // toolStripLabel3

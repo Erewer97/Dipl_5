@@ -183,16 +183,6 @@ namespace Dipl_template_winforms
         public Vector2d PointInGridView { get; set; }
         public bool IsAttenton { get; set; } = true;
         public Group Group { get; set; } = new Group();
-
-        public void ClearListSelectedFigures()
-        {
-            if (ListSelFig.Count > 0)
-            {
-                for (int i = 0; i < ListSelFig.Count; i++)
-                    ListSelFig[i].IsSelect = false;
-                ListSelFig.Clear();
-            }
-        }
     }
 
     public class Grid

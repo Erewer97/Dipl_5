@@ -1626,279 +1626,6 @@ namespace Dipl_template_winforms
         }
     }
 
-    public class SVG
-    {
-        public string Res { get; set; }
-        public ulong ID { get; set; }
-        public int Width { get; set; }
-        public int Height { get; set; }
-
-        WorkWithMouse mouse;
-        int sx, sy;
-
-        List<Layer> _layers = new List<Layer>();
-        public List<Layer> Layers
-        {
-            get
-            {
-                return _layers;
-            }
-            set { _layers = value; }
-        }
-
-        public SVG() {; }
-        public SVG(string fileName, int controlWidth, int controlH)
-        {
-            if (fileName.Length == 0)
-                return;
-            XmlDocument xDoc = new XmlDocument();
-            xDoc.Load(fileName);
-
-            // получим корневой элемент
-            XmlElement xRoot = xDoc.DocumentElement;
-
-            Width = int.Parse(xRoot.Attributes["viewBox"].Value.Split(new char[] { ' ' })[2]);
-            Height = int.Parse(xRoot.Attributes["viewBox"].Value.Split(new char[] { ' ' })[3]);
-
-            sx = (controlWidth - Width) / 2;
-            sy = (controlH - Height) / 2;
-
-            mouse = new WorkWithMouse(controlWidth, controlH, 10.0f);
-
-            // обход всех узлов в корневом элементе
-            int i = 0;
-            foreach (XmlNode xnode in xRoot)
-            {
-                if (xnode.Name == "g")
-                {
-                    Layer layer = new Layer("layer_" + i.ToString(), "L" + i.ToString());
-                    Res += ParseGroup(layer, xnode);
-                    _layers.Add(layer);
-                    i++;
-                }
-            }
-        }
-
-        string ParseGroup(Layer layer, XmlNode xmlNode)
-        {
-            string id = xmlNode.Attributes["id"].Value;
-            string d = "G: " + id + "\n";
-            XmlNodeList c = xmlNode.ChildNodes;
-
-            //if (layer != null)
-            //    foreach (XmlNode node in c)
-            //    {
-            //        switch (node.Name)
-            //        {
-            //            case "metadata":
-            //                d += "  Meta:\n";
-            //                break;
-
-            //            case "rect":
-            //                d += "  Rectangle:\n";
-            //                double x = double.Parse(node.Attributes["x"].Value, System.Globalization.CultureInfo.InvariantCulture);
-            //                double y = double.Parse(node.Attributes["y"].Value, System.Globalization.CultureInfo.InvariantCulture);
-
-            //                double w = double.Parse(node.Attributes["width"].Value, System.Globalization.CultureInfo.InvariantCulture);
-            //                double h = double.Parse(node.Attributes["height"].Value, System.Globalization.CultureInfo.InvariantCulture);
-
-            //                var a = mouse.MousePosition((sx + (int)x), (sy + (int)y));
-            //                var b = mouse.MousePosition((sx + (int)x + (int)w), (sy + (int)y + (int)h));
-
-            //                Figure rect = new Figure(ID++, a, b);
-            //                SetAttr(rect, node);
-            //                rect.CalcAABB();
-            //                rect.IsSelect = false;
-            //                rect.TranslateToCenterAxis();
-            //                layer.AddFigure(rect);
-            //                break;
-
-            //            case "ellipse":
-            //                d += "  Ellipse:\n";
-            //                x = double.Parse(node.Attributes["cx"].Value, System.Globalization.CultureInfo.InvariantCulture);
-            //                y = double.Parse(node.Attributes["cy"].Value, System.Globalization.CultureInfo.InvariantCulture);
-
-            //                double rx = double.Parse(node.Attributes["rx"].Value, System.Globalization.CultureInfo.InvariantCulture);
-            //                double ry = double.Parse(node.Attributes["ry"].Value, System.Globalization.CultureInfo.InvariantCulture);
-
-            //                a = mouse.MousePosition((sx + (int)x), (sy + (int)y));
-            //                rx = Math.Abs(mouse.MousePosition(sx + (int)rx, 0).X - mouse.MousePosition(sx, 0).X);
-            //                ry = Math.Abs(mouse.MousePosition(sy + (int)ry, 0).X - mouse.MousePosition(sy, 0).X);
-            //                Ellipsoid circle = new Ellipsoid(ID++, new Vector2d(a.X, a.Y), rx, ry);
-            //                circle.CalcPoints();
-            //                SetAttr(circle, node);
-            //                circle.CalcAABB();
-            //                circle.IsSelect = false;
-            //                circle.TranslateToCenterAxis();
-            //                layer.AddFigure(circle);
-            //                break;
-
-            //            case "circle":
-            //                d += "  Circle:\n";
-            //                x = double.Parse(node.Attributes["cx"].Value, System.Globalization.CultureInfo.InvariantCulture);
-            //                y = double.Parse(node.Attributes["cy"].Value, System.Globalization.CultureInfo.InvariantCulture);
-
-            //                double r = double.Parse(node.Attributes["r"].Value, System.Globalization.CultureInfo.InvariantCulture);
-
-            //                a = mouse.MousePosition((sx + (int)x), (sy + (int)y));
-            //                r = Math.Abs(mouse.MousePosition(sx + (int)r, 0).X - mouse.MousePosition(sx, 0).X);
-
-            //                Ellipsoid cc = new Ellipsoid(ID++, new Vector2d(a.X, a.Y), r, r);
-            //                cc.CalcPoints();
-            //                SetAttr(cc, node);
-            //                cc.CalcAABB();
-            //                cc.IsSelect = false;
-            //                cc.TranslateToCenterAxis();
-            //                layer.AddFigure(cc);
-            //                break;
-
-            //            case "polygon":
-            //                d += "  Polygon:\n";
-            //                string s = GetAttr("points", node);
-            //                string[] points = s.Split(new char[] { ' ' });
-            //                List<Vector2d> l = new List<Vector2d>();
-            //                for (int k = 0; k < points.Length - 1; k++)
-            //                {
-            //                    string[] s1 = points[k].Split(new char[] { ',' });
-            //                    double xx = double.Parse(s1[0], System.Globalization.CultureInfo.InvariantCulture);
-            //                    double yy = double.Parse(s1[1], System.Globalization.CultureInfo.InvariantCulture);
-            //                    l.Add(mouse.MousePosition((sx + xx), (sy + yy)));
-            //                }
-            //                Polygon poli = new Polygon(ID++, l);
-            //                poli.CalcAABB();
-            //                SetAttr(poli, node);
-            //                poli.CalcAABB();
-            //                poli.IsSelect = false;
-            //                poli.TranslateToCenterAxis();
-            //                layer.AddFigure(poli);
-            //                break;
-
-            //            case "path":
-            //                d += "  Path:\n";
-
-            //                break;
-
-            //            case "line":
-            //                d += "  Line:\n";
-            //                double x1 = double.Parse(node.Attributes["x1"].Value, System.Globalization.CultureInfo.InvariantCulture);
-            //                double y1 = double.Parse(node.Attributes["y1"].Value, System.Globalization.CultureInfo.InvariantCulture);
-
-            //                double x2 = double.Parse(node.Attributes["x2"].Value, System.Globalization.CultureInfo.InvariantCulture);
-            //                double y2 = double.Parse(node.Attributes["y2"].Value, System.Globalization.CultureInfo.InvariantCulture);
-
-            //                a = mouse.MousePosition((sx + (int)x1), (sy + (int)y1));
-            //                b = mouse.MousePosition((sx + (int)x2), (sy + (int)y2));
-
-            //                Line line = new Line(
-            //                    ID++,
-            //                    a,
-            //                    b);
-            //                SetAttr(line, node);
-            //                line.CalcAABB();
-            //                line.IsSelect = false;
-            //                line.TranslateToCenterAxis();
-            //                layer.AddFigure(line);
-            //                break;
-
-            //            case "g":
-            //                d += ParseGroup(layer, node);
-            //                break;
-
-            //            default:
-            //                break;
-            //        }
-            //        //return d;
-            //    }
-
-            return d;
-        }
-        string GetAttr(string attr, XmlNode xmlNode)
-        {
-            if (xmlNode.Attributes[attr] != null)
-                return xmlNode.Attributes[attr].Value;
-            else
-                return null;
-        }
-        void SetAttr(Figure figure, XmlNode xmlNode)
-        {
-            string s = null;
-            switch (figure.Type)
-            {
-                case TypeFigures.Line:
-                    s = GetAttr("stroke", xmlNode);
-                    if (s != null)
-                        figure.FillColor = ColorTranslator.FromHtml(s);
-
-                    s = GetAttr("stroke-width", xmlNode);
-                    if (s != null)
-                        figure.LineWidth = float.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
-
-                    if ((s = GetAttr("id", xmlNode)) != null)
-                        figure.Name = s;
-                    break;
-
-                case TypeFigures.Circle:
-                    s = GetAttr("stroke", xmlNode);
-                    if (s != null)
-                        figure.BorderColor = ColorTranslator.FromHtml(s);
-
-                    s = GetAttr("stroke-width", xmlNode);
-                    if (s != null)
-                        figure.LineWidth = float.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
-
-                    if ((s = GetAttr("fill", xmlNode)) != null)
-                        figure.FillColor = ColorTranslator.FromHtml(s);
-
-                    if ((s = GetAttr("id", xmlNode)) != null)
-                        figure.Name = s;
-                    break;
-
-                case TypeFigures.Rect:
-                    s = GetAttr("stroke", xmlNode);
-                    if (s != null)
-                        figure.BorderColor = ColorTranslator.FromHtml(s);
-
-                    if ((s = GetAttr("fill", xmlNode)) != null)
-                        figure.FillColor = ColorTranslator.FromHtml(s);
-
-                    s = GetAttr("stroke-width", xmlNode);
-                    if (s != null)
-                        figure.LineWidth = float.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
-
-                    if ((s = GetAttr("id", xmlNode)) != null)
-                        figure.Name = s;
-                    break;
-
-                case TypeFigures.Polygon:
-                    s = GetAttr("stroke", xmlNode);
-                    if (s != null)
-                        figure.BorderColor = ColorTranslator.FromHtml(s);
-
-                    s = GetAttr("stroke-width", xmlNode);
-                    if (s != null)
-                        figure.LineWidth = float.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
-
-                    if ((s = GetAttr("fill", xmlNode)) != null)
-                        figure.FillColor = ColorTranslator.FromHtml(s);
-
-                    if ((s = GetAttr("id", xmlNode)) != null)
-                        figure.Name = s;
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        public void Draw()
-        {
-            foreach (var l in _layers)
-            {
-                l.Draw();
-            }
-        }
-    }
-
     public class ExportInGEO
     {
         public string PathToExport { get; set; } = string.Empty;
@@ -3049,6 +2776,8 @@ namespace Dipl_template_winforms
         public List<Triangle> Sub { get; set; } = new List<Triangle>();
         public string ResTime { get; private set; }
 
+        List<Vector2d> res = new List<Vector2d>();
+
         public TrianglesBool() {; }
         public TrianglesBool(List<Triangle> Tr1, List<Triangle> Tr2, List<Vector2d> F1, List<Vector2d> F2, Operations o)
         {
@@ -3264,8 +2993,33 @@ namespace Dipl_template_winforms
         {
             if (Intersect.Count > 0)
             {
+                Triangle a = Intersect[0];
+                res.Add(a.A);
+                res.Add(a.B);
+                res.Add(a.C);
+
+                for (int i = 0; i < Intersect.Count; i++)
+                {
+                    Triangle t = Intersect[i];
+
+                    if (!res.Contains(t.A)) res.Add(t.A);
+                    if (!res.Contains(t.B)) res.Add(t.B);
+                    if (!res.Contains(t.C)) res.Add(t.C);
+                }
+            }
+            if (Union.Count > 0)
+            {
 
             }
+            if (Sub.Count > 0)
+            {
+
+            }
+        }
+        public List<Vector2d> Result()
+        {
+            Verteces();
+            return res;
         }
         public void Draw()
         {

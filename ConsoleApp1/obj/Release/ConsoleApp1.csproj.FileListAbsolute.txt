@@ -1,0 +1,9 @@
+F:\_____PROGECTS\Dipl_5_12\ConsoleApp1\bin\Release\ConsoleApp1.exe.config
+F:\_____PROGECTS\Dipl_5_12\ConsoleApp1\bin\Release\ConsoleApp1.exe
+F:\_____PROGECTS\Dipl_5_12\ConsoleApp1\bin\Release\ConsoleApp1.pdb
+F:\_____PROGECTS\Dipl_5_12\ConsoleApp1\bin\Release\OpenTK.Compatibility.dll
+F:\_____PROGECTS\Dipl_5_12\ConsoleApp1\bin\Release\OpenTK.dll
+F:\_____PROGECTS\Dipl_5_12\ConsoleApp1\bin\Release\OpenTK.GLControl.dll
+F:\_____PROGECTS\Dipl_5_12\ConsoleApp1\obj\Release\ConsoleApp1.csproj.CoreCompileInputs.cache
+F:\_____PROGECTS\Dipl_5_12\ConsoleApp1\obj\Release\ConsoleApp1.exe
+F:\_____PROGECTS\Dipl_5_12\ConsoleApp1\obj\Release\ConsoleApp1.pdb

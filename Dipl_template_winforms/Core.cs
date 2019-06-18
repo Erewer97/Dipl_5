@@ -2345,9 +2345,7 @@ namespace Dipl_template_winforms
                     TimeSpan ts = stopWatch.Elapsed;
 
                     // Format and display the TimeSpan value.
-                    ResTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                        ts.Hours, ts.Minutes, ts.Seconds,
-                        ts.Milliseconds / 10);
+                    ResTime = ts.Milliseconds.ToString();
 
                     if (res.Count > 2)
                         return res;
@@ -2368,9 +2366,7 @@ namespace Dipl_template_winforms
                     ts = stopWatch.Elapsed;
 
                     // Format and display the TimeSpan value.
-                    ResTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                        ts.Hours, ts.Minutes, ts.Seconds,
-                        ts.Milliseconds / 10);
+                    ResTime = ts.Milliseconds.ToString();
 
                     return res;
 
@@ -2389,9 +2385,7 @@ namespace Dipl_template_winforms
                     ts = stopWatch.Elapsed;
 
                     // Format and display the TimeSpan value.
-                    ResTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                        ts.Hours, ts.Minutes, ts.Seconds,
-                        ts.Milliseconds / 10);
+                    ResTime = ts.Milliseconds.ToString();
 
                     return res;
 
@@ -3053,17 +3047,32 @@ namespace Dipl_template_winforms
         public List<Triangle> Intersect { get; set; } = new List<Triangle>();
         public List<Triangle> Union { get; set; } = new List<Triangle>();
         public List<Triangle> Sub { get; set; } = new List<Triangle>();
+        public string ResTime { get; private set; }
 
         public TrianglesBool() {; }
         public TrianglesBool(List<Triangle> Tr1, List<Triangle> Tr2, List<Vector2d> F1, List<Vector2d> F2, Operations o)
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             Triangulating(Tr1, Tr2, F1, F2);
             CalcCenters(F1, F2, o);
+
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            ResTime = ts.Milliseconds.ToString();
         }
         public TrianglesBool(Figure f1, Figure f2, Operations operations)
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             Triangulating(f1.Triangles, f2.Triangles, f1.Verteces, f2.Verteces);
             CalcCenters(f1.Verteces, f2.Verteces, operations);
+
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            ResTime = ts.Milliseconds.ToString();
         }
 
 

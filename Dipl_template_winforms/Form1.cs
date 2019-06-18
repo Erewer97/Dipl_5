@@ -830,6 +830,7 @@ namespace Dipl_template_winforms
                     modificators.Operation = Operations.Interset;
 
                     pc.res = modificators.Result();
+                    MessageBox.Show(modificators.ResTime);
                     if (pc.res.Count > 0)
                     {
                         Figure f = new Figure();
@@ -862,6 +863,7 @@ namespace Dipl_template_winforms
                 else
                 {
                     trianglesBool = new TrianglesBool(t1, t2, f1, f2, Operations.Interset);
+                    MessageBox.Show(trianglesBool.ResTime);
                 }
             }
         }
@@ -879,6 +881,7 @@ namespace Dipl_template_winforms
                     modificators.Operation = Operations.Union;
 
                     pc.res = modificators.Result();
+                    MessageBox.Show(modificators.ResTime);
                     if (pc.res.Count > 0)
                     {
                         Figure f = new Figure();
@@ -892,7 +895,7 @@ namespace Dipl_template_winforms
                         f.TranslateToCenterCoordinates();
                         f.ReCalc();
 
-                        f.FillColor   = pc.Group.Figures[1].FillColor;
+                        f.FillColor = pc.Group.Figures[1].FillColor;
                         f.BorderColor = pc.Group.Figures[1].BorderColor;
 
                         pc.ClearListSelectedFigures();
@@ -909,7 +912,10 @@ namespace Dipl_template_winforms
                     }
                 }
                 else
+                {
                     trianglesBool = new TrianglesBool(pc.Group.Figures[0], pc.Group.Figures[1], Operations.Union);
+                    MessageBox.Show(trianglesBool.ResTime);
+                }
             }
             else if (pc.Group.Figures.Count > 2)
             {
@@ -980,6 +986,7 @@ namespace Dipl_template_winforms
                     modificators.Operation = Operations.Sub;
 
                     pc.res = modificators.Result();
+                    MessageBox.Show(modificators.ResTime);
                     if (pc.res.Count > 0)
                     {
                         Figure f = new Figure();
@@ -1011,6 +1018,7 @@ namespace Dipl_template_winforms
                 else
                 {
                     trianglesBool = new TrianglesBool(pc.Group.Figures[0], pc.Group.Figures[1], Operations.Sub);
+                    MessageBox.Show(trianglesBool.ResTime);
                 }
             }
         }

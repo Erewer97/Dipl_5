@@ -10,17 +10,39 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Platform.Windows;
 using System.Xml;
+using System.Diagnostics;
 using System.IO;
 
 namespace ConsoleApp1
 {
     public enum TypeFigures { None, Line, Rect, Circle, Curve, Polygon, Ellipsoid }
-    public enum Operations { None, Union, Interset }
+    public enum Operations { None, Union, Interset , Sub}
     public enum ActionWithFigure { None, Move, Rotate, Scale }
     public enum SelectingMode { Points, Edges }
 
     public static class MathVec
     {
+        public static bool Hit(Vector2d v, List<Vector2d> Verteces)
+        {
+            Vector2d Point = v;
+            bool result = false;
+            int j = Verteces.Count - 1;
+
+
+            for (int i = 0; i < Verteces.Count; i++)
+            {
+                if (
+                    (Verteces[i].Y < Point.Y && Verteces[j].Y >= Point.Y
+                    ||
+                    Verteces[j].Y < Point.Y && Verteces[i].Y >= Point.Y)
+                    &&
+                     (Verteces[i].X + (Point.Y - Verteces[i].Y) / (Verteces[j].Y - Verteces[i].Y) * (Verteces[j].X - Verteces[i].X) < Point.X))
+                    result = !result;
+                j = i;
+            }
+
+            return result;
+        }
         public static Vector2d AbsSub(Vector2d a, Vector2d b)
         {
             return new Vector2d(Math.Abs((a - b).X), Math.Abs((a - b).Y));
@@ -42,6 +64,12 @@ namespace ConsoleApp1
             else
                 return false;
         }
+        public static bool DCompare(double a, double b)
+        {
+            if (Math.Abs(a - b) <= 0.001)
+                return true;
+            return false;
+        }
         public static bool VectrCompare(Vector2d a, Vector2d b)
         {
             Vector2d v = AbsSub(a, b);
@@ -51,11 +79,7 @@ namespace ConsoleApp1
             else
                 return false;
         }
-        public static int DCompare(double a, double b)
-        {
-            int r = a.CompareTo(b);
-            return r;
-        }
+
         public static bool DoubEquale(double a, double b, double e)
         {
             if (Math.Abs(a - b) <= 4 * e * Math.Max(Math.Abs(a), Math.Abs(b)))
@@ -395,6 +419,7 @@ namespace ConsoleApp1
 
     public class Figure
     {
+        public List<Triangle> Triangles { get { return _triangles; } private set {; } }
         public string Name { get; set; }
         public string Id { get; set; }
         public bool IsClosed { get; set; } = true; // Замкнута ли фигура?
@@ -1544,7 +1569,7 @@ namespace ConsoleApp1
             this.b = b;
             this.c = c;
         }
-
+        public Vector2d Center { get { return (A + B + C) / 3.0; } private set {; } }
         public override string ToString()
         {
             return a.ToString() + " " + b.ToString() + " " + c.ToString() + "\n"; 
@@ -1560,9 +1585,10 @@ namespace ConsoleApp1
         List<Vector2d> figure2 = new List<Vector2d>();
 
         public Operations Operation { get { return operation; } set { operation = value; } }
+        public string ResTime { get; private set; }
 
         public Modificators() {; }
-        public Modificators(List<Vector2d> InputFigure1, List<Vector2d> Figure2) 
+        public Modificators(List<Vector2d> InputFigure1, List<Vector2d> Figure2)
         {
             figure1 = InputFigure1; figure2 = Figure2;
         }
@@ -1629,6 +1655,9 @@ namespace ConsoleApp1
         }
         public List<Vector2d> Result()
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             List<Vector2d> res = new List<Vector2d>();
             List<Vertex> F1 = new List<Vertex>();
             List<Vertex> F2 = new List<Vertex>();
@@ -1651,80 +1680,68 @@ namespace ConsoleApp1
             List<Vertex> pointsIntersection = Calculate();
             //-------------------------------------------------
 
-            //ChangeList(F1, pointsIntersection, 1);
-            //ChangeList(F2, pointsIntersection, 2);
             ChangeList(F1, pointsIntersection);
             ChangeList(F2, pointsIntersection);
 
             switch (operation)
             {
                 case Operations.Interset:
-                    bool exit = false, change = false;
-                    Vertex v = pointsIntersection[0];
-                    int i = F1.IndexOf(v);
-                    int begin = i;
-                    res.Add(v.V);
-                    while (!exit)
-                    {
-                        i++;
-                        v = F1[i];
+                    if (F1[0].IsInOtherFigure)
+                        res = intersect(F1, F2, pointsIntersection);
+                    else if (F2[0].IsInOtherFigure)
+                        res = intersect(F2, F1, pointsIntersection);
+                    else
+                        res = intersect1(F1, F2, pointsIntersection);
 
-                        if (v.IsInOtherFigure)
-                            res.Add(v.V);
+                    stopWatch.Stop();
+                    // Get the elapsed time as a TimeSpan value.
+                    TimeSpan ts = stopWatch.Elapsed;
 
-                        if (begin == i)
-                            exit = true;
+                    // Format and display the TimeSpan value.
+                    ResTime = ts.Milliseconds.ToString();
 
-                        if (v.IsPointIntersection && (exit == false))
-                        {
-                            res.Add(v.V);
-                            int ind = F2.FindIndex(x => x.V == v.V);
-                            if (ind == F2.Count - 1)
-                            {
-                                ind = 0;
-                                v = F2[ind];
-                                while (!change)
-                                {
-                                    if (v.IsInOtherFigure)
-                                        res.Add(v.V);
+                    if (res.Count > 2)
+                        return res;
+                    else
+                        return new List<Vector2d>();
+                    break;
 
-                                    if (v.IsPointIntersection)
-                                    {
-                                        //res.Add(v.V);
-                                        change = true;
-                                    }
+                case Operations.Union:
+                    if (F1[0].IsInOtherFigure && F2[0].IsInOtherFigure)
+                        res = union1(F1, F2, pointsIntersection);
+                    else if (F1[0].IsInOtherFigure)
+                        res = union(F2, F1, pointsIntersection);
+                    else
+                        res = union(F1, F2, pointsIntersection);
 
-                                    ind++;
-                                    v = F2[ind];
-                                }
-                            }
-                            else
-                            {
-                                ind++;
-                                v = F2[ind];
-                                while (!change)
-                                {
-                                    if (v.IsInOtherFigure)
-                                        res.Add(v.V);
+                    stopWatch.Stop();
+                    // Get the elapsed time as a TimeSpan value.
+                    ts = stopWatch.Elapsed;
 
-                                    if (v.IsPointIntersection)
-                                    {
-                                        //res.Add(v.V);
-                                        change = true;
-                                    }
+                    // Format and display the TimeSpan value.
+                    ResTime = ts.Milliseconds.ToString();
 
-                                    if (ind != F2.Count - 1)
-                                        ind++;
-                                    else
-                                        ind = 0;
-                                    v = F2[ind];
-                                }
-                            }
+                    return res;
 
-                            i = -1;
-                            //exit = true;
-                        }                      
-                    }
+                    break;
+
+                case Operations.Sub:
+                    if (F1[0].IsInOtherFigure && F2[0].IsInOtherFigure)
+                        res = sub1(F1, F2, pointsIntersection);
+                    else if (F1[0].IsInOtherFigure && (!F2[0].IsInOtherFigure))
+                        res = sub2(F1, F2, pointsIntersection);
+                    else
+                        res = sub(F1, F2, pointsIntersection);
+
+                    stopWatch.Stop();
+                    // Get the elapsed time as a TimeSpan value.
+                    ts = stopWatch.Elapsed;
+
+                    // Format and display the TimeSpan value.
+                    ResTime = ts.Milliseconds.ToString();
+
+                    return res;
+
                     break;
 
                 default:
@@ -1733,41 +1750,558 @@ namespace ConsoleApp1
 
             return res;
         }
-       
-        public void ChangeList(List<Vertex> inputList, List<Vertex> pointsInter, int numList)
+
+        public List<Vector2d> intersect(List<Vertex> F1, List<Vertex> F2, List<Vertex> pointsIntersection)
         {
-            int i = 1;
-            if (numList == 1)
+            List<Vector2d> res = new List<Vector2d>();
+            bool exit = false, change = false;
+            Vertex v = new Vertex();
+            int i = 0;
+            int begin = 0;
+            //res.Add(v.V);
+            while (!exit)
             {
-                foreach (Vertex v in pointsInter)
+                v = F1[i];
+
+                if (v.IsInOtherFigure)
+                    res.Add(v.V);
+
+                if (v.IsPointIntersection && (exit == false))
                 {
-                    if ((v.IndexIn1 + i) == figure1.Count && (v.IndexIn1 != figure1.Count - i))
+                    res.Add(v.V);
+                    //int ind = F2.FindIndex(x => x.V == v.V);
+                    int ind = F2.FindIndex(
+                        x => {
+                            return MathVec.DCompare(x.V.X, v.V.X) && MathVec.DCompare(x.V.Y, v.V.Y);
+                        }
+                    );
+                    if (ind == F2.Count - 1)
                     {
-                        inputList.Add(v);
+                        ind = 0;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            ind++;
+                            v = F2[ind];
+                        }
                     }
                     else
                     {
-                        inputList.Insert(v.IndexIn1 + i, v);
-                        i++;
+                        ind++;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                res.Add(v.V);
+                                change = true;
+                            }
+
+                            if (change == false)
+                            {
+                                if (ind != F2.Count - 1)
+                                    ind++;
+                                else
+                                    ind = 0;
+                                v = F2[ind];
+                            }
+                        }
                     }
+
+                    i = F1.FindIndex(
+                        x =>
+                        {
+                            return MathVec.DCompare(x.V.X, v.V.X) && MathVec.DCompare(x.V.Y, v.V.Y);
+                        });
+                    //exit = true;
                 }
+
+                if (i == F1.Count - 1)
+                    exit = true;
+
+                i++;
             }
-            else
-            {
-                foreach (Vertex v in pointsInter)
-                {
-                    if ((v.IndexIn2 + i) == figure1.Count && (v.IndexIn2 != figure1.Count - i))
-                    {
-                        inputList.Add(v);
-                    }
-                    else
-                    {
-                        inputList.Insert(v.IndexIn2 + i, v);
-                        i++;
-                    }
-                }
-            }
+
+            return res;
         }
+        public List<Vector2d> intersect1(List<Vertex> F1, List<Vertex> F2, List<Vertex> pointsIntersection)
+        {
+            List<Vector2d> res = new List<Vector2d>();
+            bool exit = false, change = false;
+
+            int i = F1.FindIndex(x => x.IsPointIntersection == true);
+            Vertex v = F1[i];
+
+            res.Add(v.V);
+            while (!exit)
+            {
+                i++;
+                v = F1[i];
+
+                if (v.IsInOtherFigure)
+                    res.Add(v.V);
+
+                if (v.IsPointIntersection && (exit == false))
+                {
+                    res.Add(v.V);
+
+                    int ind = F2.FindIndex(x => x.IsPointIntersection == true);
+                    if (ind == F2.Count - 1)
+                    {
+                        ind = 0;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            ind++;
+                            v = F2[ind];
+                        }
+                    }
+                    else
+                    {
+                        ind++;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            if (change == false)
+                            {
+                                if (ind != F2.Count - 1)
+                                    ind++;
+                                else
+                                    ind = 0;
+                                v = F2[ind];
+                            }
+                        }
+                    }
+                    exit = true;
+                }
+            }
+
+            return res;
+        }
+        public List<Vector2d> union(List<Vertex> F1, List<Vertex> F2, List<Vertex> pointsIntersection)
+        {
+            List<Vector2d> res = new List<Vector2d>();
+            bool exit = false, change = false;
+            Vertex v = new Vertex();
+            int i = 0;
+            int begin = 0;
+            //res.Add(v.V);
+            while (!exit)
+            {
+                v = F1[i];
+
+                if (!v.IsInOtherFigure)
+                    res.Add(v.V);
+
+                if (v.IsPointIntersection && (exit == false))
+                {
+                    res.Add(v.V);
+                    //int ind = F2.FindIndex(x => x.V == v.V);
+                    int ind = F2.FindIndex(
+                        x => {
+                            return MathVec.DCompare(x.V.X, v.V.X) && MathVec.DCompare(x.V.Y, v.V.Y);
+                        }
+                    );
+                    if (ind == F2.Count - 1)
+                    {
+                        ind = 0;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (!v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            ind++;
+                            v = F2[ind];
+                        }
+                    }
+                    else
+                    {
+                        ind++;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (!v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                res.Add(v.V);
+                                change = true;
+                            }
+
+                            if (change == false)
+                            {
+                                if (ind != F2.Count - 1)
+                                    ind++;
+                                else
+                                    ind = 0;
+                                v = F2[ind];
+                            }
+                        }
+                    }
+
+                    i = F1.FindIndex(
+                        x =>
+                        {
+                            return MathVec.DCompare(x.V.X, v.V.X) && MathVec.DCompare(x.V.Y, v.V.Y);
+                        });
+                    //exit = true;
+                }
+
+                if (i == F1.Count - 1)
+                    exit = true;
+
+                i++;
+            }
+
+            return res;
+        }
+        public List<Vector2d> union1(List<Vertex> F1, List<Vertex> F2, List<Vertex> pointsIntersection)
+        {
+            List<Vector2d> res = new List<Vector2d>();
+            bool exit = false, change = false;
+
+            int i = F1.FindIndex(x => x.IsPointIntersection == true);
+            Vertex v = F1[i];
+
+            res.Add(v.V);
+            while (!exit)
+            {
+                i++;
+                v = F1[i];
+
+                if (!v.IsInOtherFigure)
+                    res.Add(v.V);
+
+                if (v.IsPointIntersection && (exit == false))
+                {
+                    res.Add(v.V);
+
+                    int ind = F2.FindIndex(x => x.IsPointIntersection == true);
+                    if (ind == F2.Count - 1)
+                    {
+                        ind = 0;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (!v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            ind++;
+                            v = F2[ind];
+                        }
+                    }
+                    else
+                    {
+                        ind++;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (!v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            if (change == false)
+                            {
+                                if (ind != F2.Count - 1)
+                                    ind++;
+                                else
+                                    ind = 0;
+                                v = F2[ind];
+                            }
+                        }
+                    }
+                    exit = true;
+                }
+            }
+
+            return res;
+        }
+        public List<Vector2d> sub(List<Vertex> F1, List<Vertex> F2, List<Vertex> pointsIntersection)
+        {
+            List<Vector2d> res = new List<Vector2d>();
+            bool exit = false, change = false;
+
+            int i = 0;// F1.FindIndex(x => x.IsPointIntersection == true);
+            Vertex v = F1[i];
+
+            res.Add(v.V);
+            while (!exit)
+            {
+                i++;
+                v = F1[i];
+
+                if (!v.IsInOtherFigure)
+                    res.Add(v.V);
+
+                if (v.IsPointIntersection && (exit == false))
+                {
+                    res.Add(v.V);
+
+                    int ind = F2.FindIndex(x => { return MathVec.DCompare(x.V.X, v.V.X) && MathVec.DCompare(x.V.Y, v.V.Y); });
+                    if (ind == F2.Count - 1)
+                    {
+                        //ind = 0;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            ind--;
+                            v = F2[ind];
+                        }
+                    }
+                    else
+                    {
+                        ind--;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            if (change == false)
+                            {
+                                if (ind != 0)
+                                    ind--;
+                                else
+                                    ind = F2.Count - 1;
+                                v = F2[ind];
+                            }
+                        }
+                    }
+
+                    res.Add(v.V);
+                    i = F1.FindIndex(x => { return MathVec.DCompare(x.V.X, v.V.X) && MathVec.DCompare(x.V.Y, v.V.Y); });
+
+                    if (i == F1.Count - 1)
+                    {
+                        exit = true;
+                    }
+                    else
+                    {
+                        while (i != F1.Count - 1)
+                        {
+                            i++;
+                            v = F1[i];
+
+                            if (!v.IsInOtherFigure)
+                                res.Add(v.V);
+                        }
+                    }
+
+                    exit = true;
+                }
+            }
+
+            return res;
+        }
+        public List<Vector2d> sub1(List<Vertex> F1, List<Vertex> F2, List<Vertex> pointsIntersection)
+        {
+            List<Vector2d> res = new List<Vector2d>();
+            bool exit = false, change = false;
+
+            int i = F1.FindIndex(x => x.IsPointIntersection == true);
+            Vertex v = F1[i];
+
+            res.Add(v.V);
+            while (!exit)
+            {
+                i++;
+                v = F1[i];
+
+                if (!v.IsInOtherFigure)
+                    res.Add(v.V);
+
+                if (v.IsPointIntersection && (exit == false))
+                {
+                    res.Add(v.V);
+
+                    int ind = F2.FindIndex(x => x.IsPointIntersection == true);
+                    if (ind == F2.Count - 1)
+                    {
+                        //ind = 0;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            ind--;
+                            v = F2[ind];
+                        }
+                    }
+                    else
+                    {
+                        ind--;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            if (change == false)
+                            {
+                                if (ind != 0)
+                                    ind--;
+                                else
+                                    ind = F2.Count - 1;
+                                v = F2[ind];
+                            }
+                        }
+                    }
+                    exit = true;
+                }
+            }
+
+            return res;
+        }
+        public List<Vector2d> sub2(List<Vertex> F1, List<Vertex> F2, List<Vertex> pointsIntersection)
+        {
+            List<Vector2d> res = new List<Vector2d>();
+            bool exit = false, change = false;
+
+            int i = F1.FindIndex(x => x.IsPointIntersection == true);
+            Vertex v = F1[i];
+
+            res.Add(v.V);
+            while (!exit)
+            {
+                i++;
+                v = F1[i];
+
+                if (!v.IsInOtherFigure)
+                    res.Add(v.V);
+
+                if (v.IsPointIntersection && (exit == false))
+                {
+                    res.Add(v.V);
+
+                    int ind = F2.FindIndex(x => { return MathVec.DCompare(x.V.X, v.V.X) && MathVec.DCompare(x.V.Y, v.V.Y); });
+                    if (ind == F2.Count - 1)
+                    {
+                        //ind = 0;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            ind--;
+                            v = F2[ind];
+                        }
+                    }
+                    else
+                    {
+                        ind--;
+                        v = F2[ind];
+                        while (!change)
+                        {
+                            if (v.IsInOtherFigure)
+                                res.Add(v.V);
+
+                            if (v.IsPointIntersection)
+                            {
+                                //res.Add(v.V);
+                                change = true;
+                            }
+
+                            if (change == false)
+                            {
+                                if (ind != 0)
+                                    ind--;
+                                else
+                                    ind = F2.Count - 1;
+                                v = F2[ind];
+                            }
+                        }
+                    }
+                    exit = true;
+                }
+            }
+
+            return res;
+        }
+
         public void ChangeList(List<Vertex> inputList, List<Vertex> pointsInter)
         {
             bool e = true;
@@ -1775,18 +2309,20 @@ namespace ConsoleApp1
             Vertex v = pointsInter[k];
             while (e)
             {
-                if (j == inputList.Count && MathVec.PointOnEdge(inputList[i].V, inputList[0].V, v.V))
+                if (j == inputList.Count)
                 {
-                    inputList.Add(v);
-                    i = -1;
-                    j = 0;
-                    k++;
-                    if (k == pointsInter.Count)
-                        return;
-                    v = pointsInter[k];
+                    if (MathVec.PointOnEdge(inputList[i].V, inputList[0].V, v.V))
+                    {
+                        inputList.Add(v);
+                        i = -1;
+                        j = 0;
+                        k++;
+                        if (k == pointsInter.Count)
+                            return;
+                        v = pointsInter[k];
+                    }
                 }
-                else
-                if (MathVec.PointOnEdge(inputList[i].V, inputList[j].V, v.V))
+                else if (MathVec.PointOnEdge(inputList[i].V, inputList[j].V, v.V))
                 {
                     inputList.Insert(j, v);
                     i = -1;
@@ -1841,17 +2377,17 @@ namespace ConsoleApp1
             int j = Verteces.Count - 1;
 
 
-                for (int i = 0; i < Verteces.Count; i++)
-                {
-                    if (
-                        (Verteces[i].Y < Point.Y && Verteces[j].Y >= Point.Y
-                        ||
-                        Verteces[j].Y < Point.Y && Verteces[i].Y >= Point.Y)
-                        &&
-                         (Verteces[i].X + (Point.Y - Verteces[i].Y) / (Verteces[j].Y - Verteces[i].Y) * (Verteces[j].X - Verteces[i].X) < Point.X))
-                        result = !result;
-                    j = i;
-                }
+            for (int i = 0; i < Verteces.Count; i++)
+            {
+                if (
+                    (Verteces[i].Y < Point.Y && Verteces[j].Y >= Point.Y
+                    ||
+                    Verteces[j].Y < Point.Y && Verteces[i].Y >= Point.Y)
+                    &&
+                     (Verteces[i].X + (Point.Y - Verteces[i].Y) / (Verteces[j].Y - Verteces[i].Y) * (Verteces[j].X - Verteces[i].X) < Point.X))
+                    result = !result;
+                j = i;
+            }
 
             return result;
         }
@@ -1882,11 +2418,35 @@ namespace ConsoleApp1
     {
         public List<Triangle> Result1 { get; set; } = new List<Triangle>();
         public List<Triangle> Result2 { get; set; } = new List<Triangle>();
+        public List<Triangle> Intersect { get; set; } = new List<Triangle>();
+        public List<Triangle> Union { get; set; } = new List<Triangle>();
+        public List<Triangle> Sub { get; set; } = new List<Triangle>();
+        public string ResTime { get; private set; }
 
-        public TrianglesBool() { ; }
-        public TrianglesBool(List<Triangle> Tr1, List<Triangle> Tr2, List<Vector2d> F1, List<Vector2d> F2)
+        public TrianglesBool() {; }
+        public TrianglesBool(List<Triangle> Tr1, List<Triangle> Tr2, List<Vector2d> F1, List<Vector2d> F2, Operations o)
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             Triangulating(Tr1, Tr2, F1, F2);
+            CalcCenters(F1, F2, o);
+
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            ResTime = ts.Milliseconds.ToString();
+        }
+        public TrianglesBool(Figure f1, Figure f2, Operations operations)
+        {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
+            Triangulating(f1.Triangles, f2.Triangles, f1.Verteces, f2.Verteces);
+            CalcCenters(f1.Verteces, f2.Verteces, operations);
+
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+            ResTime = ts.Milliseconds.ToString();
         }
 
 
@@ -2047,6 +2607,37 @@ namespace ConsoleApp1
             Result1 = res1;
             Result2 = res2;
         }
+        void CalcCenters(List<Vector2d> f1, List<Vector2d> f2, Operations operations)
+        {
+            if (operations == Operations.Interset)
+            {
+                for (int i = 0; i < Result1.Count; i++)
+                    if (MathVec.Hit(Result1[i].Center, f2))
+                        Intersect.Add(Result1[i]);
+
+                for (int i = 0; i < Result2.Count; i++)
+                    if (MathVec.Hit(Result2[i].Center, f1))
+                        Intersect.Add(Result2[i]);
+            }
+            if (operations == Operations.Union)
+            {
+                for (int i = 0; i < Result1.Count; i++)
+                    Union.Add(Result1[i]);
+
+                for (int i = 0; i < Result2.Count; i++)
+                    Union.Add(Result2[i]);
+            }
+            if (operations == Operations.Sub)
+            {
+                for (int i = 0; i < Result1.Count; i++)
+                    if (!MathVec.Hit(Result1[i].Center, f2))
+                        Intersect.Add(Result1[i]);
+            }
+        }
+        public void Draw()
+        {
+
+        }
     }
 
     public class ImportFromGEO
@@ -2114,394 +2705,213 @@ namespace ConsoleApp1
 
     class Program
     {
-        static public List<Triangle> Sub(List<Triangle> triangles, List<Vector2d> lines)
+        public static Figure Add(TypeFigures type, List<Vector2d> mousePos)
         {
-            List<Triangle> res = new List<Triangle>();
+            Vector2d fmp = mousePos[0];
+            Vector2d smp = mousePos[1];
 
-            Triangle triangle = triangles[0];
+            Figure f = new Figure();
 
-            Vector2d End   = lines[1];
-            Vector2d Begin = lines[0];
-
-            Vector2d p1 = (MathVec.LinesIntersection(triangle.A, triangle.B, End, Begin));
-            Vector2d p2 = (MathVec.LinesIntersection(triangle.B, triangle.C, End, Begin));
-            Vector2d p3 = (MathVec.LinesIntersection(triangle.C, triangle.A, End, Begin));
-
-            List<Triangle> tr = new List<Triangle>();
-            List<Vector2d> lv = new List<Vector2d>();
-            List<Vector2d> lv1 = new List<Vector2d>();
-
-            Triangulate triangulate = new Triangulate();
-
-            if (triangulate.isPointInside(triangle, End))
-                Begin = End;
-
-            int countPointIntersect = 0;
-
-            if (!double.IsNaN(p1.X)) countPointIntersect++;
-            if (!double.IsNaN(p2.X)) countPointIntersect++;
-            if (!double.IsNaN(p3.X)) countPointIntersect++;
-
-            if (countPointIntersect == 2)
+            switch (type)
             {
-                if (double.IsNaN(p1.X))
-                {
-                    tr.Add(new Triangle(p2, triangle.C, p3));
-                    lv.AddRange(new List<Vector2d>() { triangle.A, triangle.B, p2, p3 });
-                }
-                if (double.IsNaN(p2.X))
-                {
-                    tr.Add(new Triangle(p3, triangle.A, p1));
-                    lv.AddRange(new List<Vector2d>() { p1, triangle.B, triangle.C, p3 });
-                }
-                if (double.IsNaN(p3.X))
-                {
-                    tr.Add(new Triangle(p1, triangle.B, p2));
-                    lv.AddRange(new List<Vector2d>() { p1, p2, triangle.C, triangle.A });
-                }
-            }
-            if (countPointIntersect == 1)
-            {
-                if (!double.IsNaN(p1.X))
-                {
-                    Console.WriteLine("P1");
-                    tr.Add(new Triangle(triangle.A, p1, Begin));
-                    tr.Add(new Triangle(triangle.B, p1, Begin));
-                    tr.Add(new Triangle(triangle.B, triangle.C, Begin));
-                    tr.Add(new Triangle(Begin, triangle.C, triangle.A));
-                }
-                if (!double.IsNaN(p2.X))
-                {
-                    Console.WriteLine("P2");
-                    tr.Add(new Triangle(triangle.A, triangle.B, Begin));
-                    tr.Add(new Triangle(triangle.B, p2, Begin));
-                    tr.Add(new Triangle(p2, triangle.C, Begin));
-                    tr.Add(new Triangle(Begin, triangle.C, triangle.A));
-                }
-                if (!double.IsNaN(p3.X))
-                {
-                    Console.WriteLine("P3");
-                    tr.Add(new Triangle(triangle.A, Begin, p3));
-                    tr.Add(new Triangle(triangle.A, Begin, triangle.B));
-                    tr.Add(new Triangle(triangle.B, triangle.C, Begin));
-                    tr.Add(new Triangle(Begin, triangle.C, p3));
-                }
+                case TypeFigures.Line:
+                    f.Edges = new List<Edge>()
+                        {
+                            new Edge(new Vector2d(fmp.X, fmp.Y), new Vector2d(smp.X, smp.Y))
+                        };
+                    f.Type = TypeFigures.Line;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.TranslateToCenterCoordinates();
+                    f.SortAtClock();
+                    f.IsClosed = false;
+                    f.ReCalc();
+                    break;
+
+                case TypeFigures.Rect:
+                    f.Edges = new List<Edge>()
+                        {
+                            new Edge(new Vector2d(fmp.X, fmp.Y), new Vector2d(fmp.X, smp.Y)),
+                            new Edge(new Vector2d(fmp.X, smp.Y), new Vector2d(smp.X, smp.Y)),
+                            new Edge(new Vector2d(smp.X, smp.Y), new Vector2d(smp.X, fmp.Y)),
+                            new Edge(new Vector2d(smp.X, fmp.Y), new Vector2d(fmp.X, fmp.Y))
+                        };
+                    f.Type = TypeFigures.Rect;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.TranslateToCenterCoordinates();
+                    f.SortAtClock();
+                    f.ReCalc();
+                    break;
+
+                case TypeFigures.Ellipsoid:
+                    //f.Edges = CalcEllipsoid(fmp, smp, 360).ToList();
+                    f.Edges = CalcBezieEllipsoid(fmp, smp);
+                    f.Type = TypeFigures.Ellipsoid;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
+                    break;
+
+                case TypeFigures.Polygon:
+                    f.Edges = CalcEllipsoid(fmp, smp, 6).ToList();
+                    f.Type = TypeFigures.Polygon;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
+                    break;
+
+
+
+                case TypeFigures.Curve:
+                    f.Edges.Add(new Edge(fmp, smp));
+                    f.Type = TypeFigures.Curve;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.IsClosed = false;
+                    f.Edges[0].ConvertToBezie();
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
+                    break;
+
+                default:
+                    break;
             }
 
-            List<Triangle> oo = null;
-            if (lv.Count > 0)
+            return f;
+        }
+        public static Figure Add(TypeFigures type, List<Vector2d> mousePos, int c)
+        {
+            Vector2d fmp = mousePos[0];
+            Vector2d smp = mousePos[1];
+
+            Figure f = new Figure();
+
+            switch (type)
             {
-                Triangulate ttt = new Triangulate(lv.ToArray());
-                oo = ttt.Triangles;
+                case TypeFigures.Line:
+                    f.Edges = new List<Edge>()
+                        {
+                            new Edge(new Vector2d(fmp.X, fmp.Y), new Vector2d(smp.X, smp.Y))
+                        };
+                    f.Type = TypeFigures.Line;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.TranslateToCenterCoordinates();
+                    f.SortAtClock();
+                    f.IsClosed = false;
+                    f.ReCalc();
+                    break;
+
+                case TypeFigures.Rect:
+                    f.Edges = new List<Edge>()
+                        {
+                            new Edge(new Vector2d(fmp.X, fmp.Y), new Vector2d(fmp.X, smp.Y)),
+                            new Edge(new Vector2d(fmp.X, smp.Y), new Vector2d(smp.X, smp.Y)),
+                            new Edge(new Vector2d(smp.X, smp.Y), new Vector2d(smp.X, fmp.Y)),
+                            new Edge(new Vector2d(smp.X, fmp.Y), new Vector2d(fmp.X, fmp.Y))
+                        };
+                    f.Type = TypeFigures.Rect;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.TranslateToCenterCoordinates();
+                    f.SortAtClock();
+                    f.ReCalc();
+                    break;
+
+                case TypeFigures.Ellipsoid:
+                    //f.Edges = CalcEllipsoid(fmp, smp, 360).ToList();
+                    f.Edges = CalcBezieEllipsoid(fmp, smp);
+                    f.Type = TypeFigures.Ellipsoid;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
+                    break;
+
+                case TypeFigures.Polygon:
+                    f.Edges = CalcEllipsoid(fmp, smp, c).ToList();
+                    f.Type = TypeFigures.Polygon;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
+                    break;
+
+
+
+                case TypeFigures.Curve:
+                    f.Edges.Add(new Edge(fmp, smp));
+                    f.Type = TypeFigures.Curve;
+                    f.Center = (fmp + smp) / 2.0;
+                    f.IsClosed = false;
+                    f.Edges[0].ConvertToBezie();
+                    f.TranslateToCenterCoordinates();
+                    f.ReCalc();
+                    break;
+
+                default:
+                    break;
             }
 
-            Console.WriteLine(countPointIntersect);
-
-            res.AddRange(tr);
-            if (oo != null)
-                res.AddRange(oo);
-
-            return res;
+            return f;
         }
 
-        static public void Sub1(List<Triangle> triangles, List<Vector2d> lines)
+        static List<Edge> CalcEllipsoid(Vector2d fmp, Vector2d smp, int countLines)
         {
-            List<Triangle> res = new List<Triangle>();
-            List<Triangle> input = triangles.ToList();
-            triangles.Clear();
+            List<Edge> le = new List<Edge>();
 
-            foreach (var t in input)
+            Vector2d c = (fmp + smp) / 2.0;
+            double r1 = Vector2d.Max(fmp, smp).X - c.X;
+            double r2 = Vector2d.Max(fmp, smp).Y - c.Y;
+
+            double theta = MathHelper.DegreesToRadians(360.0 / countLines);
+            for (int i = 0; i < countLines; i++)
             {
-                Triangle triangle = t;
-
-                Vector2d End = lines[1];
-                Vector2d Begin = lines[0];
-
-                Vector2d p1 = (MathVec.LinesIntersection(triangle.A, triangle.B, End, Begin));
-                Vector2d p2 = (MathVec.LinesIntersection(triangle.B, triangle.C, End, Begin));
-                Vector2d p3 = (MathVec.LinesIntersection(triangle.C, triangle.A, End, Begin));
-
-                List<Triangle> tr = new List<Triangle>();
-                List<Vector2d> lv = new List<Vector2d>();
-
-                Triangulate triangulate = new Triangulate();
-
-                if (triangulate.isPointInside(triangle, End))
-                    Begin = End;
-
-                int countPointIntersect = 0;
-
-                if (!double.IsNaN(p1.X)) countPointIntersect++;
-                if (!double.IsNaN(p2.X)) countPointIntersect++;
-                if (!double.IsNaN(p3.X)) countPointIntersect++;
-
-                if (countPointIntersect == 0)
-                {
-                    res.Add(t);
-                }
-                if (countPointIntersect == 3)
-                {
-                    if (MathVec.VectrCompare(p1, p2))
-                    {
-                        tr.Add(new Triangle(triangle.A, triangle.B, p3));
-                        tr.Add(new Triangle(triangle.B, triangle.C, p3));
-                    }
-                    if (MathVec.VectrCompare(p2, p3))
-                    {
-                        tr.Add(new Triangle(triangle.A, p1, triangle.C));
-                        tr.Add(new Triangle(triangle.B, triangle.C, p1));
-                    }
-                    if (MathVec.VectrCompare(p1, p3))
-                    {
-                        tr.Add(new Triangle(triangle.A, triangle.B, p2));
-                        tr.Add(new Triangle(triangle.A, triangle.C, p2));
-                    }
-                }
-                if (countPointIntersect == 2)
-                {
-                    if (double.IsNaN(p1.X))
-                    {
-                        if (!MathVec.VectrCompare(p2, p3))
-                        {
-                            tr.Add(new Triangle(p2, triangle.C, p3));
-                            lv.AddRange(new List<Vector2d>() { triangle.A, triangle.B, p2, p3 });
-                        }
-                        else
-                        {
-                            tr.Add(t);
-                        }
-                    }
-                    if (double.IsNaN(p2.X))
-                    {
-                        if (!MathVec.VectrCompare(p1, p3))
-                        {
-                            tr.Add(new Triangle(p3, triangle.A, p1));
-                            lv.AddRange(new List<Vector2d>() { p1, triangle.B, triangle.C, p3 });
-                        }
-                        else
-                        {
-                            tr.Add(t);
-                        }
-                    }
-                    if (double.IsNaN(p3.X))
-                    {
-                        if (!MathVec.VectrCompare(p1, p2))
-                        {
-                            tr.Add(new Triangle(p1, triangle.B, p2));
-                            lv.AddRange(new List<Vector2d>() { p1, p2, triangle.C, triangle.A });
-                        }
-                        else
-                        {
-                            tr.Add(t);
-                        }
-                    }
-                }
-                if (countPointIntersect == 1)
-                {
-                    if (!double.IsNaN(p1.X))
-                    {
-                        tr.Add(new Triangle(triangle.A, p1, Begin));
-                        tr.Add(new Triangle(triangle.B, p1, Begin));
-                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
-                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
-                    }
-                    if (!double.IsNaN(p2.X))
-                    {
-                        tr.Add(new Triangle(triangle.A, triangle.B, Begin));
-                        tr.Add(new Triangle(triangle.B, p2, Begin));
-                        tr.Add(new Triangle(p2, triangle.C, Begin));
-                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
-                    }
-                    if (!double.IsNaN(p3.X))
-                    {
-                        tr.Add(new Triangle(triangle.A, Begin, p3));
-                        tr.Add(new Triangle(triangle.A, Begin, triangle.B));
-                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
-                        tr.Add(new Triangle(Begin, triangle.C, p3));
-                    }
-                }
-
-                List<Triangle> oo = null;
-                if (lv.Count > 0)
-                {
-                    Triangulate ttt = new Triangulate(lv.ToArray());
-                    oo = ttt.Triangles;
-                }
-
-                tr.RemoveAll(x => { return MathVec.VectrCompare(x.A, x.B) || MathVec.VectrCompare(x.B, x.C) || MathVec.VectrCompare(x.A, x.C); });
-
-                res.AddRange(tr);
-                if (oo != null)
-                    res.AddRange(oo);
-
-            }
-            triangles.AddRange(res);
-        }
-        static public void Subdiv(List<Triangle> triangles, Vector2d v1, Vector2d v2)
-        {
-            List<Triangle> res = new List<Triangle>();
-            List<Triangle> input = triangles.ToList();
-            triangles.Clear();
-
-            foreach (var t in input)
-            {
-                Triangle triangle = t;
-
-                Vector2d End = v1;
-                Vector2d Begin = v2;
-
-                Vector2d p1 = (MathVec.LinesIntersection(triangle.A, triangle.B, End, Begin));
-                Vector2d p2 = (MathVec.LinesIntersection(triangle.B, triangle.C, End, Begin));
-                Vector2d p3 = (MathVec.LinesIntersection(triangle.C, triangle.A, End, Begin));
-
-                List<Triangle> tr = new List<Triangle>();
-                List<Vector2d> lv = new List<Vector2d>();
-
-                Triangulate triangulate = new Triangulate();
-
-                if (triangulate.isPointInside(triangle, End))
-                    Begin = End;
-
-                int countPointIntersect = 0;
-
-                if (!double.IsNaN(p1.X)) countPointIntersect++;
-                if (!double.IsNaN(p2.X)) countPointIntersect++;
-                if (!double.IsNaN(p3.X)) countPointIntersect++;
-
-                if (countPointIntersect == 0)
-                {
-                    res.Add(t);
-                }
-                if (countPointIntersect == 3)
-                {
-                    if (MathVec.VectrCompare(p1, p2))
-                    {
-                        tr.Add(new Triangle(triangle.A, triangle.B, p3));
-                        tr.Add(new Triangle(triangle.B, triangle.C, p3));
-                    }
-                    if (MathVec.VectrCompare(p2, p3))
-                    {
-                        tr.Add(new Triangle(triangle.A, p1, triangle.C));
-                        tr.Add(new Triangle(triangle.B, triangle.C, p1));
-                    }
-                    if (MathVec.VectrCompare(p1, p3))
-                    {
-                        tr.Add(new Triangle(triangle.A, triangle.B, p2));
-                        tr.Add(new Triangle(triangle.A, triangle.C, p2));
-                    }
-                }
-                if (countPointIntersect == 2)
-                {
-                    if (double.IsNaN(p1.X))
-                    {
-                        if (!MathVec.VectrCompare(p2, p3))
-                        {
-                            tr.Add(new Triangle(p2, triangle.C, p3));
-                            lv.AddRange(new List<Vector2d>() { triangle.A, triangle.B, p2, p3 });
-                        }
-                        else
-                        {
-                            tr.Add(t);
-                        }
-                    }
-                    if (double.IsNaN(p2.X))
-                    {
-                        if (!MathVec.VectrCompare(p1, p3))
-                        {
-                            tr.Add(new Triangle(p3, triangle.A, p1));
-                            lv.AddRange(new List<Vector2d>() { p1, triangle.B, triangle.C, p3 });
-                        }
-                        else
-                        {
-                            tr.Add(t);
-                        }
-                    }
-                    if (double.IsNaN(p3.X))
-                    {
-                        if (!MathVec.VectrCompare(p1, p2))
-                        {
-                            tr.Add(new Triangle(p1, triangle.B, p2));
-                            lv.AddRange(new List<Vector2d>() { p1, p2, triangle.C, triangle.A });
-                        }
-                        else
-                        {
-                            tr.Add(t);
-                        }
-                    }
-                }
-                if (countPointIntersect == 1)
-                {
-                    if (!double.IsNaN(p1.X))
-                    {
-                        tr.Add(new Triangle(triangle.A, p1, Begin));
-                        tr.Add(new Triangle(triangle.B, p1, Begin));
-                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
-                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
-                    }
-                    if (!double.IsNaN(p2.X))
-                    {
-                        tr.Add(new Triangle(triangle.A, triangle.B, Begin));
-                        tr.Add(new Triangle(triangle.B, p2, Begin));
-                        tr.Add(new Triangle(p2, triangle.C, Begin));
-                        tr.Add(new Triangle(Begin, triangle.C, triangle.A));
-                    }
-                    if (!double.IsNaN(p3.X))
-                    {
-                        tr.Add(new Triangle(triangle.A, Begin, p3));
-                        tr.Add(new Triangle(triangle.A, Begin, triangle.B));
-                        tr.Add(new Triangle(triangle.B, triangle.C, Begin));
-                        tr.Add(new Triangle(Begin, triangle.C, p3));
-                    }
-                }
-
-                List<Triangle> oo = null;
-                if (lv.Count > 0)
-                {
-                    Triangulate ttt = new Triangulate(lv.ToArray());
-                    oo = ttt.Triangles;
-                }
-
-                tr.RemoveAll(x => { return MathVec.VectrCompare(x.A, x.B) || MathVec.VectrCompare(x.B, x.C) || MathVec.VectrCompare(x.A, x.C); });
-
-                res.AddRange(tr);
-                if (oo != null)
-                    res.AddRange(oo);
-
-            }
-            triangles.AddRange(res);
-        }
-        static public void Triangulating(List<Triangle> tr1, List<Triangle> tr2, List<Vector2d> f1, List<Vector2d> f2)
-        {
-            List<Triangle> res1 = tr1.ToList();
-            List<Triangle> res2 = tr2.ToList();
-
-            for (int i = 0, j = 1; i < f2.Count; i++, j++)
-            {
-                if (j == f2.Count)
-                    Subdiv(res1, f2[i], f2[0]);
-                else
-                    Subdiv(res1, f2[i], f2[j]);
+                double th = theta * i;
+                var e = new Edge();
+                e.Begin = new Vector2d(r1 * Math.Cos(th), r2 * Math.Sin(th)) + c;
+                double t = th + theta;
+                e.End = new Vector2d(r1 * Math.Cos(t), r2 * Math.Sin(t)) + c;
+                le.Add(e);
             }
 
-            for (int i = 0, j = 1; i < f1.Count; i++, j++)
-            {
-                if (j == f1.Count)
-                    Subdiv(res2, f1[i], f1[0]);
-                else
-                    Subdiv(res2, f1[i], f1[j]);
-            }
+            return le;
         }
 
-        static double LenToLine(Vector2d a, Vector2d b, Vector2d p)
+        static List<Edge> CalcBezieEllipsoid(Vector2d fmp, Vector2d smp)
         {
-            double ch1 = (p.X - a.X) * (b.X - a.X);
-            double ch2 = (p.Y - a.Y) * (b.Y - a.Y);
-            double znamenatel = (b.X - a.X) * (b.X - a.X) + (b.Y - a.Y) * (b.Y - a.Y);
+            List<Edge> edges = new List<Edge>();
 
-            double t = (ch1 + ch2) / znamenatel;
-            if (t <= 0.01)
-                return 1;
-            return -1;
+            double L = 0.55228474;
+
+            Vector2d c = (fmp + smp) / 2.0;
+            double rx = Vector2d.Max(fmp, smp).X - c.X;
+            double ry = Vector2d.Max(fmp, smp).Y - c.Y;
+
+            edges.Add(
+                new Edge(
+                    new Vector2d(c.X + rx, c.Y),
+                    new Vector2d(c.X, c.Y + ry),
+                    new Vector2d(c.X + rx, c.Y + (L * ry)),
+                    new Vector2d(c.X + (L * rx), c.Y + ry)
+                    ));
+            edges.Add(
+                new Edge(
+                    new Vector2d(c.X, c.Y + ry),
+                    new Vector2d(c.X - rx, c.Y),
+                    new Vector2d(c.X - (L * rx), c.Y + ry),
+                    new Vector2d(c.X - rx, c.Y + (L * ry))
+                    ));
+            edges.Add(
+                new Edge(
+                    new Vector2d(c.X - rx, c.Y),
+                    new Vector2d(c.X, c.Y - ry),
+                    new Vector2d(c.X - rx, c.Y - (L * ry)),
+                    new Vector2d(c.X - (L * rx), c.Y - ry)
+                    ));
+            edges.Add(
+                new Edge(
+                    new Vector2d(c.X, c.Y - ry),
+                    new Vector2d(c.X + rx, c.Y),
+                    new Vector2d(c.X + (L * rx), c.Y - ry),
+                    new Vector2d(c.X + rx, c.Y - (L * ry))
+                    ));
+
+            return edges;
         }
 
         static void Main(string[] args)
@@ -2534,13 +2944,103 @@ namespace ConsoleApp1
             //foreach (Triangle a in res)
             //    Console.Write(a);
 
-            Vector2d a = new Vector2d(0);
-            Vector2d b = new Vector2d(1);
-            Vector2d p = new Vector2d(2, 0);
-            Console.WriteLine(
-                LenToLine(a,b,p)
-                );
+            string Test = "";
+            int c = 1500;
+            int C = 6;
+            int inc = 2;
 
+            for (int i = 0; i < 3; i++)
+            {
+                if (i == 0)
+                {
+                    Test += "Inter:\n";
+                    Test += "Att:\n";
+                    for (C = 6; C <= c; C *= inc)
+                    {
+                        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                        Modificators modificators = new Modificators(f1.Verteces, f2.Verteces) { Operation = Operations.Interset };
+                        modificators.Result();
+
+                        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                    }
+
+                    Test += "Trian:\n";
+                    for (C = 6; C <= c; C *= inc)
+                    {
+                        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                        TrianglesBool modificators = new TrianglesBool(f1, f2, Operations.Interset);
+
+                        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                    }
+                }
+                if (i == 1)
+                {
+                    Test += "Union:\n";
+                    Test += "Att:\n";
+                    for (C = 6; C <= c; C *= inc)
+                    {
+                        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                        Modificators modificators = new Modificators(f1.Verteces, f2.Verteces) { Operation = Operations.Union };
+                        modificators.Result();
+
+                        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                    }
+
+                    Test += "Trian:\n";
+                    for (C = 6; C <= c; C *= inc)
+                    {
+                        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                        TrianglesBool modificators = new TrianglesBool(f1, f2, Operations.Union);
+
+                        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                    }
+                }
+                if (i == 2)
+                {
+                    Test += "Sub:\n";
+                    Test += "Att:\n";
+                    for (C = 6; C <= c; C *= inc)
+                    {
+                        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                        Modificators modificators = new Modificators(f1.Verteces, f2.Verteces) { Operation = Operations.Sub };
+                        modificators.Result();
+
+                        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                    }
+
+                    Test += "Trian:\n";
+                    for (C = 6; C <= c; C *= inc)
+                    {
+                        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                        TrianglesBool modificators = new TrianglesBool(f1, f2, Operations.Sub);
+
+                        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                    }
+                }
+                Console.WriteLine(i.ToString());
+            }
+
+            Console.WriteLine(Test);
+
+            Console.WriteLine("Done");
             Console.ReadLine();
         }
 

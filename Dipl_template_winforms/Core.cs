@@ -1784,6 +1784,8 @@ namespace Dipl_template_winforms
                 {
                     string[] ll = s.Split(new char[] { '(', ')', '{', '}', ',' });
 
+                    W = double.Parse(ll[6]);
+
                     points.Add(
                         int.Parse(ll[1]),
                         new Vector2d(

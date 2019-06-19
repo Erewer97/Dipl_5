@@ -22,6 +22,37 @@ namespace Dipl_template_winforms
 
     public static class MathVec
     {
+        public static void Calc(List<Vector2d> verteces)
+        {
+            Vector2d Center = new Vector2d(0);
+            if (verteces.Count > 0)
+            {
+                double maxx = verteces[0].X,
+                       maxy = verteces[0].Y,
+                       minx = verteces[0].X,
+                       miny = verteces[0].Y;
+
+                foreach (var r in verteces)
+                {
+                    if ((r.X >= maxx))
+                        maxx = r.X;
+                    if ((r.X <= minx))
+                        minx = r.X;
+                    if ((r.Y >= maxy))
+                        maxy = r.Y;
+                    if ((r.Y <= miny))
+                        miny = r.Y;
+                }
+
+                Vector2d Max = new Vector2d(maxx, maxy);
+                Vector2d Min = new Vector2d(minx, miny);
+
+                Center = ((Min + Max) / 2.0);
+
+                for (int i = 0; i < verteces.Count; i++)
+                    verteces[i] = verteces[i] - Center;
+            }
+        }
         public static Vector2d AbsSub(Vector2d a, Vector2d b)
         {
             return new Vector2d(Math.Abs((a - b).X), Math.Abs((a - b).Y));
@@ -123,12 +154,6 @@ namespace Dipl_template_winforms
                 return true;
             else
                 return false;
-        }
-        public static bool DoubEquale(double a, double b, double e)
-        {
-            if (Math.Abs(a - b) <= 4 * e * Math.Max(Math.Abs(a), Math.Abs(b)))
-                return true;
-            return false;
         }
 
         public static Vector2d LinesIntersection(Vector2d x1, Vector2d y1, Vector2d x2, Vector2d y2)
@@ -2989,6 +3014,40 @@ namespace Dipl_template_winforms
                         Intersect.Add(Result1[i]);
             }
         }
+        List<Vector2d> SortAtClock(List<Vector2d> p) 
+        {
+            Dictionary<double, Vector2d> dictionary = new Dictionary<double, Vector2d>();
+
+            MathVec.Calc(p);
+
+            for (int i = 0; i < p.Count; i++)
+            {
+                Vector2d v = p[i];
+                for (int j = 0; j < p.Count; j++)
+                {
+                    if (i == p.Count)
+                        i--;
+                    if ((i != j) && MathVec.VectrCompare(p[i], p[j], 0.01))
+                        p.RemoveAt(j);
+                }
+            }
+
+            foreach (var r in p)
+            {
+                double angle = Math.Atan2(r.Y, r.X);
+                if (angle < 0) angle += 2 * Math.PI;
+                dictionary.Add(angle, r);
+            }
+
+            var t = dictionary.Keys.ToList();
+            List<Vector2d> res = new List<Vector2d>();
+
+            t.Sort();
+
+            foreach (var k in t)
+                res.Add(dictionary[k]);
+            return res;
+        }
         void Verteces()
         {
             if (Intersect.Count > 0)
@@ -3006,14 +3065,44 @@ namespace Dipl_template_winforms
                     if (!res.Contains(t.B)) res.Add(t.B);
                     if (!res.Contains(t.C)) res.Add(t.C);
                 }
+
+                res = SortAtClock(res);
             }
             if (Union.Count > 0)
             {
+                Triangle a = Union[0];
+                res.Add(a.A);
+                res.Add(a.B);
+                res.Add(a.C);
 
+                for (int i = 0; i < Union.Count; i++)
+                {
+                    Triangle t = Union[i];
+
+                    if (!res.Contains(t.A)) res.Add(t.A);
+                    if (!res.Contains(t.B)) res.Add(t.B);
+                    if (!res.Contains(t.C)) res.Add(t.C);
+                }
+
+                res = SortAtClock(res);
             }
             if (Sub.Count > 0)
             {
+                Triangle a = Sub[0];
+                res.Add(a.A);
+                res.Add(a.B);
+                res.Add(a.C);
 
+                for (int i = 0; i < Sub.Count; i++)
+                {
+                    Triangle t = Sub[i];
+
+                    if (!res.Contains(t.A)) res.Add(t.A);
+                    if (!res.Contains(t.B)) res.Add(t.B);
+                    if (!res.Contains(t.C)) res.Add(t.C);
+                }
+
+                res = SortAtClock(res);
             }
         }
         public List<Vector2d> Result()

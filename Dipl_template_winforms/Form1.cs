@@ -71,8 +71,6 @@ namespace Dipl_template_winforms
 
             if (pc.Group.CountFigures > 1) pc.Group.DrawAABB();
 
-            if (trianglesBool != null) trianglesBool.Draw();
-
             GL.Flush();
             GL.Finish();
 
@@ -930,7 +928,6 @@ namespace Dipl_template_winforms
 
                         helper.DeleteDuplicats(pc.res);
 
-
                         f.Edges = Helper.ConvertToEdges(pc.res);
                         f.Type = TypeFigures.Polygon;
                         f.Center = helper.CalcCenter(pc.res);
@@ -953,6 +950,39 @@ namespace Dipl_template_winforms
                 else
                 {
                     trianglesBool = new TrianglesBool(pc.Group.Figures[0], pc.Group.Figures[1], Operations.Union);
+                    pc.res = trianglesBool.Result();
+
+                    Color fill = pc.Group.Figures[1].FillColor;
+                    Color border = pc.Group.Figures[1].BorderColor;
+
+                    pc.Group.Clear();
+
+                    if (pc.res.Count > 0)
+                    {
+                        Figure f = new Figure();
+
+                        helper.DeleteDuplicats(pc.res);
+
+                        f.Edges = Helper.ConvertToEdges(pc.res);
+                        f.Type = TypeFigures.Polygon;
+                        f.Center = helper.CalcCenter(pc.res);
+                        f.TranslateToCenterCoordinates();
+                        f.ReCalc();
+
+                        f.FillColor = fill;
+                        f.BorderColor = border;
+
+                        f.Id = _core.Ids.ToString();
+                        f.Name = "TriangleBoolenResult " + f.Id;
+                        SetProperties(f);
+                        _core.Add(f);
+
+                        treeView1.Nodes.Clear();
+                        treeView1.Nodes.AddRange(_core.NodesForTree());
+                        treeView1.ExpandAll();
+
+                        glControl1.Invalidate();
+                    }
                 }
             }
         }
@@ -1007,6 +1037,39 @@ namespace Dipl_template_winforms
                 else
                 {
                     trianglesBool = new TrianglesBool(pc.Group.Figures[0], pc.Group.Figures[1], Operations.Sub);
+                    pc.res = trianglesBool.Result();
+
+                    Color fill = pc.Group.Figures[1].FillColor;
+                    Color border = pc.Group.Figures[1].BorderColor;
+
+                    pc.Group.Clear();
+
+                    if (pc.res.Count > 0)
+                    {
+                        Figure f = new Figure();
+
+                        helper.DeleteDuplicats(pc.res);
+
+                        f.Edges = Helper.ConvertToEdges(pc.res);
+                        f.Type = TypeFigures.Polygon;
+                        f.Center = helper.CalcCenter(pc.res);
+                        f.TranslateToCenterCoordinates();
+                        f.ReCalc();
+
+                        f.FillColor = fill;
+                        f.BorderColor = border;
+
+                        f.Id = _core.Ids.ToString();
+                        f.Name = "TriangleBoolenResult " + f.Id;
+                        SetProperties(f);
+                        _core.Add(f);
+
+                        treeView1.Nodes.Clear();
+                        treeView1.Nodes.AddRange(_core.NodesForTree());
+                        treeView1.ExpandAll();
+
+                        glControl1.Invalidate();
+                    }
                 }
             }
         }

@@ -190,3 +190,16 @@ Z:\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.csproj.Core
 Z:\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.csproj.CopyComplete
 Z:\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.exe
 Z:\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.pdb
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\bin\Debug\Dipl_template_winforms.exe.config
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\bin\Debug\Dipl_template_winforms.exe
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\bin\Debug\Dipl_template_winforms.pdb
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\bin\Debug\OpenTK.Compatibility.dll
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\bin\Debug\OpenTK.dll
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\bin\Debug\OpenTK.GLControl.dll
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.csprojResolveAssemblyReference.cache
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.Form1.resources
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.Properties.Resources.resources
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.csproj.GenerateResource.Cache
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.csproj.CoreCompileInputs.cache
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.exe
+F:\_____PROGECTS\Dipl_5_14\Dipl_template_winforms\obj\Debug\Dipl_template_winforms.pdb

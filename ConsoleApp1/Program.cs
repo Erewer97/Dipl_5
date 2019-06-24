@@ -2957,154 +2957,105 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             string Test = "";
-            int c = 1500;
-            int C = 6;
+            int c = 3000;
+            int C = 0;
+            int f = 500;
+            C = f;
             int inc = 2;
 
-            //for (int i = 0; i < 3; i++)
-            //{
-            //    if (i == 0)
-            //    {
-            //        Test += "Inter:\n";
-            //        Test += "Att:\n";
-            //        for (C = 6; C <= c; C *= inc)
-            //        {
-            //            Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
-            //            Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
-
-            //            Modificators modificators = new Modificators(f1.Verteces, f2.Verteces) { Operation = Operations.Interset };
-            //            modificators.Result();
-
-            //            Test += C.ToString() + " : " + modificators.ResTime + "\n";
-
-            //        }
-
-            //        Test += "Trian:\n";
-            //        for (C = 6; C <= c; C *= inc)
-            //        {
-            //            Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
-            //            Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
-
-            //            TrianglesBool modificators = new TrianglesBool(f1, f2, Operations.Interset);
-
-            //            Test += C.ToString() + " : " + modificators.ResTime + "\n";
-
-            //        }
-            //    }
-            //    if (i == 1)
-            //    {
-            //        Test += "Union:\n";
-            //        Test += "Att:\n";
-            //        for (C = 6; C <= c; C *= inc)
-            //        {
-            //            Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
-            //            Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
-
-            //            Modificators modificators = new Modificators(f1.Verteces, f2.Verteces) { Operation = Operations.Union };
-            //            modificators.Result();
-
-            //            Test += C.ToString() + " : " + modificators.ResTime + "\n";
-
-            //        }
-
-            //        Test += "Trian:\n";
-            //        for (C = 6; C <= c; C *= inc)
-            //        {
-            //            Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
-            //            Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
-
-            //            TrianglesBool modificators = new TrianglesBool(f1, f2, Operations.Union);
-
-            //            Test += C.ToString() + " : " + modificators.ResTime + "\n";
-
-            //        }
-            //    }
-            //    if (i == 2)
-            //    {
-            //        Test += "Sub:\n";
-            //        Test += "Att:\n";
-            //        for (C = 6; C <= c; C *= inc)
-            //        {
-            //            Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
-            //            Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
-
-            //            Modificators modificators = new Modificators(f1.Verteces, f2.Verteces) { Operation = Operations.Sub };
-            //            modificators.Result();
-
-            //            Test += C.ToString() + " : " + modificators.ResTime + "\n";
-
-            //        }
-
-            //        Test += "Trian:\n";
-            //        for (C = 6; C <= c; C *= inc)
-            //        {
-            //            Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
-            //            Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
-
-            //            TrianglesBool modificators = new TrianglesBool(f1, f2, Operations.Sub);
-
-            //            Test += C.ToString() + " : " + modificators.ResTime + "\n";
-
-            //        }
-            //    }
-            //    Console.WriteLine(i.ToString());
-            //}
-
-            //Console.WriteLine(Test);
-
-            //Dictionary<double, Vector2d> dictionary = new Dictionary<double, Vector2d>();
-
-            List<Vector2d> p = new List<Vector2d>()
+            for (int i = 0; i < 3; i++)
             {
-                new Vector2d(5),
-                new Vector2d(5),
-                new Vector2d(4),
-                new Vector2d(0),
-                new Vector2d(0.1),
-                new Vector2d(0.01),
-                new Vector2d(5.1),
-                new Vector2d(3),
-                new Vector2d(3.1),
-                new Vector2d(3.01),
-                new Vector2d(3.001),
-                new Vector2d(3.0001)
-            };
-
-
-            //MathVec.Calc(p);
-
-
-            //foreach (var r in p)
-            //{
-            //    double angle = Math.Atan2(r.Y, r.X);
-            //    if (angle < 0) angle += 2 * Math.PI;
-            //    dictionary.Add(angle, r);
-            //}
-
-            //var t = dictionary.Keys.ToList();
-            //List<Vector2d> res = new List<Vector2d>();
-
-            //t.Sort();
-
-            //foreach (var k in t)
-            //    Console.WriteLine(k + "   " + dictionary[k]);
-
-
-
-            for (int i = 0; i < p.Count; i++)
-            {
-                Vector2d v = p[i];
-                for (int j = 0; j < p.Count; j++)
+                if (i == 0)
                 {
-                    if (i == p.Count)
-                        i--;
-                    if ((i != j) && MathVec.VectrCompare(p[i], p[j], 0.01))
-                        p.RemoveAt(j);
+                    Test += "Inter:\n";
+                    Test += "Att:\n";
+                    //for ( ; C <= c; C *= inc)
+                    //{
+                    //    Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                    //    Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                    //    Modificators modificators = new Modificators(f1.Verteces, f2.Verteces) { Operation = Operations.Interset };
+                    //    modificators.Result();
+
+                    //    Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                    //}
+
+                    C = f;
+                    Test += "Trian:\n";
+                    for (; C <= c; C *= inc)
+                    {
+                        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                        TrianglesBool modificators = new TrianglesBool(f1, f2, Operations.Interset);
+
+                        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                    }
                 }
+                //if (i == 1)
+                //{
+                //    Test += "Union:\n";
+                //    Test += "Att:\n";
+                //    for (C = 6; C <= c; C *= inc)
+                //    {
+                //        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                //        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                //        Modificators modificators = new Modificators(f1.Verteces, f2.Verteces) { Operation = Operations.Union };
+                //        modificators.Result();
+
+                //        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                //    }
+
+                //    Test += "Trian:\n";
+                //    for (C = 6; C <= c; C *= inc)
+                //    {
+                //        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                //        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                //        TrianglesBool modificators = new TrianglesBool(f1, f2, Operations.Union);
+
+                //        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                //    }
+                //}
+                //if (i == 2)
+                //{
+                //    Test += "Sub:\n";
+                //    Test += "Att:\n";
+                //    for (C = 6; C <= c; C *= inc)
+                //    {
+                //        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                //        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                //        Modificators modificators = new Modificators(f1.Verteces, f2.Verteces) { Operation = Operations.Sub };
+                //        modificators.Result();
+
+                //        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                //    }
+
+                //    Test += "Trian:\n";
+                //    for (C = 6; C <= c; C *= inc)
+                //    {
+                //        Figure f1 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0), new Vector2d(2) }, C);
+                //        Figure f2 = Add(TypeFigures.Polygon, new List<Vector2d>() { new Vector2d(0.3), new Vector2d(4) }, C);
+
+                //        TrianglesBool modificators = new TrianglesBool(f1, f2, Operations.Sub);
+
+                //        Test += C.ToString() + " : " + modificators.ResTime + "\n";
+
+                //    }
+                //}
+                Console.WriteLine(i.ToString());
             }
 
-            foreach (var v in p)
-                Console.WriteLine(v);
+            Console.WriteLine(Test);
+
+
 
             Console.WriteLine("Done");
             Console.ReadLine();

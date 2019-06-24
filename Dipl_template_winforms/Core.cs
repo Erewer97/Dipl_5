@@ -697,10 +697,6 @@ namespace Dipl_template_winforms
 
             Center = new Vector2d(0);
         }
-        public void SetCenter(Vector2d NewCenter)
-        {
-            Center = NewCenter - MoveTo;
-        }
         public bool IsTrueTrend()
         {
             if (mainFigure.Count > 0)
@@ -730,8 +726,6 @@ namespace Dipl_template_winforms
 
                 Edges.Reverse();
                 mainFigure = Edges.ToList();
-                //for (int i = 0; i < Edges.Count; i++)
-                //    mainFigure[i] = Edges[i] - MoveTo;
             }
         }
         // Hit in figure
@@ -776,11 +770,6 @@ namespace Dipl_template_winforms
             return result;
 
         }
-        /// <summary>
-        /// Проверка попали ли мы на ребро текущего объекта
-        /// </summary>
-        /// <param name="v">Позиция мыши</param>
-        /// <returns>Ребро, если попали, иначе null</returns>
         public bool HitInBorder(Vector2d v)
         {
             Edge r = null;
@@ -1113,7 +1102,6 @@ namespace Dipl_template_winforms
             v.Normalize();
             var a = manipul[indPoint].Normalized();
 
-            //mouseRot = v;
 
             var sm = Vector2d.Dot(v, a);
             var angle = Math.Acos(sm);
@@ -1472,20 +1460,7 @@ namespace Dipl_template_winforms
                 }
             }
         }
-
-        public override string ToString()
-        {
-            string r = TRSI.ToString() + "\n";
-            r += "  Verteces:\n";
-            foreach (var t in Verteces)
-                r += t.ToString() + "\n";
-            r += "  Manipuls: \n";
-            foreach (var t in Manipulators)
-                r += t.X.ToString("F") + " " + t.Y.ToString("F") + "\n";
-            r += "\n";
-            return r;
-        }       
-
+      
         int FindIndScale(int index)
         {
             switch (index)
